@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:developers-apps-in-toss.toss.im)",
+      "Bash(/opt/homebrew/bin/brew tap:*)",
+      "Bash(/opt/homebrew/bin/brew install:*)",
+      "Bash(curl -s \"https://developers-apps-in-toss.toss.im/development/llms.html\")",
+      "Bash(gunzip)",
+      "mcp__apps-in-toss__search_docs",
+      "mcp__apps-in-toss__list_examples",
+      "mcp__apps-in-toss__get_doc",
+      "mcp__apps-in-toss__get_example",
+      "Bash(python3:*)",
+      "Bash(/Users/dc.kim/project/memoryBattle/assets/logo-dark.svg:*)",
+      "Bash(__NEW_LINE_98f86a9f9a272eed__ cat:*)",
+      "Bash(/Users/dc.kim/project/memoryBattle/assets/logo-light.svg:*)",
+      "Bash(pip install:*)",
+      "Read(//Users/dc.kim/.npm-global/**)",
+      "Read(//Users/dc.kim/**)",
+      "Bash(npm config:*)",
+      "Bash(npm pack:*)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:api.github.com)"
+    ]
+  }
+}
