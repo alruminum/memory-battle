@@ -69,6 +69,15 @@ VITE_APP_NAME=memory-battle
 
 ---
 
+## Git
+
+```
+Remote: https://github.com/alruminum/memory-battle.git
+Branch: main
+```
+
+---
+
 ## AI 개발 (MCP)
 
 ```bash

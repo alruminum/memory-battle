@@ -5,7 +5,7 @@ export default defineConfig({
   brand: {
     displayName: '기억력배틀',
     primaryColor: '#ff6900',
-    icon: null, // 화면에 노출될 앱의 아이콘 이미지 주소로 바꿔주세요.
+    icon: 'https://static.toss.im/icons/png/4x/icon-person-man.png', // 콘솔 등록 후 실제 앱 아이콘 URL로 교체
   },
   web: {
     host: 'localhost',
@@ -17,4 +17,7 @@ export default defineConfig({
   },
   permissions: [],
   outdir: 'dist',
+  webViewProps: {
+    type: 'game',
+  },
 });

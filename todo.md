@@ -45,15 +45,15 @@
 - [x] `index.html` viewport 메타 추가: `maximum-scale=1, user-scalable=no` (검수 필수)
 
 ### 2. SDK 래퍼 · DB 클라이언트
-- [ ] `src/lib/supabase.ts` — Supabase 클라이언트 초기화
-- [ ] `src/lib/ait.ts` — `getUserId()`: `getUserKeyForGame()` + 구버전 폴백 `getDeviceId()`
-- [ ] `src/lib/ait.ts` — `showRewardAd()`: `loadFullScreenAd` → `showFullScreenAd` 2단계, `userEarnedReward`에서만 resolve(true)
-- [ ] `src/lib/ait.ts` — `attachBannerAd(element)`: `TossAds.initialize` + `attachBanner`, cleanup 함수 반환
-- [ ] `src/types/index.ts` — 공통 타입 정의 (`GameStatus`, `ButtonColor` 등)
-- [ ] 광고 mock 분기 처리 — `IS_SANDBOX` 환경 플래그 설정, 샌드박스에서 광고 API 대신 mock 함수 사용
+- [x] `src/lib/supabase.ts` — Supabase 클라이언트 초기화
+- [x] `src/lib/ait.ts` — `getUserId()`: `getUserKeyForGame()` + 구버전 폴백 `getDeviceId()`
+- [x] `src/lib/ait.ts` — `showRewardAd()`: `loadFullScreenAd` → `showFullScreenAd` 2단계, `userEarnedReward`에서만 resolve(true)
+- [x] `src/lib/ait.ts` — `attachBannerAd(element)`: `TossAds.initialize` + `attachBanner`, cleanup 함수 반환
+- [x] `src/types/index.ts` — 공통 타입 정의 (`GameStatus`, `ButtonColor` 등)
+- [x] 광고 mock 분기 처리 — `IS_SANDBOX` 환경 플래그 설정, 샌드박스에서 광고 API 대신 mock 함수 사용
 
 ### 3. Zustand Store
-- [ ] `src/store/gameStore.ts` — 상태 인터페이스 구현
+- [x] `src/store/gameStore.ts` — 상태 인터페이스 구현
   - `status: 'IDLE' | 'SHOWING' | 'INPUT' | 'RESULT'`
   - `sequence`, `currentIndex`, `score`, `stage`, `isFullCombo`
   - `userId`, `dailyChancesLeft`
@@ -61,7 +61,7 @@
   - 액션: `startGame(difficulty)`, `addInput`, `gameOver`, `resetGame`, `useChance`
 
 ### 4. 게임 로직 훅
-- [ ] `src/hooks/useGameEngine.ts` — 상태머신 전체 흐름 관리
+- [x] `src/hooks/useGameEngine.ts` — 상태머신 전체 흐름 관리
   - IDLE→SHOWING: 시퀀스에 랜덤 버튼 추가, 순서대로 버튼 점등
   - SHOWING→INPUT: 시퀀스 표시 완료 후 입력 모드 전환
   - INPUT: 정답/오답 판정, `addInput()` 호출
@@ -69,16 +69,16 @@
   - INPUT→SHOWING: 정답 완료 시 다음 라운드
   - 깜빡임 속도: `FLASH_DURATION[difficulty]` 상수 사용 (Easy 500ms / Medium 400ms / Hard 300ms)
   - 최종 점수: `gameOver()` 시 `rawScore × DIFFICULTY_MULTIPLIER[difficulty]` 적용
-- [ ] `src/hooks/useTimer.ts` — 2초 카운트다운, 만료 시 콜백 실행, 정답 입력 시 리셋
-- [ ] `src/hooks/useCombo.ts` — 0.3초(300ms) 이내 연속 입력 감지, 라운드 종료 시 풀콤보 여부 반환
+- [x] `src/hooks/useTimer.ts` — 2초 카운트다운, 만료 시 콜백 실행, 정답 입력 시 리셋
+- [x] `src/hooks/useCombo.ts` — 0.3초(300ms) 이내 연속 입력 감지, 라운드 종료 시 풀콤보 여부 반환
 
 ### 5. 게임 화면 컴포넌트
-- [ ] `src/components/game/ButtonPad.tsx` — 4개 원형 버튼 (orange/blue/green/yellow)
+- [x] `src/components/game/ButtonPad.tsx` — 4개 원형 버튼 (orange/blue/green/yellow)
   - 깜빡임: `isFlashing` prop으로 밝기 증가 애니메이션
   - SHOWING 중 터치 이벤트 차단
-- [ ] `src/components/game/TimerGauge.tsx` — 2초 프로그레스바, 남은 시간 비례 너비, 50% 이하 빨간색 전환
-- [ ] `src/components/game/ScoreDisplay.tsx` — 현재 점수, 스테이지, 콤보 표시 (`COMBO!` 10스테이지+)
-- [ ] `src/pages/GamePage.tsx` — ButtonPad + TimerGauge + ScoreDisplay 조합, 배너 광고 하단 고정 자리 확보
+- [x] `src/components/game/TimerGauge.tsx` — 2초 프로그레스바, 남은 시간 비례 너비, 50% 이하 빨간색 전환
+- [x] `src/components/game/ScoreDisplay.tsx` — 현재 점수, 스테이지, 콤보 표시 (`COMBO!` 10스테이지+)
+- [x] `src/pages/GamePage.tsx` — ButtonPad + TimerGauge + ScoreDisplay 조합, 배너 광고 하단 고정 자리 확보
 
 ---
 
