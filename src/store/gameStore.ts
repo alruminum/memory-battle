@@ -45,7 +45,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   setSequence: (seq) => set({ sequence: seq }),
 
   startGame: (difficulty) =>
-    set((state) => ({
+    set({
       status: 'SHOWING',
       difficulty,
       sequence: [],
@@ -53,8 +53,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       score: 0,
       stage: 0,
       isFullCombo: false,
-      dailyChancesLeft: Math.max(0, state.dailyChancesLeft - 1),
-    })),
+    }),
 
   addInput: (color) => {
     const { sequence, currentIndex, score } = get()

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useGameStore } from '../store/gameStore'
 import { useGameEngine } from '../hooks/useGameEngine'
 import { ButtonPad } from '../components/game/ButtonPad'
+import { BannerAd } from '../components/ads/BannerAd'
 import type { Difficulty } from '../types'
 
 const DIFFICULTIES: {
@@ -169,17 +170,8 @@ export function GamePage() {
       </div>
 
       {/* 광고 영역 */}
-      <div style={{
-        height: 96,
-        backgroundColor: 'var(--ad-bg)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: 11,
-        color: 'var(--ad-text)',
-        flexShrink: 0,
-      }}>
-        AD
+      <div style={{ flexShrink: 0 }}>
+        <BannerAd />
       </div>
     </div>
   )

@@ -35,6 +35,7 @@ VITE_APP_NAME=memory-battle
 
 1. **`todo.md`** 에서 미완료 항목 확인
 2. **`docs/impl/NN-*.md`** 해당 모듈 구현 계획 확인 (없으면 먼저 작성)
+   - 설계 결정 근거(왜 이 구조를 선택했는지)는 **`docs/impl/00-decisions.md`** 참조
 3. 계획대로 구현 후 **`todo.md`** 체크
 
 | 모듈 번호 | 계획 파일 |
@@ -64,6 +65,7 @@ VITE_APP_NAME=memory-battle
 | [docs/db-schema.md](docs/db-schema.md) | Supabase 테이블 DDL + 랭킹 쿼리 |
 | [docs/sdk.md](docs/sdk.md) | 앱인토스 SDK (유저ID·리워드광고·배너광고·granite.config) |
 | [docs/ui-spec.md](docs/ui-spec.md) | 화면별 컴포넌트 스펙 |
+| [docs/impl/00-decisions.md](docs/impl/00-decisions.md) | 설계 결정 근거 (왜 이 구조를 선택했는지) |
 
 설계 의도 및 비즈니스 요구사항은 `prd.md` / `trd.md` 참고.
 

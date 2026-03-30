@@ -91,7 +91,7 @@
 - [ ] Supabase Row Level Security (RLS) 정책 설정 — anon key로 INSERT/SELECT 허용
 
 ### 7. 랭킹 훅
-- [ ] `src/hooks/useRanking.ts`
+- [x] `src/hooks/useRanking.ts`
   - 일간 / 월간 / 시즌 랭킹 조회 함수 (`docs/db-schema.md` 쿼리 기준)
   - 내 순위 계산 (user_id 기준 필터)
   - 게임 오버 시 점수 INSERT (Supabase)
@@ -99,21 +99,16 @@
 - [ ] ResultPage에 "친구 랭킹 보기" 버튼 → `openGameCenterLeaderboard()` 연결
 
 ### 8. 일간 기회 제한 로직
-- [ ] `gameStore.ts`의 `startGame()` — Supabase `daily_chances` 조회
-  - `last_date`가 오늘이 아니면 `used_count=0` 리셋
-  - 기회 소진(`dailyChancesLeft === 0`) 시 게임 시작 차단
-- [ ] `useChance()` — 리워드 광고 완료 후 `used_count++`, `dailyChancesLeft++` (최대 3회 추가)
+- [x] `gameStore.ts`의 `startGame()` — dailyChancesLeft-- 제거 (useDailyChances 훅으로 분리)
+- [x] `src/hooks/useDailyChances.ts` — init / consumeChance / addChance
 
 ### 9. 광고 컴포넌트
-- [ ] `src/components/ads/BannerAd.tsx`
-  - `useRef`로 컨테이너 참조
-  - `useEffect`에서 `attachBannerAd()` 호출, cleanup에서 `destroyAll()`
-  - 컨테이너: `width: 100%`, `height: 96px`
-- [ ] `GamePage.tsx`에 `<BannerAd />` 하단 고정 삽입
-- [ ] `src/components/ads/RewardAd.tsx` (또는 훅) — `showRewardAd()` 래핑, 로딩 상태 관리
+- [x] `src/components/ads/BannerAd.tsx`
+- [x] `src/hooks/useRewardAd.ts` — `showRewardAd()` 래핑, 로딩 상태 관리
+- [x] `GamePage.tsx`에 `<BannerAd />` 하단 삽입
 
 ### 10. 결과 화면
-- [ ] `src/pages/ResultPage.tsx`
+- [x] `src/pages/ResultPage.tsx`
   - 이번 점수 + 최고 기록 갱신 여부 표시
   - 랭킹 순위 표시 (일간 / 월간 / 시즌 각각)
   - 포인트 안내 문구: `"월간 N위 → M월 1일에 XXX원 지급 예정"`
