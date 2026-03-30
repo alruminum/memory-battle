@@ -120,8 +120,8 @@
 ## Day 3 — 메인·랭킹 화면 + QA + 제출
 
 ### 11. 메인 화면
-- [ ] `src/components/game/DifficultySelector.tsx` — Easy / Medium / Hard 선택 UI, 배율 안내(x1/x2/x3) 표시
-- [ ] `src/pages/MainPage.tsx`
+- [x] `src/components/game/DifficultySelector.tsx` — Easy / Medium / Hard 선택 UI, 배율 안내(x1/x2/x3) 표시
+- [x] `src/pages/MainPage.tsx`
   - 앱 진입 시 `getUserId()` 호출 → `userId` store에 저장
   - Supabase에서 `daily_chances` 읽어 `dailyChancesLeft` 초기화
   - 남은 기회 표시: `오늘 N번 플레이 가능`
@@ -129,15 +129,15 @@
   - 시작 버튼: 기회 0이면 비활성화
 
 ### 12. 랭킹 화면
-- [ ] `src/components/ranking/RankingTab.tsx` — 일간 / 월간 / 시즌 탭 전환
-- [ ] `src/components/ranking/RankingRow.tsx` — 순위 + 점수, 내 항목 하이라이트
-- [ ] `src/pages/RankingPage.tsx`
+- [x] `src/components/ranking/RankingTab.tsx` — 일간 / 월간 / 시즌 탭 전환
+- [x] `src/components/ranking/RankingRow.tsx` — 순위 + 점수, 내 항목 하이라이트
+- [x] `src/pages/RankingPage.tsx`
   - TOP 50 리스트
   - 하단 고정: 내 순위 (50위 밖이어도 항상 표시)
   - 탭 전환 시 쿼리 재실행
 
 ### 13. 라우팅 연결
-- [ ] 페이지 라우팅 설정 (React Router 또는 단순 상태 기반)
+- [x] 페이지 라우팅 설정 (React Router 또는 단순 상태 기반)
   - Main → Game → Result → (Main | Game | Ranking)
   - 뒤로가기 처리 (앱인토스 네이티브 백버튼 대응)
 

@@ -39,3 +39,40 @@ interface ResultPageProps {
 ## 데이터
 - `useRanking()` 훅으로 순위 조회
 - `useGameStore()` 로 score, dailyChancesLeft
+
+---
+
+## ⚠️ isNewBest 레이스 컨디션 수정
+
+### 현재 버그
+ResultPage 마운트 시 `useRanking().fetchAll()`이 완료되기 전에 `daily` 배열이 빈 상태.
+`prevBest = 0`으로 비교 → 모든 게임이 `isNewBest = true`로 표시됨.
+
+### 수정 방법 (채택)
+
+`useRanking()` 훅을 마운트 시 자동으로 `fetchAll()` 실행하도록 수정:
+
+```typescript
+// useRanking.ts 내
+useEffect(() => {
+  if (userId) fetchAll()
+}, [userId])
+```
+
+ResultPage는 `isLoading`이 완료된 후 `isNewBest` 판단:
+
+```typescript
+const prevBest = isLoading ? null : (daily.find(r => r.userId === userId)?.score ?? 0)
+const isNewBest = !isLoading && score > prevBest
+```
+
+`isLoading === true` 동안은 "🏆 최고기록 갱신!" 표시 보류 (깜빡임 방지).
+
+### 점수 제출 타이밍
+
+ResultPage 마운트 시 실행 순서:
+1. `fetchAll()` 자동 실행 (기존 랭킹 조회)
+2. `submitScore(score, stage, difficulty, userId)` — INSERT
+3. `refetch()` — 제출 후 랭킹 갱신
+
+`isNewBest` 판단은 2번 INSERT 전에 완료된 1번 결과로 수행.

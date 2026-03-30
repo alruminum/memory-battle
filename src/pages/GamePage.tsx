@@ -1,9 +1,13 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useGameStore } from '../store/gameStore'
 import { useGameEngine } from '../hooks/useGameEngine'
 import { ButtonPad } from '../components/game/ButtonPad'
 import { BannerAd } from '../components/ads/BannerAd'
 import type { Difficulty } from '../types'
+
+interface GamePageProps {
+  onGameOver: () => void
+}
 
 const DIFFICULTIES: {
   value: Difficulty
@@ -17,10 +21,16 @@ const DIFFICULTIES: {
   { value: 'HARD',   label: 'HARD',   multiplier: 'x3', color: '#FF4444', glow: '#FF444444' },
 ]
 
-export function GamePage() {
+export function GamePage({ onGameOver }: GamePageProps) {
   const { status, score, stage } = useGameStore()
   const { flashingButton, clearingStage, countdown, handleInput, startGame, retryGame } = useGameEngine()
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>('EASY')
+
+  useEffect(() => {
+    if (status === 'RESULT') {
+      onGameOver()
+    }
+  }, [status]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const isIdle = status === 'IDLE'
   const isResult = status === 'RESULT'

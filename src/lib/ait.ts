@@ -11,8 +11,9 @@ import {
 
 const IS_SANDBOX = import.meta.env.DEV || import.meta.env.VITE_SANDBOX === 'true'
 
-const REWARD_AD_ID = import.meta.env.VITE_REWARD_AD_ID ?? 'ait-ad-test-rewarded-id'
-const BANNER_AD_ID = import.meta.env.VITE_BANNER_AD_ID ?? 'ait-ad-test-banner-id'
+// adGroupId: 콘솔에서 발급한 광고 그룹 ID
+const REWARD_AD_GROUP_ID = import.meta.env.VITE_REWARD_AD_GROUP_ID ?? 'ait-ad-test-rewarded-id'
+const BANNER_AD_GROUP_ID = import.meta.env.VITE_BANNER_AD_GROUP_ID ?? 'ait-ad-test-banner-id'
 
 // 세션 내 동일 userId 유지
 const DEV_USER_ID = 'dev-user-' + crypto.randomUUID()
@@ -42,30 +43,34 @@ export function showRewardAd(): Promise<boolean> {
   return new Promise((resolve) => {
     let loaded = false
 
-    const unsubscribe = loadFullScreenAd(
-      { adId: REWARD_AD_ID },
-      (event) => {
+    // loadFullScreenAd 공식 시그니처: ({ onEvent, onError, options? }) => () => void
+    const unsubscribe = loadFullScreenAd({
+      options: { adGroupId: REWARD_AD_GROUP_ID },
+      onEvent: (event) => {
         if (event.type === 'loaded' && !loaded) {
           loaded = true
-          showFullScreenAd(
-            { adId: REWARD_AD_ID },
-            (showEvent) => {
+          unsubscribe()
+
+          // showFullScreenAd 공식 시그니처: ({ onEvent, onError, options? }) => () => void
+          showFullScreenAd({
+            options: { adGroupId: REWARD_AD_GROUP_ID },
+            onEvent: (showEvent) => {
               if (showEvent.type === 'userEarnedReward') {
                 resolve(true)
               } else if (showEvent.type === 'dismissed') {
                 resolve(false)
               }
             },
-            () => resolve(false)
-          )
+            onError: () => resolve(false),
+          })
         }
       },
-      () => resolve(false)
-    )
+      onError: () => resolve(false),
+    })
 
     // 타임아웃 10초
     setTimeout(() => {
-      unsubscribe?.()
+      unsubscribe()
       resolve(false)
     }, 10000)
   })
@@ -74,15 +79,25 @@ export function showRewardAd(): Promise<boolean> {
 export function attachBannerAd(container: HTMLElement): () => void {
   if (IS_SANDBOX) return () => {}
 
+  let bannerSlot: { destroy: () => void } | null = null
+
+  // TossAds.initialize 공식 시그니처: ({ callbacks?: { onInitialized?, onInitializationFailed? } })
   TossAds.initialize({
-    onInitialized: () => {
-      TossAds.attachBanner(BANNER_AD_ID, container)
+    callbacks: {
+      onInitialized: () => {
+        // attachBanner 반환값 { destroy: () => void } 보관
+        bannerSlot = TossAds.attachBanner(BANNER_AD_GROUP_ID, container)
+      },
+      onInitializationFailed: () => {},
     },
   })
 
-  return () => TossAds.destroyAll()
+  return () => {
+    bannerSlot?.destroy()
+  }
 }
 
+// getOperationalEnvironment는 동기 함수 (await 불필요)
 export async function submitScore(score: number): Promise<void> {
   if (getOperationalEnvironment() !== 'toss') return
   await submitGameCenterLeaderBoardScore({ score: String(score) })

@@ -15,6 +15,7 @@ interface UseRankingReturn {
   season: RankEntry[]
   myRanks: { daily: number; monthly: number; season: number }
   isLoading: boolean
+  error: boolean
   submitScore: (score: number, stage: number, difficulty: Difficulty, userId: string) => Promise<void>
   refetch: () => void
 }
@@ -35,19 +36,27 @@ export function useRanking(userId: string | null): UseRankingReturn {
   const [monthly, setMonthly] = useState<RankEntry[]>([])
   const [season, setSeason] = useState<RankEntry[]>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState(false)
 
   const fetchAll = useCallback(async () => {
     setIsLoading(true)
+    setError(false)
     try {
-      const [dailyRes, monthlyRes, seasonRes] = await Promise.all([
+      const [dailyResult, monthlyResult, seasonResult] = await Promise.all([
         supabase.rpc('ranking_daily'),
         supabase.rpc('ranking_monthly'),
         supabase.rpc('ranking_season', { season_start: SEASON_START }),
       ])
 
-      setDaily(addRanks((dailyRes.data ?? []) as { user_id: string; best_score: number }[]))
-      setMonthly(addRanks((monthlyRes.data ?? []) as { user_id: string; best_score: number }[]))
-      setSeason(addRanks((seasonRes.data ?? []) as { user_id: string; best_score: number }[]))
+      if (dailyResult.error || monthlyResult.error || seasonResult.error) {
+        setError(true)
+      } else {
+        setDaily(addRanks((dailyResult.data ?? []) as { user_id: string; best_score: number }[]))
+        setMonthly(addRanks((monthlyResult.data ?? []) as { user_id: string; best_score: number }[]))
+        setSeason(addRanks((seasonResult.data ?? []) as { user_id: string; best_score: number }[]))
+      }
+    } catch {
+      setError(true)
     } finally {
       setIsLoading(false)
     }
@@ -79,6 +88,7 @@ export function useRanking(userId: string | null): UseRankingReturn {
     season,
     myRanks,
     isLoading,
+    error,
     submitScore,
     refetch: fetchAll,
   }

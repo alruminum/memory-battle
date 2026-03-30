@@ -167,15 +167,15 @@ const isFullCombo = comboCount === sequence.length
 // lib/ait.ts
 
 // 게임 오버 시 점수 제출 (score는 string으로 전달)
-export const submitLeaderboardScore = async (score: number): Promise<void> => {
-  await AppsInToss.submitGameCenterLeaderBoardScore({
-    score: String(score),
-  })
+// ⚠️ export명: submitScore (submitLeaderboardScore 아님)
+export async function submitScore(score: number): Promise<void> {
+  if (getOperationalEnvironment() !== 'toss') return
+  await submitGameCenterLeaderBoardScore({ score: String(score) })
 }
 
 // 친구랭킹 + 전체랭킹 내장 UI 오픈
-export const openLeaderboard = async (): Promise<void> => {
-  await AppsInToss.openGameCenterLeaderboard()
+export async function openLeaderboard(): Promise<void> {
+  await openGameCenterLeaderboard()
 }
 ```
 
@@ -289,7 +289,9 @@ export const attachBannerAd = (container: HTMLElement) => {
 }
 
 // 토스 리더보드 점수 제출 (게임 오버 시)
-export const submitLeaderboardScore = async (score: number): Promise<void> => {
+// ⚠️ export명: submitScore (submitLeaderboardScore 아님)
+export async function submitScore(score: number): Promise<void> {
+  if (getOperationalEnvironment() !== 'toss') return  // 샌드박스 방어
   await submitGameCenterLeaderBoardScore({ score: String(score) })
 }
 
