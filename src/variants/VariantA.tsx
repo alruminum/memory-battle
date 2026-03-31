@@ -257,7 +257,7 @@ function MainScreen({ onNavigate }: { onNavigate: (page: string) => void }) {
 }
 
 // ---- GAME SCREEN ----
-function GameScreen({ onNavigate }: { onNavigate: (page: string) => void }) {
+function GameScreen({ onNavigate: _onNavigate }: { onNavigate: (page: string) => void }) {
   const [flashIdx, setFlashIdx] = useState<number | null>(null)
 
   return (

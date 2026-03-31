@@ -42,7 +42,6 @@
   --ad-text: #bbbbcc;
 }
 
-:root[data-theme='dark'],
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     --bg-primary: #0d0d12;

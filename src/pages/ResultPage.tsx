@@ -12,7 +12,7 @@ interface ResultPageProps {
 
 export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
   const { score, stage, difficulty, userId, dailyChancesLeft } = useGameStore()
-  const { daily, monthly, season, myRanks, submitScore } = useRanking(userId)
+  const { daily, myRanks, submitScore } = useRanking(userId)
   const { show: showAd, isLoading: adLoading } = useRewardAd()
   const { addChance } = useDailyChances()
 
