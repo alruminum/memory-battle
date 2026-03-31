@@ -21,6 +21,7 @@ export function useGameEngine() {
   const [countdown, setCountdown] = useState<number | null>(null)
   const showingRef = useRef(false)
   const clearingRef = useRef(false)
+  const startingRef = useRef(false) // 카운트다운 중복 시작 방지
 
   const combo = useCombo()
 
@@ -70,10 +71,13 @@ export function useGameEngine() {
 
   // 카운트다운 후 게임 실제 시작
   const launchAfterCountdown = useCallback((diff: Difficulty) => {
+    if (startingRef.current) return  // 이미 카운트다운 진행 중 — 중복 방지
+    startingRef.current = true
     setCountdown(3)
     setTimeout(() => setCountdown(2), COUNTDOWN_INTERVAL)
     setTimeout(() => setCountdown(1), COUNTDOWN_INTERVAL * 2)
     setTimeout(() => {
+      startingRef.current = false
       setCountdown(null)
       combo.reset()
       clearingRef.current = false
