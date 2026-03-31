@@ -73,3 +73,33 @@ src/
 | [docs/db-schema.md](docs/db-schema.md) | DB 스키마, 랭킹 쿼리 |
 | [docs/sdk.md](docs/sdk.md) | 앱인토스 SDK 연동 |
 | [docs/ui-spec.md](docs/ui-spec.md) | 화면별 UI 스펙 |
+
+## AI 협업 구조
+
+이 프로젝트는 Claude Code와 멀티 에이전트 워크플로로 개발됩니다.
+
+### 에이전트 역할
+
+| 에이전트 | 역할 |
+|---|---|
+| **product-planner** | 요구사항 수집 → 기능 스펙 → 스코프 결정 |
+| **orchestrator** | 단계별 워크플로 조율 및 게이트 관리 |
+| **architect** | 시스템 설계 및 모듈별 구현 계획 작성 |
+| **engineer** | 계획 파일 기반 코드 구현 |
+| **validator** | 설계/코드 검증 (읽기 전용) |
+| **designer** | UI variant 3개 생성 |
+| **design-critic** | 디자인 variant 점수화 및 선택 판정 (읽기 전용) |
+
+### 개발 흐름
+
+```
+product-planner (기획 + 스코프 결정)
+  └→ orchestrator
+       ├→ [병렬] architect + validator (설계 잠금)
+       ├→ [병렬] designer + design-critic (UI 디자인)
+       ├→ architect + engineer (구현)
+       └→ validator (코드 검증) → DONE
+```
+
+각 단계는 유저 명시적 승인 후 다음 단계로 진행합니다.
+전체 에이전트 흐름도: [`~/.claude/agents/README.md`](~/.claude/agents/README.md)
