@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react'
 import { useGameStore } from '../store/gameStore'
-import { useDailyChances } from '../hooks/useDailyChances'
 import { useRanking } from '../hooks/useRanking'
 import { getUserId } from '../lib/ait'
 import type { Difficulty } from '../types'
@@ -31,8 +30,7 @@ const CORNER_POS: { color: keyof typeof BTN_COLORS; top?: number; bottom?: numbe
 ]
 
 export function MainPage({ onStart, onRanking }: MainPageProps) {
-  const { userId, dailyChancesLeft, setUserId, difficulty } = useGameStore()
-  const dailyChances = useDailyChances()
+  const { userId, setUserId, difficulty } = useGameStore()
   const ranking = useRanking(userId || null)
 
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>(difficulty)
@@ -50,7 +48,6 @@ export function MainPage({ onStart, onRanking }: MainPageProps) {
       try {
         const uid = await getUserId()
         setUserId(uid)
-        await dailyChances.init(uid)
         ranking.refetch()
       } catch {
         showToast('랭킹 연동 실패. 오프라인 모드로 진행됩니다')
@@ -62,13 +59,10 @@ export function MainPage({ onStart, onRanking }: MainPageProps) {
   }, [])
 
   function handleStart() {
-    const ok = dailyChances.consumeChance()
-    if (!ok) return
     onStart(selectedDifficulty)
   }
 
-  const noChances = dailyChancesLeft <= 0
-  const startDisabled = isInitializing || noChances
+  const startDisabled = isInitializing
 
   const rankLabel = (rank: number, loading: boolean) => {
     if (loading) return '#—'
@@ -76,9 +70,9 @@ export function MainPage({ onStart, onRanking }: MainPageProps) {
     return `#${rank}`
   }
 
-  // Today's Plays 도트: 총 3개, dailyChancesLeft 수만큼 라임색
+  // Today's Plays 도트: 모듈 11에서 useDailyReward 기반으로 교체 예정
   const totalDots = 3
-  const activeDots = Math.min(dailyChancesLeft, totalDots)
+  const activeDots = totalDots
 
   return (
     <div
@@ -298,7 +292,7 @@ export function MainPage({ onStart, onRanking }: MainPageProps) {
               color: startDisabled ? 'var(--vb-text-dim)' : 'var(--vb-accent)',
               letterSpacing: 1,
             }}>
-              {isInitializing ? '...' : noChances ? 'DONE' : 'START'}
+              {isInitializing ? '...' : 'START'}
             </span>
           </button>
         </div>
@@ -306,17 +300,6 @@ export function MainPage({ onStart, onRanking }: MainPageProps) {
 
       {/* View Rankings 버튼 */}
       <div style={{ padding: '0 20px 32px', flexShrink: 0 }}>
-        {noChances && !isInitializing && (
-          <div style={{
-            textAlign: 'center',
-            marginBottom: 10,
-            fontSize: 12,
-            color: 'var(--vb-text-dim)',
-            fontFamily: 'var(--vb-font-body)',
-          }}>
-            오늘 기회를 모두 사용했어요. 내일 다시 오세요
-          </div>
-        )}
         <button
           onClick={onRanking}
           style={{

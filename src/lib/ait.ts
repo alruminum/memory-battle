@@ -7,6 +7,7 @@ import {
   TossAds,
   submitGameCenterLeaderBoardScore,
   openGameCenterLeaderboard,
+  grantPromotionReward,
 } from '@apps-in-toss/web-framework'
 
 const IS_SANDBOX = import.meta.env.DEV || import.meta.env.VITE_SANDBOX === 'true'
@@ -106,4 +107,12 @@ export async function submitScore(score: number): Promise<void> {
 export async function openLeaderboard(): Promise<void> {
   if (getOperationalEnvironment() !== 'toss') return
   await openGameCenterLeaderboard()
+}
+
+const DAILY_REWARD_CODE = 'DAILY_PLAY'
+const DAILY_REWARD_AMOUNT = 10
+
+export async function grantDailyReward(): Promise<void> {
+  if (IS_SANDBOX) return  // 샌드박스 분기: 실제 포인트 지급 생략
+  await grantPromotionReward({ params: { promotionCode: DAILY_REWARD_CODE, amount: DAILY_REWARD_AMOUNT } })
 }

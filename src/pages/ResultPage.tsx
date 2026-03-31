@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import { useGameStore } from '../store/gameStore'
 import { useRanking } from '../hooks/useRanking'
 import { useRewardAd } from '../hooks/useRewardAd'
-import { useDailyChances } from '../hooks/useDailyChances'
 import { openLeaderboard } from '../lib/ait'
 
 interface ResultPageProps {
@@ -11,10 +10,9 @@ interface ResultPageProps {
 }
 
 export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
-  const { score, stage, difficulty, userId, dailyChancesLeft } = useGameStore()
+  const { score, stage, difficulty, userId } = useGameStore()
   const { daily, myRanks, submitScore } = useRanking(userId)
   const { show: showAd, isLoading: adLoading } = useRewardAd()
-  const { addChance } = useDailyChances()
 
   const submitted = useRef(false)
   const [isNewBest, setIsNewBest] = useState(false)
@@ -31,13 +29,10 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
     submitScore(score, stage, difficulty, userId)
   }, [userId]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const noChances = dailyChancesLeft <= 0
-
   async function handlePlayAgain() {
     setShowModal(false)
     const earned = await showAd()
     if (!earned) return
-    await addChance(userId)
     onPlayAgain()
   }
 
@@ -194,32 +189,21 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
         flexDirection: 'column',
         gap: 10,
       }}>
-        {noChances && (
-          <div style={{
-            textAlign: 'center',
-            fontSize: 12,
-            color: 'var(--vb-text-dim)',
-            fontFamily: 'var(--vb-font-body)',
-          }}>
-            오늘 플레이 기회를 모두 사용했습니다
-          </div>
-        )}
         <button
-          onClick={() => !noChances && setShowModal(true)}
-          disabled={noChances}
+          onClick={() => setShowModal(true)}
           style={{
             width: '100%',
             padding: '16px 0',
             borderRadius: 8,
             border: 'none',
-            backgroundColor: noChances ? 'var(--vb-surface)' : 'var(--vb-accent)',
-            color: noChances ? 'var(--vb-text-dim)' : '#0e0e10',
+            backgroundColor: 'var(--vb-accent)',
+            color: '#0e0e10',
             fontFamily: 'var(--vb-font-score)',
             fontSize: 14,
             fontWeight: 900,
             letterSpacing: 2,
-            cursor: noChances ? 'default' : 'pointer',
-            boxShadow: noChances ? 'none' : '0 4px 24px rgba(200,255,0,0.2)',
+            cursor: 'pointer',
+            boxShadow: '0 4px 24px rgba(200,255,0,0.2)',
           }}
         >
           PLAY AGAIN

@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react'
 import { useGameStore } from '../store/gameStore'
 import { useGameEngine } from '../hooks/useGameEngine'
 import { useRanking } from '../hooks/useRanking'
-import { useDailyChances } from '../hooks/useDailyChances'
 import { getUserId } from '../lib/ait'
 import { ButtonPad } from '../components/game/ButtonPad'
 import { BannerAd } from '../components/ads/BannerAd'
@@ -24,9 +23,8 @@ const DIFFICULTIES: {
 ]
 
 export function GamePage({ onGameOver, onRanking }: GamePageProps) {
-  const { status, score, stage, userId, dailyChancesLeft, setUserId } = useGameStore()
+  const { status, score, stage, userId, setUserId } = useGameStore()
   const { flashingButton, clearingStage, countdown, handleInput, startGame, retryGame } = useGameEngine()
-  const dailyChances = useDailyChances()
   const ranking = useRanking(userId || null)
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>('EASY')
   const [isInitializing, setIsInitializing] = useState(true)
@@ -36,7 +34,6 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
       try {
         const uid = await getUserId()
         setUserId(uid)
-        await dailyChances.init(uid)
         ranking.refetch()
       } catch {
         // 실패 시 기본값(dailyChancesLeft=1) 유지
@@ -59,8 +56,6 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
   const canChangeDifficulty = isIdle || isResult
 
   function handleStart() {
-    const ok = dailyChances.consumeChance()
-    if (!ok) return
     startGame(selectedDifficulty)
   }
 
@@ -169,7 +164,7 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
           fontFamily: 'var(--vb-font-body)',
           marginBottom: 8,
         }}>
-          {isInitializing ? 'Loading...' : `오늘 ${dailyChancesLeft}번 플레이 가능`}
+          {isInitializing ? 'Loading...' : '무한 플레이 가능'}
         </div>
         <button
           onClick={onRanking}

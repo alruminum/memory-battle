@@ -16,16 +16,15 @@ interface GameStore {
   difficulty: Difficulty
 
   userId: string
-  dailyChancesLeft: number
+  hasTodayReward: boolean
 
   setUserId: (id: string) => void
-  setDailyChancesLeft: (n: number) => void
+  setTodayReward: (value: boolean) => void
   setSequence: (seq: ButtonColor[]) => void
   startGame: (difficulty: Difficulty) => void
   addInput: (color: ButtonColor) => 'correct' | 'wrong' | 'round-clear'
   gameOver: (isFullCombo: boolean) => void
   resetGame: () => void
-  useChance: () => void
 }
 
 export const useGameStore = create<GameStore>((set, get) => ({
@@ -38,10 +37,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
   difficulty: 'EASY',
 
   userId: '',
-  dailyChancesLeft: 1,
+  hasTodayReward: false,
 
   setUserId: (id) => set({ userId: id }),
-  setDailyChancesLeft: (n) => set({ dailyChancesLeft: n }),
+  setTodayReward: (value) => set({ hasTodayReward: value }),
   setSequence: (seq) => set({ sequence: seq }),
 
   startGame: (difficulty) =>
@@ -91,9 +90,4 @@ export const useGameStore = create<GameStore>((set, get) => ({
       stage: 0,
       isFullCombo: false,
     }),
-
-  useChance: () =>
-    set((state) => ({
-      dailyChancesLeft: Math.min(4, state.dailyChancesLeft + 1),
-    })),
 }))
