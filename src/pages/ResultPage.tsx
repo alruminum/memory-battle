@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useGameStore } from '../store/gameStore'
 import { useRanking } from '../hooks/useRanking'
 import { useRewardAd } from '../hooks/useRewardAd'
+import { useDailyReward } from '../hooks/useDailyReward'
 import { openLeaderboard } from '../lib/ait'
 
 interface ResultPageProps {
@@ -11,29 +12,65 @@ interface ResultPageProps {
 
 export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
   const { score, stage, difficulty, userId } = useGameStore()
-  const { daily, myRanks, submitScore } = useRanking(userId)
+  const { daily, myRanks, isLoading, submitScore } = useRanking(userId)
   const { show: showAd, isLoading: adLoading } = useRewardAd()
+  const { hasTodayReward, grantDailyReward } = useDailyReward()
 
   const submitted = useRef(false)
+  const [adDone, setAdDone] = useState(false)
+  const [toast, setToast] = useState<string | null>(null)
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // 점수 제출 (마운트 1회, isLoading 완료 후 isNewBest 판단)
+  const prevBestRef = useRef<number | null>(null)
   const [isNewBest, setIsNewBest] = useState(false)
-  const [showModal, setShowModal] = useState(false)
 
   useEffect(() => {
-    if (submitted.current || !userId) return
+    if (submitted.current || !userId || isLoading) return
     submitted.current = true
 
-    // 제출 전 기존 best 확인
     const prevBest = daily.find((e) => e.user_id === userId)?.best_score ?? 0
+    prevBestRef.current = prevBest
     if (score > prevBest) setIsNewBest(true)
 
     submitScore(score, stage, difficulty, userId)
-  }, [userId]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [userId, isLoading]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  async function handlePlayAgain() {
-    setShowModal(false)
-    const earned = await showAd()
-    if (!earned) return
-    onPlayAgain()
+  // 마운트 시 리워드광고 자동 시작
+  useEffect(() => {
+    let cancelled = false
+
+    async function startAd() {
+      try {
+        const earned = await showAd()
+        if (cancelled) return
+        if (earned && !hasTodayReward) {
+          try {
+            await grantDailyReward()
+            showToastMsg('오늘의 10포인트 지급!')
+          } catch {
+            showToastMsg('포인트 지급 중 오류가 발생했습니다')
+          }
+        }
+      } catch {
+        // 광고 실패 — 버튼 활성화만 진행
+      } finally {
+        if (!cancelled) setAdDone(true)
+      }
+    }
+
+    startAd()
+
+    return () => {
+      cancelled = true
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current)
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  function showToastMsg(msg: string) {
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current)
+    setToast(msg)
+    toastTimerRef.current = setTimeout(() => setToast(null), 3000)
   }
 
   async function handleFriendRanking() {
@@ -189,21 +226,36 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
         flexDirection: 'column',
         gap: 10,
       }}>
+        {/* 광고 로딩 중 표시 */}
+        {adLoading && !adDone && (
+          <div style={{
+            textAlign: 'center',
+            padding: '10px 0',
+            fontSize: 13,
+            color: 'var(--vb-text-dim)',
+            fontFamily: 'var(--vb-font-body)',
+          }}>
+            광고 로딩 중...
+          </div>
+        )}
+
         <button
-          onClick={() => setShowModal(true)}
+          onClick={onPlayAgain}
+          disabled={!adDone}
           style={{
             width: '100%',
             padding: '16px 0',
             borderRadius: 8,
             border: 'none',
-            backgroundColor: 'var(--vb-accent)',
-            color: '#0e0e10',
+            backgroundColor: adDone ? 'var(--vb-accent)' : 'var(--vb-border)',
+            color: adDone ? '#0e0e10' : 'var(--vb-text-dim)',
             fontFamily: 'var(--vb-font-score)',
             fontSize: 14,
             fontWeight: 900,
             letterSpacing: 2,
-            cursor: 'pointer',
-            boxShadow: '0 4px 24px rgba(200,255,0,0.2)',
+            cursor: adDone ? 'pointer' : 'default',
+            boxShadow: adDone ? '0 4px 24px rgba(200,255,0,0.2)' : 'none',
+            transition: 'background-color 0.2s, color 0.2s',
           }}
         >
           PLAY AGAIN
@@ -244,75 +296,24 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
         </button>
       </div>
 
-      {/* 확인 모달 */}
-      {showModal && (
+      {/* 토스트 */}
+      {toast && (
         <div style={{
-          position: 'fixed', inset: 0,
-          backgroundColor: 'rgba(0,0,0,0.75)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          zIndex: 100,
+          position: 'fixed',
+          bottom: 80,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          backgroundColor: 'rgba(20,20,20,0.92)',
+          color: 'var(--vb-text)',
+          padding: '10px 20px',
+          borderRadius: 24,
+          fontSize: 13,
+          fontFamily: 'var(--vb-font-body)',
+          whiteSpace: 'nowrap',
+          zIndex: 200,
+          border: '1px solid var(--vb-border)',
         }}>
-          <div style={{
-            backgroundColor: 'var(--vb-surface)',
-            borderRadius: 16,
-            padding: '28px 24px',
-            width: 'calc(100% - 48px)',
-            maxWidth: 320,
-            textAlign: 'center',
-            border: '1px solid var(--vb-border)',
-          }}>
-            <div style={{
-              fontFamily: 'var(--vb-font-score)',
-              fontSize: 16,
-              fontWeight: 800,
-              letterSpacing: 1,
-              color: 'var(--vb-text)',
-              marginBottom: 8,
-            }}>
-              한 번 더 하기
-            </div>
-            <div style={{
-              fontSize: 13,
-              color: 'var(--vb-text-mid)',
-              marginBottom: 24,
-              fontFamily: 'var(--vb-font-body)',
-            }}>
-              광고를 보면 1회 추가됩니다
-            </div>
-            <div style={{ display: 'flex', gap: 10 }}>
-              <button
-                onClick={() => setShowModal(false)}
-                style={{
-                  flex: 1, padding: '12px 0', borderRadius: 8,
-                  border: '1px solid var(--vb-border)',
-                  backgroundColor: 'transparent',
-                  color: 'var(--vb-text-mid)',
-                  fontSize: 14,
-                  fontFamily: 'var(--vb-font-body)',
-                  cursor: 'pointer',
-                }}
-              >
-                취소
-              </button>
-              <button
-                onClick={handlePlayAgain}
-                disabled={adLoading}
-                style={{
-                  flex: 1, padding: '12px 0', borderRadius: 8,
-                  border: 'none',
-                  backgroundColor: 'var(--vb-accent)',
-                  color: '#0e0e10',
-                  fontSize: 14,
-                  fontWeight: 700,
-                  fontFamily: 'var(--vb-font-body)',
-                  cursor: adLoading ? 'default' : 'pointer',
-                  opacity: adLoading ? 0.6 : 1,
-                }}
-              >
-                {adLoading ? '로딩 중...' : '광고 보기'}
-              </button>
-            </div>
-          </div>
+          {toast}
         </div>
       )}
     </div>
