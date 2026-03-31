@@ -104,5 +104,6 @@ export async function submitScore(score: number): Promise<void> {
 }
 
 export async function openLeaderboard(): Promise<void> {
+  if (getOperationalEnvironment() !== 'toss') return
   await openGameCenterLeaderboard()
 }

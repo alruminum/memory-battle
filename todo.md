@@ -95,8 +95,8 @@
   - 일간 / 월간 / 시즌 랭킹 조회 함수 (`docs/db-schema.md` 쿼리 기준)
   - 내 순위 계산 (user_id 기준 필터)
   - 게임 오버 시 점수 INSERT (Supabase)
-- [ ] 게임 오버 시 `submitGameCenterLeaderBoardScore({ score: String(score) })` 호출 (토스 리더보드 제출)
-- [ ] ResultPage에 "친구 랭킹 보기" 버튼 → `openGameCenterLeaderboard()` 연결
+- [x] 게임 오버 시 `submitGameCenterLeaderBoardScore({ score: String(score) })` 호출 (토스 리더보드 제출)
+- [x] ResultPage에 "친구 랭킹 보기" 버튼 → `openGameCenterLeaderboard()` 연결
 
 ### 8. 일간 기회 제한 로직
 - [x] `gameStore.ts`의 `startGame()` — dailyChancesLeft-- 제거 (useDailyChances 훅으로 분리)
