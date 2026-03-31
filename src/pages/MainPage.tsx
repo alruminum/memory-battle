@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useGameStore } from '../store/gameStore'
 import { useRanking } from '../hooks/useRanking'
+import { useDailyReward } from '../hooks/useDailyReward'
 import { getUserId } from '../lib/ait'
 import type { Difficulty } from '../types'
 
@@ -32,6 +33,7 @@ const CORNER_POS: { color: keyof typeof BTN_COLORS; top?: number; bottom?: numbe
 export function MainPage({ onStart, onRanking }: MainPageProps) {
   const { userId, setUserId, difficulty } = useGameStore()
   const ranking = useRanking(userId || null)
+  const { hasTodayReward } = useDailyReward()
 
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>(difficulty)
   const [isInitializing, setIsInitializing] = useState(true)
@@ -69,10 +71,6 @@ export function MainPage({ onStart, onRanking }: MainPageProps) {
     if (rank === 0) return '#—'
     return `#${rank}`
   }
-
-  // Today's Plays 도트: 모듈 11에서 useDailyReward 기반으로 교체 예정
-  const totalDots = 3
-  const activeDots = totalDots
 
   return (
     <div
@@ -160,33 +158,22 @@ export function MainPage({ onStart, onRanking }: MainPageProps) {
         ))}
       </div>
 
-      {/* Today's Plays 크레딧 도트 */}
-      <div style={{
-        margin: '12px 20px 0',
-        padding: '10px 16px',
-        backgroundColor: 'var(--vb-surface)',
-        borderRadius: 8,
-        border: '1px solid var(--vb-border)',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        flexShrink: 0,
-      }}>
-        <span style={{ fontSize: 12, color: 'var(--vb-text-mid)', fontFamily: 'var(--vb-font-body)' }}>
-          {isInitializing ? 'Loading...' : "Today's Plays"}
-        </span>
-        <div style={{ display: 'flex', gap: 4 }}>
-          {Array.from({ length: totalDots }).map((_, i) => (
-            <div key={i} style={{
-              width: 8,
-              height: 8,
-              borderRadius: 2,
-              backgroundColor: i < activeDots ? 'var(--vb-accent)' : 'var(--vb-border)',
-              boxShadow: i < activeDots ? '0 0 6px var(--vb-accent-dim)' : 'none',
-            }} />
-          ))}
+      {hasTodayReward && (
+        <div style={{
+          margin: '12px 20px 0',
+          textAlign: 'center',
+          flexShrink: 0,
+        }}>
+          <span style={{
+            fontSize: 12,
+            color: 'var(--vb-accent)',
+            fontFamily: 'var(--vb-font-body)',
+            fontWeight: 600,
+          }}>
+            오늘 포인트 수령 완료 ✓
+          </span>
         </div>
-      </div>
+      )}
 
       {/* 난이도 탭 */}
       <div style={{

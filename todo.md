@@ -122,7 +122,7 @@
 ### 11. 메인 화면
 - [x] `src/components/game/DifficultySelector.tsx` — Easy / Medium / Hard 선택 UI, 배율 안내(x1/x2/x3) 표시
 - ~~[x] `src/pages/MainPage.tsx` — daily_chances 초기화, 남은 기회 도트 UI, 시작 버튼 기회 조건~~ (v0.2 재구현)
-- [ ] `MainPage.tsx` — useDailyReward 교체, 도트 UI 제거, 시작 버튼 항상 활성화
+- [x] `MainPage.tsx` — useDailyReward 교체, 도트 UI 제거, 시작 버튼 항상 활성화
 
 ### 12. 랭킹 화면
 - [x] `src/components/ranking/RankingTab.tsx` — 일간 / 월간 / 시즌 탭 전환

@@ -3,21 +3,11 @@
 > v0.2 변경: useDailyChances → useDailyReward 교체, 남은 기회 도트 UI 제거, 시작 버튼 항상 활성화
 
 ## 생성 파일
-- `src/components/game/DifficultySelector.tsx`
 - `src/pages/MainPage.tsx`
 
----
-
-## DifficultySelector.tsx
-
-```typescript
-interface DifficultySelectorProps {
-  value: Difficulty
-  onChange: (d: Difficulty) => void
-}
-```
-- Easy(x1) / Medium(x2) / Hard(x3) 3개 버튼
-- 선택된 항목 하이라이트
+> **결정 (2026-03-31)**: 난이도 탭은 `DifficultySelector.tsx` 컴포넌트 대신 MainPage 인라인 구현 유지.
+> 이유: 게임 전체가 형광 연두(var(--vb-accent)) 단일 테마인데, DifficultySelector는 난이도별 고유 색(초록/파랑/빨강)을 사용해 디자인 통일성을 해침.
+> `src/components/game/DifficultySelector.tsx`는 보존하되 사용하지 않음.
 
 ---
 
