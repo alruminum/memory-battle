@@ -203,13 +203,14 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
         flexShrink: 0,
       }}>
         <div style={{
+          flex: 1,
           fontFamily: 'var(--vb-font-score)',
           fontSize: 14,
           fontWeight: 800,
           color: 'var(--vb-text-mid)',
           letterSpacing: 1,
         }}>{diffLabel}</div>
-        <div style={{ textAlign: 'center' }}>
+        <div style={{ flex: 1, textAlign: 'center' }}>
           <div style={{
             fontFamily: 'var(--vb-font-score)',
             fontSize: 10,
@@ -225,6 +226,8 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
           }}>{score.toLocaleString()}</div>
         </div>
         <div style={{
+          flex: 1,
+          textAlign: 'right',
           fontFamily: 'var(--vb-font-score)',
           fontSize: 14,
           fontWeight: 800,
