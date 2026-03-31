@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { submitScore as submitToGameCenter } from '../lib/ait'
 import type { Difficulty } from '../types'
@@ -75,6 +75,11 @@ export function useRanking(userId: string | null): UseRankingReturn {
     },
     [fetchAll]
   )
+
+  // 마운트 시 자동 fetchAll — isNewBest 레이스 컨디션 방지
+  useEffect(() => {
+    if (userId) fetchAll()
+  }, [userId, fetchAll])
 
   const myRanks = {
     daily: userId ? findMyRank(daily, userId) : 0,
