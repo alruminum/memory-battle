@@ -43,7 +43,7 @@ export function RankingRow({ rank, score, isMe }: RankingRowProps) {
           flex: 1,
           fontSize: 14,
           fontWeight: isMe ? 700 : 400,
-          color: isMe ? 'var(--text-primary)' : 'var(--text-muted)',
+          color: isMe ? 'var(--vb-text)' : 'var(--vb-text-mid)',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
@@ -57,7 +57,7 @@ export function RankingRow({ rank, score, isMe }: RankingRowProps) {
         style={{
           fontSize: 15,
           fontWeight: 800,
-          color: isMe ? '#FF6900' : 'var(--text-primary)',
+          color: isMe ? '#FF6900' : 'var(--vb-text)',
           flexShrink: 0,
         }}
       >
