@@ -43,12 +43,19 @@ VITE_APP_NAME=memory-battle
 모듈을 구현할 때는 아래 루프를 따른다. **반드시 모듈 1개가 PASS된 후 다음 모듈로 넘어간다.**
 
 ```
-최대 3회 반복:
-  1. impl 에이전트: docs/impl/NN-*.md 읽고 구현
+[스펙 검토 단계 — 구현 전 1회]
+  1. impl 에이전트: 계획 파일 + 의존 모듈 소스 읽고 스펙 갭 체크
+     - SPEC_GAP_FOUND → design-planner 에이전트에게 갭 목록 전달
+       → design-planner: 계획 파일 보강 후 보고
+       → impl 에이전트: 보강된 계획으로 재검토 (최대 1회)
+     - 갭 없음 → 구현 시작
+
+[구현-검토 루프 — 최대 3회]
+  2. impl 에이전트: 보강된 계획대로 구현
      (재시도 시 review 피드백 포함)
-  2. review 에이전트: 설계 스펙 vs 구현 코드 비교
+  3. review 에이전트: 설계 스펙 vs 구현 코드 비교
      - PASS → todo.md 체크, 리뷰 리포트 유저에게 출력 후 대기
-     - FAIL → 리뷰 리포트 유저에게 출력, 피드백과 함께 1번 재실행
+     - FAIL → 리뷰 리포트 유저에게 출력, 피드백과 함께 2번 재실행
 3회 후 FAIL → 메인(오케스트레이터)이 유저에게 에스컬레이션
 ```
 
@@ -57,6 +64,27 @@ VITE_APP_NAME=memory-battle
 > **⚠️ 리뷰 리포트 유저 노출 필수**: PASS/FAIL 여부와 무관하게, review 에이전트가 반환한 전체 리포트(A. 스펙 일치 / B. 의존성 규칙 / C. 코드 품질 심층 검토)를 오케스트레이터가 유저에게 그대로 출력한다. 내부에서만 소비하고 숨기지 않는다.
 
 에이전트 정의: `.claude/agents/impl.md`, `.claude/agents/review.md`
+
+### 디자인 이터레이션 루프
+
+UI를 개선할 때는 아래 루프를 따른다. **반드시 PICK 또는 유저 선택 후 impl로 넘어간다.**
+
+```
+[디자인 루프 — 최대 3회]
+  1. designer 에이전트: 3가지 variant (ASCII 와이어프레임 + React 구현체) 생성
+  2. design-review 에이전트: 4개 기준 점수화 후 판정
+     - PICK → 오케스트레이터가 유저에게 PICK variant + 리포트 출력 후 대기
+              유저 승인 → impl 에이전트로 실제 파일 적용
+     - ITERATE → 피드백 포함해 1번 재실행 (최대 3회)
+     - ESCALATE → 유저에게 3개 variant 전체 보고, 유저가 직접 선택
+  3회 후 PICK 없음 → ESCALATE로 유저에게 에스컬레이션
+```
+
+> **⚠️ 디자인 리뷰 리포트 유저 노출 필수**: PICK/ITERATE/ESCALATE 여부와 무관하게, design-review 에이전트가 반환한 전체 심사 결과(점수표 + 판정 근거)를 오케스트레이터가 유저에게 그대로 출력한다.
+
+> **⚠️ PICK 후 자동 impl 금지**: design-review가 PICK해도 오케스트레이터는 유저에게 결과를 보고하고 반드시 멈춘다. impl 적용 여부는 유저가 명시적으로 지시한다.
+
+에이전트 정의: `.claude/agents/designer.md`, `.claude/agents/design-review.md`
 
 | 모듈 번호 | 계획 파일 |
 |---|---|

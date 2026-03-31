@@ -41,7 +41,7 @@ export function RankingPage({ onBack }: RankingPageProps) {
   const myRank = myRanks[activeTab]
   const myEntry = listMap[activeTab].find((e) => e.user_id === userId)
   const myScore = myEntry?.best_score ?? 0
-  const myRankLabel = myRank > 0 ? `${myRank}위` : '순위권 밖'
+  const myRankLabel = myRank > 0 ? `#${myRank}` : '순위권 밖'
   const showMyBar = Boolean(userId)
 
   return (
@@ -50,8 +50,9 @@ export function RankingPage({ onBack }: RankingPageProps) {
         display: 'flex',
         flexDirection: 'column',
         height: '100%',
-        backgroundColor: 'var(--bg-primary)',
-        color: 'var(--text-primary)',
+        backgroundColor: 'var(--vb-bg)',
+        color: 'var(--vb-text)',
+        fontFamily: 'var(--vb-font-body)',
       }}
     >
       {/* 헤더 */}
@@ -62,6 +63,7 @@ export function RankingPage({ onBack }: RankingPageProps) {
           padding: '16px 20px 8px',
           gap: 8,
           flexShrink: 0,
+          borderBottom: '1px solid var(--vb-border)',
         }}
       >
         <button
@@ -71,7 +73,7 @@ export function RankingPage({ onBack }: RankingPageProps) {
             borderRadius: 8,
             border: 'none',
             backgroundColor: 'transparent',
-            color: 'var(--text-muted)',
+            color: 'var(--vb-text-mid)',
             fontSize: 22,
             cursor: 'pointer',
             lineHeight: 1,
@@ -79,31 +81,36 @@ export function RankingPage({ onBack }: RankingPageProps) {
         >
           &#8592;
         </button>
-        <div style={{ fontSize: 18, fontWeight: 800 }}>랭킹</div>
+        <div style={{
+          fontFamily: 'var(--vb-font-score)',
+          fontSize: 18,
+          fontWeight: 800,
+          letterSpacing: 1,
+          color: 'var(--vb-text)',
+        }}>RANKINGS</div>
       </div>
 
       {/* 탭 */}
-      <div style={{ padding: '8px 20px 12px', flexShrink: 0 }}>
+      <div style={{ padding: '12px 20px', flexShrink: 0 }}>
         <RankingTab active={activeTab} onChange={handleTabChange} />
       </div>
 
       {/* 리스트 영역 (스크롤) */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '0 20px' }}>
         {isLoading ? (
-          /* 스켈레톤 10행 */
           Array.from({ length: 10 }).map((_, i) => (
             <div
               key={i}
               style={{
                 height: 44,
-                borderRadius: 4,
-                background: 'rgba(255,255,255,0.05)',
+                borderRadius: 6,
+                background: 'var(--vb-surface)',
+                border: '1px solid var(--vb-border)',
                 margin: '4px 0',
               }}
             />
           ))
         ) : error ? (
-          /* 에러 상태 */
           <div
             style={{
               display: 'flex',
@@ -114,18 +121,19 @@ export function RankingPage({ onBack }: RankingPageProps) {
               gap: 16,
             }}
           >
-            <div style={{ fontSize: 14, color: 'var(--text-muted)' }}>
+            <div style={{ fontSize: 14, color: 'var(--vb-text-mid)', fontFamily: 'var(--vb-font-body)' }}>
               랭킹을 불러올 수 없습니다
             </div>
             <button
               onClick={() => doRefetch()}
               style={{
                 padding: '10px 24px',
-                borderRadius: 10,
-                border: '1px solid rgba(255,255,255,0.15)',
+                borderRadius: 8,
+                border: '1px solid var(--vb-border)',
                 backgroundColor: 'transparent',
-                color: 'var(--text-primary)',
+                color: 'var(--vb-text)',
                 fontSize: 14,
+                fontFamily: 'var(--vb-font-body)',
                 cursor: 'pointer',
               }}
             >
@@ -133,7 +141,6 @@ export function RankingPage({ onBack }: RankingPageProps) {
             </button>
           </div>
         ) : currentList.length === 0 ? (
-          /* 빈 상태 */
           <div
             style={{
               display: 'flex',
@@ -141,13 +148,13 @@ export function RankingPage({ onBack }: RankingPageProps) {
               justifyContent: 'center',
               height: '60%',
               fontSize: 14,
-              color: 'var(--text-muted)',
+              color: 'var(--vb-text-dim)',
+              fontFamily: 'var(--vb-font-body)',
             }}
           >
             아직 기록이 없습니다
           </div>
         ) : (
-          /* 랭킹 리스트 */
           currentList.map((entry) => (
             <RankingRow
               key={entry.user_id}
@@ -165,11 +172,9 @@ export function RankingPage({ onBack }: RankingPageProps) {
         <div
           style={{
             flexShrink: 0,
-            borderTop: '1px solid rgba(255,255,255,0.1)',
+            borderTop: '1px solid var(--vb-border)',
             padding: '12px 20px',
-            position: 'sticky',
-            bottom: 0,
-            backgroundColor: 'var(--bg-primary)',
+            backgroundColor: 'var(--vb-bg)',
           }}
         >
           <RankingRow
@@ -183,8 +188,9 @@ export function RankingPage({ onBack }: RankingPageProps) {
               style={{
                 textAlign: 'center',
                 fontSize: 12,
-                color: 'var(--text-muted)',
+                color: 'var(--vb-text-dim)',
                 marginTop: 4,
+                fontFamily: 'var(--vb-font-body)',
               }}
             >
               {myRankLabel}

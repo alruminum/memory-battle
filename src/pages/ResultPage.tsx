@@ -42,96 +42,195 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
 
   const monthName = new Date().getMonth() + 2 > 12 ? 1 : new Date().getMonth() + 2
 
+  const diffLabel = difficulty === 'EASY' ? 'EASY' : difficulty === 'MEDIUM' ? 'NORMAL' : 'HARD'
+
+  const rankDisplay = (rank: number) => rank > 0 ? `#${rank}` : '#—'
+
   return (
     <div style={{
       display: 'flex',
       flexDirection: 'column',
       height: '100%',
-      backgroundColor: 'var(--bg-primary)',
-      color: 'var(--text-primary)',
-      padding: '32px 24px 24px',
-      gap: 24,
+      backgroundColor: 'var(--vb-bg)',
+      color: 'var(--vb-text)',
+      fontFamily: 'var(--vb-font-body)',
+      animation: 'slide-up 0.5s ease-out',
     }}>
-      {/* 점수 영역 */}
-      <div style={{ textAlign: 'center' }}>
-        <div style={{ fontSize: 11, letterSpacing: 3, color: 'var(--text-muted)', marginBottom: 8 }}>
-          FINAL SCORE
-        </div>
-        <div style={{ fontSize: 64, fontWeight: 900, lineHeight: 1, letterSpacing: -2 }}>
-          {score}
-        </div>
-        <div style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>
-          STAGE {stage} · {difficulty}
-        </div>
+      {/* GAME OVER 텍스트 */}
+      <div style={{
+        padding: '20px 20px 0',
+        textAlign: 'center',
+        flexShrink: 0,
+      }}>
+        <div style={{
+          fontFamily: 'var(--vb-font-score)',
+          fontSize: 12,
+          fontWeight: 800,
+          color: 'var(--vb-danger)',
+          letterSpacing: 4,
+          marginBottom: 4,
+        }}>GAME OVER</div>
+      </div>
+
+      {/* 최종 점수 카드 */}
+      <div style={{
+        margin: '16px 20px 0',
+        padding: '24px 0',
+        backgroundColor: 'var(--vb-surface)',
+        borderRadius: 12,
+        border: '1px solid var(--vb-border)',
+        textAlign: 'center',
+        flexShrink: 0,
+      }}>
+        <div style={{
+          fontFamily: 'var(--vb-font-score)',
+          fontSize: 11,
+          color: 'var(--vb-text-dim)',
+          letterSpacing: 3,
+          marginBottom: 4,
+        }}>FINAL SCORE</div>
+        <div style={{
+          fontFamily: 'var(--vb-font-score)',
+          fontSize: 64,
+          fontWeight: 900,
+          color: 'var(--vb-text)',
+          lineHeight: 1,
+          letterSpacing: -1,
+        }}>{score.toLocaleString()}</div>
+        <div style={{
+          fontFamily: 'var(--vb-font-body)',
+          fontSize: 12,
+          color: 'var(--vb-text-dim)',
+          marginTop: 8,
+        }}>Stage {stage} ◆ {diffLabel}</div>
+
+        {/* NEW PERSONAL BEST 배지 */}
         {isNewBest && (
           <div style={{
-            marginTop: 12,
-            fontSize: 13,
-            fontWeight: 700,
-            color: '#FF6900',
+            display: 'inline-block',
+            marginTop: 14,
+            padding: '4px 16px',
+            borderRadius: 20,
+            backgroundColor: 'rgba(200,255,0,0.1)',
+            border: '1px solid var(--vb-accent)',
           }}>
-            🏆 최고 기록 갱신!
+            <span style={{
+              fontFamily: 'var(--vb-font-score)',
+              fontSize: 10,
+              fontWeight: 800,
+              color: 'var(--vb-accent)',
+              letterSpacing: 2,
+            }}>NEW PERSONAL BEST</span>
           </div>
         )}
       </div>
 
-      {/* 랭킹 영역 */}
+      {/* 랭킹 리스트 */}
       <div style={{
-        backgroundColor: 'rgba(255,255,255,0.04)',
-        borderRadius: 16,
-        padding: '16px 20px',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 12,
+        margin: '16px 20px 0',
+        backgroundColor: 'var(--vb-surface)',
+        borderRadius: 12,
+        border: '1px solid var(--vb-border)',
+        overflow: 'hidden',
+        flexShrink: 0,
       }}>
-        <RankRow label="일간" rank={myRanks.daily} />
-        <RankRow
-          label="월간"
-          rank={myRanks.monthly}
-          sub={myRanks.monthly > 0 ? `${monthName}월 1일에 포인트 지급 예정` : undefined}
-        />
-        <RankRow label="시즌" rank={myRanks.season} />
+        {[
+          { label: 'Daily',   rank: myRanks.daily,   highlight: myRanks.daily > 0, sub: undefined },
+          {
+            label: 'Monthly',
+            rank: myRanks.monthly,
+            highlight: false,
+            sub: myRanks.monthly > 0 ? `${monthName}월 1일에 포인트 지급 예정` : undefined,
+          },
+          { label: 'Season',  rank: myRanks.season,  highlight: false, sub: undefined },
+        ].map(({ label, rank, highlight, sub }, i, arr) => (
+          <div key={label} style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '14px 16px',
+            borderBottom: i < arr.length - 1 ? '1px solid var(--vb-border)' : 'none',
+          }}>
+            <div>
+              <div style={{
+                fontSize: 13,
+                color: 'var(--vb-text-mid)',
+                fontWeight: 600,
+                fontFamily: 'var(--vb-font-body)',
+              }}>{label}</div>
+              {sub && (
+                <div style={{
+                  fontSize: 10,
+                  color: 'var(--vb-text-dim)',
+                  marginTop: 2,
+                  fontFamily: 'var(--vb-font-body)',
+                }}>{sub}</div>
+              )}
+            </div>
+            <div style={{
+              fontFamily: 'var(--vb-font-score)',
+              fontSize: 20,
+              fontWeight: 900,
+              color: highlight ? 'var(--vb-accent)' : 'var(--vb-text)',
+            }}>{rankDisplay(rank)}</div>
+          </div>
+        ))}
       </div>
 
       {/* 버튼 영역 */}
-      <div style={{ marginTop: 'auto', display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div style={{
+        marginTop: 'auto',
+        padding: '0 20px 32px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 10,
+      }}>
+        {noChances && (
+          <div style={{
+            textAlign: 'center',
+            fontSize: 12,
+            color: 'var(--vb-text-dim)',
+            fontFamily: 'var(--vb-font-body)',
+          }}>
+            오늘 플레이 기회를 모두 사용했습니다
+          </div>
+        )}
         <button
           onClick={() => !noChances && setShowModal(true)}
           disabled={noChances}
           style={{
             width: '100%',
             padding: '16px 0',
-            borderRadius: 14,
+            borderRadius: 8,
             border: 'none',
-            backgroundColor: noChances ? 'rgba(255,255,255,0.08)' : '#FF6900',
-            color: noChances ? 'var(--text-muted)' : '#fff',
-            fontSize: 16,
-            fontWeight: 800,
+            backgroundColor: noChances ? 'var(--vb-surface)' : 'var(--vb-accent)',
+            color: noChances ? 'var(--vb-text-dim)' : '#0e0e10',
+            fontFamily: 'var(--vb-font-score)',
+            fontSize: 14,
+            fontWeight: 900,
+            letterSpacing: 2,
             cursor: noChances ? 'default' : 'pointer',
+            boxShadow: noChances ? 'none' : '0 4px 24px rgba(200,255,0,0.2)',
           }}
         >
-          한 번 더 하기
+          PLAY AGAIN
         </button>
-        {noChances && (
-          <div style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-muted)' }}>
-            오늘 플레이 기회를 모두 사용했습니다
-          </div>
-        )}
         <button
           onClick={onGoRanking}
           style={{
             width: '100%',
             padding: '14px 0',
-            borderRadius: 14,
-            border: '1px solid rgba(255,255,255,0.12)',
+            borderRadius: 8,
+            border: '1px solid var(--vb-border)',
             backgroundColor: 'transparent',
-            color: 'var(--text-primary)',
-            fontSize: 14,
+            color: 'var(--vb-text-mid)',
+            fontFamily: 'var(--vb-font-body)',
+            fontSize: 13,
             fontWeight: 600,
             cursor: 'pointer',
           }}
         >
-          랭킹 보기
+          View Rankings
         </button>
       </div>
 
@@ -139,32 +238,48 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
       {showModal && (
         <div style={{
           position: 'fixed', inset: 0,
-          backgroundColor: 'rgba(0,0,0,0.7)',
+          backgroundColor: 'rgba(0,0,0,0.75)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           zIndex: 100,
         }}>
           <div style={{
-            backgroundColor: 'var(--bg-secondary, #1a1a1a)',
-            borderRadius: 20,
+            backgroundColor: 'var(--vb-surface)',
+            borderRadius: 16,
             padding: '28px 24px',
             width: 'calc(100% - 48px)',
             maxWidth: 320,
             textAlign: 'center',
+            border: '1px solid var(--vb-border)',
           }}>
-            <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 8 }}>
+            <div style={{
+              fontFamily: 'var(--vb-font-score)',
+              fontSize: 16,
+              fontWeight: 800,
+              letterSpacing: 1,
+              color: 'var(--vb-text)',
+              marginBottom: 8,
+            }}>
               한 번 더 하기
             </div>
-            <div style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 24 }}>
+            <div style={{
+              fontSize: 13,
+              color: 'var(--vb-text-mid)',
+              marginBottom: 24,
+              fontFamily: 'var(--vb-font-body)',
+            }}>
               광고를 보면 1회 추가됩니다
             </div>
             <div style={{ display: 'flex', gap: 10 }}>
               <button
                 onClick={() => setShowModal(false)}
                 style={{
-                  flex: 1, padding: '12px 0', borderRadius: 10,
-                  border: '1px solid rgba(255,255,255,0.12)',
+                  flex: 1, padding: '12px 0', borderRadius: 8,
+                  border: '1px solid var(--vb-border)',
                   backgroundColor: 'transparent',
-                  color: 'var(--text-muted)', fontSize: 14, cursor: 'pointer',
+                  color: 'var(--vb-text-mid)',
+                  fontSize: 14,
+                  fontFamily: 'var(--vb-font-body)',
+                  cursor: 'pointer',
                 }}
               >
                 취소
@@ -173,10 +288,13 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
                 onClick={handlePlayAgain}
                 disabled={adLoading}
                 style={{
-                  flex: 1, padding: '12px 0', borderRadius: 10,
+                  flex: 1, padding: '12px 0', borderRadius: 8,
                   border: 'none',
-                  backgroundColor: '#FF6900',
-                  color: '#fff', fontSize: 14, fontWeight: 700,
+                  backgroundColor: 'var(--vb-accent)',
+                  color: '#0e0e10',
+                  fontSize: 14,
+                  fontWeight: 700,
+                  fontFamily: 'var(--vb-font-body)',
                   cursor: adLoading ? 'default' : 'pointer',
                   opacity: adLoading ? 0.6 : 1,
                 }}
@@ -187,24 +305,6 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
           </div>
         </div>
       )}
-    </div>
-  )
-}
-
-function RankRow({ label, rank, sub }: { label: string; rank: number; sub?: string }) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-      <div>
-        <span style={{ fontSize: 13, color: 'var(--text-muted)' }}>{label}</span>
-        {sub && (
-          <div style={{ fontSize: 11, color: 'var(--text-muted)', opacity: 0.6, marginTop: 2 }}>
-            {sub}
-          </div>
-        )}
-      </div>
-      <div style={{ fontSize: 18, fontWeight: 800, color: rank > 0 ? 'var(--text-primary)' : 'var(--text-muted)' }}>
-        {rank > 0 ? `${rank}위` : '-'}
-      </div>
     </div>
   )
 }
