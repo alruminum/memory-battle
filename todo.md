@@ -168,7 +168,7 @@
 - [ ] **Supabase CORS 허용 도메인 추가**
   - 프로덕션: `https://memory-battle.apps.tossmini.com`
   - QR 테스트: `https://memory-battle.private-apps.tossmini.com`
-- [ ] **게임 음향 관리** — 광고 재생 중 앱 BGM/효과음 일시정지, 광고 종료 후 자동 재개 (검수 가이드 항목)
+- [x] **게임 음향 관리** — 광고 재생 중 앱 BGM/효과음 일시정지, 광고 종료 후 자동 재개 (검수 가이드 항목)
 - [ ] 콘솔에 스크린샷 업로드 (세로 636×1048px PNG 최소 3장, 가로 1504×741px 최소 1장)
 - [ ] `appName`이 콘솔 등록명과 정확히 일치하는지 최종 확인
 - [ ] `npm run build` 에러 없이 완료, 번들 크기 100MB 이하 확인

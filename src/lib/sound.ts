@@ -129,6 +129,14 @@ export function playApplause(): void {
   } catch { /* ignore */ }
 }
 
+export function suspendAudio(): void {
+  audioCtx?.suspend()
+}
+
+export function resumeAudio(): void {
+  audioCtx?.resume()
+}
+
 // 게임 오버: 하강 버저 + 짧은 쿵 느낌
 export function playGameOver(): void {
   try {
