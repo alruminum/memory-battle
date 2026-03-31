@@ -4,3 +4,14 @@ dist/
 .env.local
 .DS_Store
 *.log
+
+# 빌드 아티팩트
+.granite/
+*.ait
+
+# 테스트/검수 아티팩트
+.playwright-mcp/
+screen-*.png
+
+# 디자인 작업 임시 파일
+assets/variants/
