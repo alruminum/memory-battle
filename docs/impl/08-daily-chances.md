@@ -1,62 +1,124 @@
-# 08. 일간 기회 제한 로직
+# 08. 일간 리워드 로직 (v0.2)
 
-## 수정 파일
-- `src/store/gameStore.ts` (startGame, useChance 확장)
+> v0.2 전면 교체: daily_chances 기회 제한 폐지 → 게임오버 즉시 광고, 첫 완시청 1회 10포인트
 
----
-
-## startGame() Supabase 연동
-
-```
-1. daily_chances WHERE user_id = userId 조회
-2. last_date !== today → used_count = 0 으로 UPDATE (자정 리셋)
-3. dailyChancesLeft = MAX_DAILY - used_count  (MAX_DAILY = 1 기본 + 최대 3 광고)
-4. dailyChancesLeft === 0 → throw '기회 없음' (게임 시작 차단)
-5. used_count++ UPDATE → status = SHOWING
-```
-
-## useChance() — 리워드 광고 후 호출
-
-```
-1. used_count < 3 인지 확인
-2. used_count++ UPDATE
-3. dailyChancesLeft++
-```
-
-## 초기화 (MainPage 진입 시)
-- `daily_chances` 조회 → `setDailyChancesLeft()` 호출
-- 레코드 없으면 INSERT (used_count=0, last_date=today)
+## 수정/생성 파일
+- `src/hooks/useDailyReward.ts` (신규 — `src/hooks/useDailyChances.ts` 삭제)
+- `src/store/gameStore.ts` (수정 — hasTodayReward/setTodayReward 반영, 03-zustand-store.md 참고)
+- `src/lib/ait.ts` (수정 — grantDailyReward 래퍼 추가)
 
 ---
 
-## ⚠️ today() 함수 타임존 수정 (KST 기준)
+## Supabase daily_reward 테이블 스키마
 
-현재 코드 버그: `new Date().toISOString().slice(0, 10)` → UTC 기준
-한국 사용자는 오전 9시 이전에 어제 날짜로 인식 → 일간 기회 리셋이 오전 9시에 발생
+```sql
+CREATE TABLE daily_reward (
+  user_id     TEXT    NOT NULL,
+  reward_date DATE    NOT NULL,
+  PRIMARY KEY (user_id, reward_date)
+);
 
-**수정 방법 (KST 오프셋 적용):**
+-- RLS: anon key로 INSERT/SELECT 허용
+ALTER TABLE daily_reward ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "allow anon insert" ON daily_reward FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY "allow anon select" ON daily_reward FOR SELECT TO anon USING (true);
+```
+
+---
+
+## 인터페이스 정의
 
 ```typescript
-const today = (): string => {
-  const now = new Date()
-  const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000)
-  return kst.toISOString().slice(0, 10)
+// src/hooks/useDailyReward.ts
+interface UseDailyRewardReturn {
+  hasTodayReward: boolean            // 오늘 이미 리워드를 받았는지
+  markTodayRewarded: () => Promise<void>  // daily_reward INSERT (중복 무시)
+  grantDailyReward: () => Promise<void>   // 포인트 지급 + markTodayRewarded
+}
+
+export function useDailyReward(): UseDailyRewardReturn
+```
+
+---
+
+## 핵심 로직
+
+### hasTodayReward 초기화 (마운트 시)
+
+```typescript
+useEffect(() => {
+  if (!userId) return
+  supabase
+    .from('daily_reward')
+    .select('user_id')
+    .eq('user_id', userId)
+    .eq('reward_date', todayKST())   // YYYY-MM-DD, KST 기준
+    .maybeSingle()
+    .then(({ data }) => {
+      setTodayReward(!!data)  // gameStore.setTodayReward 호출
+    })
+}, [userId])
+```
+
+### markTodayRewarded()
+
+```typescript
+async function markTodayRewarded(): Promise<void> {
+  await supabase
+    .from('daily_reward')
+    .insert({ user_id: userId, reward_date: todayKST() })
+    // PK 중복 시 자동 무시 (upsert 대신 insert; DB PK 제약으로 중복 방지)
+    // 에러 무시 (이미 존재하면 409 conflict — catch 불필요, 결과 무관)
+  setTodayReward(true)
 }
 ```
 
-DB의 `last_date`는 `DATE` 타입이므로 KST 기준 날짜 문자열(YYYY-MM-DD)과 비교.
-DB RPC 함수도 동일하게 `AT TIME ZONE 'Asia/Seoul'` 적용 → `db-schema.md` 참조.
+### grantDailyReward()
 
-## 기회 표시 방식 (확정)
+```typescript
+async function grantDailyReward(): Promise<void> {
+  // ait.ts의 grantDailyReward 래퍼 호출
+  await grantDailyRewardAit()
+  await markTodayRewarded()
+}
+```
 
-`dailyChancesLeft` = **남은 기회 횟수** (누적 사용 횟수가 아님)
+### ait.ts — grantDailyReward 래퍼
 
-| 상황 | dailyChancesLeft |
+```typescript
+// import: { grantPromotionReward } from '@apps-in-toss/web-framework'
+export async function grantDailyReward(): Promise<void> {
+  if (IS_SANDBOX) return  // 샌드박스 분기: 실제 포인트 지급 생략
+  await grantPromotionReward({ params: { promotionCode: 'DAILY_PLAY', amount: 10 } })
+}
+```
+
+### KST 날짜 헬퍼
+
+```typescript
+// useDailyReward.ts 내부 사용
+const todayKST = (): string => {
+  const now = new Date()
+  const kst = new Date(now.getTime() + 9 * 60 * 60 * 1000)
+  return kst.toISOString().slice(0, 10)  // 'YYYY-MM-DD'
+}
+```
+
+---
+
+## 에러 처리 방식
+
+| 상황 | 처리 |
 |---|---|
-| 초기 진입 | 1 |
-| 광고 1회 시청 | 2 |
-| 광고 3회 시청 (최대) | 4 |
-| 게임 1회 플레이 | -1 |
+| `SELECT` 실패 (네트워크 등) | `hasTodayReward = false` 유지 (안전 방향: 지급 시도 허용) |
+| `INSERT` 중복 (409) | 무시 (PK 제약 보장) — 재지급 없음 |
+| `grantPromotionReward` 실패 | throw 전파 → ResultPage에서 catch 후 토스트 표시, `markTodayRewarded()` 호출 안 함 |
 
-UI 표시: `"오늘 N번 플레이 가능"` (N = dailyChancesLeft)
-N === 0 이면: `"오늘 기회를 모두 사용했어요. 내일 다시 오세요"`
+---
+
+## 주의사항
+
+- `useDailyChances.ts`를 import하는 모든 파일 교체 필요: `ResultPage.tsx`, `MainPage.tsx`
+- `grantPromotionReward` API는 `@apps-in-toss/web-framework`에서 import (deprecated `grantPromotionRewardForGame` 사용 금지)
+- `hasTodayReward`는 세션 내 캐시. 앱 재시작 시 Supabase 재조회.
+- 하루 1회 제한은 `daily_reward` PK 제약으로 DB 레벨에서 보장. 클라이언트 `hasTodayReward` 체크는 UX 목적(버튼 상태 표시)만.

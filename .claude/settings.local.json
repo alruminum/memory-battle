@@ -24,7 +24,11 @@
       "WebFetch(domain:api.github.com)",
       "Bash(npx tsc:*)",
       "Bash(npx vite:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(*)",
+      "WebSearch",
+      "WebFetch(domain:www.anthropic.com)",
+      "WebFetch(domain:addyosmani.com)"
     ]
   }
 }

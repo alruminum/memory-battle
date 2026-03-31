@@ -86,7 +86,8 @@
 
 ### 6. Supabase DB 세팅
 - [ ] Supabase 콘솔에서 `scores` 테이블 생성 (DDL: `docs/db-schema.md` 참고)
-- [ ] `daily_chances` 테이블 생성
+- ~~[ ] `daily_chances` 테이블 생성~~ (v0.2 폐지)
+- [ ] `daily_reward` 테이블 생성 — PK(user_id, reward_date), docs/db-schema.md 참고
 - [ ] 인덱스 생성: `idx_scores_played_at`, `idx_scores_user_id`
 - [ ] Supabase Row Level Security (RLS) 정책 설정 — anon key로 INSERT/SELECT 허용
 
@@ -98,9 +99,12 @@
 - [x] 게임 오버 시 `submitGameCenterLeaderBoardScore({ score: String(score) })` 호출 (토스 리더보드 제출)
 - [x] ResultPage에 "친구 랭킹 보기" 버튼 → `openGameCenterLeaderboard()` 연결
 
-### 8. 일간 기회 제한 로직
-- [x] `gameStore.ts`의 `startGame()` — dailyChancesLeft-- 제거 (useDailyChances 훅으로 분리)
-- [x] `src/hooks/useDailyChances.ts` — init / consumeChance / addChance
+### 8. 일간 리워드 로직 (v0.2 변경)
+- ~~[x] `gameStore.ts`의 `startGame()` — dailyChancesLeft-- 제거 (useDailyChances 훅으로 분리)~~ (v0.2 폐지)
+- ~~[x] `src/hooks/useDailyChances.ts` — init / consumeChance / addChance~~ (v0.2 폐지)
+- [x] `src/hooks/useDailyReward.ts` 구현 (daily_reward 테이블 조회/기록, grantPromotionReward 호출)
+- [x] `gameStore.ts` — dailyChancesLeft/useChance 제거, hasTodayReward/setTodayReward 추가
+- [x] `ait.ts` — grantDailyReward() 래퍼 추가
 
 ### 9. 광고 컴포넌트
 - [x] `src/components/ads/BannerAd.tsx`
@@ -108,12 +112,8 @@
 - [x] `GamePage.tsx`에 `<BannerAd />` 하단 삽입
 
 ### 10. 결과 화면
-- [x] `src/pages/ResultPage.tsx`
-  - 이번 점수 + 최고 기록 갱신 여부 표시
-  - 랭킹 순위 표시 (일간 / 월간 / 시즌 각각)
-  - 포인트 안내 문구: `"월간 N위 → M월 1일에 XXX원 지급 예정"`
-  - 한 번 더 버튼 → 확인 모달 → `showRewardAd()` → `userEarnedReward` 시 게임 재시작
-  - 기회 소진 시 버튼 비활성화 + 안내 문구
+- ~~[x] `src/pages/ResultPage.tsx` — 기회 소진 시 버튼 비활성화, 확인 모달~~ (v0.2 재구현)
+- [ ] `ResultPage.tsx` 재구현 — 광고 자동 시작, 완시청 포인트 지급, 다시하기 버튼
 
 ---
 
@@ -121,12 +121,8 @@
 
 ### 11. 메인 화면
 - [x] `src/components/game/DifficultySelector.tsx` — Easy / Medium / Hard 선택 UI, 배율 안내(x1/x2/x3) 표시
-- [x] `src/pages/MainPage.tsx`
-  - 앱 진입 시 `getUserId()` 호출 → `userId` store에 저장
-  - Supabase에서 `daily_chances` 읽어 `dailyChancesLeft` 초기화
-  - 남은 기회 표시: `오늘 N번 플레이 가능`
-  - 내 랭킹 뱃지: 일간 / 월간 / 시즌 순위
-  - 시작 버튼: 기회 0이면 비활성화
+- ~~[x] `src/pages/MainPage.tsx` — daily_chances 초기화, 남은 기회 도트 UI, 시작 버튼 기회 조건~~ (v0.2 재구현)
+- [ ] `MainPage.tsx` — useDailyReward 교체, 도트 UI 제거, 시작 버튼 항상 활성화
 
 ### 12. 랭킹 화면
 - [x] `src/components/ranking/RankingTab.tsx` — 일간 / 월간 / 시즌 탭 전환
@@ -152,7 +148,7 @@
 #### 샌드박스에서 테스트 가능 항목
 - [ ] 게임 플레이 전체 플로우 (시퀀스 → 입력 → 점수 → Supabase 저장)
 - [ ] 게임 로그인 (`getUserKeyForGame()`) — **mock 데이터 반환, 실제 hash는 QR 코드로 토스앱에서 별도 확인**
-- [ ] 일간 기회 제한 동작 (4회 이후 차단)
+- ~~[ ] 일간 기회 제한 동작 (4회 이후 차단)~~ (v0.2 폐지)
 - [ ] 랭킹 3종 데이터 정상 출력 (일간 / 월간 / 시즌)
 - [ ] 타이머 2초 만료 → 게임 오버
 - [ ] 콤보 0.3초 판정
