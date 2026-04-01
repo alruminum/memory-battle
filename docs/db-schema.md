@@ -15,13 +15,6 @@ CREATE TABLE scores (
 CREATE INDEX idx_scores_played_at ON scores(played_at DESC);
 CREATE INDEX idx_scores_user_id   ON scores(user_id);
 
--- 일간 기회 제한
-CREATE TABLE daily_chances (
-  user_id     TEXT PRIMARY KEY,
-  used_count  INTEGER DEFAULT 0,    -- 오늘 사용한 추가 기회 수 (0~3)
-  last_date   DATE DEFAULT CURRENT_DATE
-);
-
 -- 일일 리워드 수령 기록
 CREATE TABLE daily_reward (
   user_id      TEXT NOT NULL,
@@ -62,17 +55,6 @@ LIMIT 50;
 
 ---
 
-## 일간 기회 로직
-
-```typescript
-// daily_chances 확인 흐름
-// 1. last_date가 오늘이 아니면 → used_count=0으로 리셋
-// 2. used_count >= 3이면 → 추가 불가 (기본 1회 포함 최대 4회)
-// 3. 리워드광고 완료 후 → used_count++ , dailyChancesLeft++
-```
-
----
-
 ## RLS (Row Level Security) 정책
 
 Supabase SQL Editor에서 배포 전 반드시 실행.
@@ -80,20 +62,19 @@ Supabase SQL Editor에서 배포 전 반드시 실행.
 ```sql
 -- RLS 활성화
 ALTER TABLE scores ENABLE ROW LEVEL SECURITY;
-ALTER TABLE daily_chances ENABLE ROW LEVEL SECURITY;
+ALTER TABLE daily_reward ENABLE ROW LEVEL SECURITY;
 
 -- scores: 누구나 읽기 허용 (공개 랭킹), INSERT만 허용, UPDATE/DELETE 차단
 CREATE POLICY "scores_select_all"   ON scores FOR SELECT USING (true);
 CREATE POLICY "scores_insert_anon"  ON scores FOR INSERT WITH CHECK (true);
 -- UPDATE/DELETE 정책 없음 → 자동 차단
 
--- daily_chances: anon key로 전체 허용 (user_id 기반 RLS 불가 — 토스 hash는 auth.uid()와 무관)
--- used_count 범위 검증(0~3)은 RPC 함수 내에서 수행
-CREATE POLICY "daily_chances_all_anon" ON daily_chances FOR ALL USING (true) WITH CHECK (true);
+-- daily_reward: anon key로 전체 허용 (user_id 기반 RLS 불가 — 토스 hash는 auth.uid()와 무관)
+CREATE POLICY "daily_reward_all_anon" ON daily_reward FOR ALL USING (true) WITH CHECK (true);
 ```
 
 > ⚠️ anon key가 클라이언트에 노출되는 구조에서는 user-level RLS 불가.
-> 실질적 방어: INSERT-only + used_count 서버 검증 + 배포 후 이상 패턴 모니터링.
+> 실질적 방어: INSERT-only + PK 중복 제약(23505) + 배포 후 이상 패턴 모니터링.
 
 ---
 
@@ -181,8 +162,6 @@ npm run gen:types
 ```typescript
 export type ScoreRow = Database['public']['Tables']['scores']['Row']
 export type ScoreInsert = Database['public']['Tables']['scores']['Insert']
-export type DailyChancesRow = Database['public']['Tables']['daily_chances']['Row']
-export type DailyChancesInsert = Database['public']['Tables']['daily_chances']['Insert']
 export type DailyRewardRow = Database['public']['Tables']['daily_reward']['Row']
 export type DailyRewardInsert = Database['public']['Tables']['daily_reward']['Insert']
 ```
