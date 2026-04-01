@@ -15,3 +15,6 @@ screen-*.png
 
 # 디자인 작업 임시 파일
 assets/variants/
+
+# 스크린샷
+screenshots/
