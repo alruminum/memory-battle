@@ -14,9 +14,9 @@ model: sonnet
 
 ## 프로젝트 특화 — 컨텍스트 파악 순서
 
-1. `CLAUDE.md`를 읽어 문서 목록을 파악한다.
+1. `CLAUDE.md`를 읽어 문서 목록과 현재 마일스톤을 파악한다.
 2. `backlog.md`를 읽어 에픽 목록을 확인한다.
-3. 요청된 에픽의 `docs/epics/epic-NN-*/stories.md`를 읽어 스토리/태스크 맥락을 파악한다.
+3. 요청된 에픽의 `docs/milestones/vNN/epics/epic-NN-*/stories.md`를 읽어 스토리/태스크 맥락을 파악한다.
 4. 에픽 내 기존 impl 파일을 읽어 기존 설계 결정을 확인한다.
 5. 요청된 모듈과 관련된 설계 문서를 읽는다:
    - 화면/컴포넌트 모듈 → `docs/ui-spec.md` + `docs/architecture.md`
@@ -24,9 +24,12 @@ model: sonnet
    - DB/랭킹 모듈 → `docs/db-schema.md`
    - SDK 연동 모듈 → `docs/sdk.md`
 6. 해당 에픽 내 기존 impl 파일 1~2개를 읽어 포맷 패턴을 확인한다.
-7. `docs/epics/epic-NN-*/impl/NN-모듈명.md` 파일을 작성한다.
+7. `docs/milestones/vNN/epics/epic-NN-*/impl/NN-모듈명.md` 파일을 작성한다.
 8. 설계 결정 근거는 impl 파일 내 "결정 근거" 섹션에 직접 작성한다.
 9. `stories.md`에 해당 태스크가 없으면 해당 스토리 아래 추가한다.
+10. impl 파일 작성 완료 후 **`CLAUDE.md`의 모듈 계획 파일 표를 반드시 업데이트**한다:
+    - 해당 milestone/epic 섹션 아래 새 impl 항목 추가
+    - 섹션이 없으면 `### vNN` + `**Epic NN — 이름** · [stories](경로)` 헤더 포함해 추가
 
 ## 계획 파일 형식
 
