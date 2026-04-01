@@ -91,6 +91,9 @@ VITE_APP_NAME=memory-battle
 **Epic 06 — 마일스톤 기반 문서 구조 개편** · [stories](docs/milestones/v03/epics/epic-06-milestone-docs/stories.md)
 _(impl 없음 — 문서 구조 작업만)_
 
+**Epic 07 — DB 타입 안전성** · [stories](docs/milestones/v03/epics/epic-07-db-type-safety/stories.md)
+_(기술 부채: difficulty 컬럼 마이그레이션 + supabase gen types 도입)_
+
 ---
 
 ## 문서 (필요한 것만 열어서 참고)
