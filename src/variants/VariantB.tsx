@@ -35,8 +35,8 @@ const STYLE_TAG = `
   --vb-surface: #18181b;
   --vb-surface-2: #1f1f23;
   --vb-border: #2a2a2e;
-  --vb-accent: #c8ff00;
-  --vb-accent-dim: #6b8a00;
+  --vb-accent: #D4A843;
+  --vb-accent-dim: #8B7332;
   --vb-text: #e8e8ea;
   --vb-text-mid: #8b8b90;
   --vb-text-dim: #505055;

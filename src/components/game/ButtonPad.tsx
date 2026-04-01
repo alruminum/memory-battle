@@ -46,14 +46,14 @@ export function ButtonPad({
 
   const centerLabel = () => {
     if (isCounting) {
-      return <span style={{ fontSize: 14, fontWeight: 800, color: '#FF6900', letterSpacing: 1 }}>READY</span>
+      return <span style={{ fontSize: 14, fontWeight: 800, color: '#D4A843', letterSpacing: 1 }}>READY</span>
     }
     if (isClearing) {
       return (
         <div style={{ textAlign: 'center', lineHeight: 1.15 }}>
-          <div style={{ fontSize: 9, color: '#FF6900', fontWeight: 800, letterSpacing: 1 }}>STAGE</div>
+          <div style={{ fontSize: 9, color: '#D4A843', fontWeight: 800, letterSpacing: 1 }}>STAGE</div>
           <div style={{ fontSize: 20, color: '#fff', fontWeight: 900 }}>{clearingStage}</div>
-          <div style={{ fontSize: 9, color: '#FF6900', fontWeight: 700 }}>CLEAR ✓</div>
+          <div style={{ fontSize: 9, color: '#D4A843', fontWeight: 700 }}>CLEAR ✓</div>
         </div>
       )
     }
@@ -168,7 +168,7 @@ export function ButtonPad({
           width: CENTER,
           height: CENTER,
           borderRadius: '50%',
-          border: `2px solid ${isClearing ? '#FF6900' : 'rgba(255,255,255,0.10)'}`,
+          border: `2px solid ${isClearing ? '#D4A843' : 'rgba(255,255,255,0.10)'}`,
           cursor: isCenterClickable ? 'pointer' : 'default',
           background: isClearing
             ? 'radial-gradient(circle at 40% 35%, #2a2a3e, #111120)'
@@ -177,7 +177,7 @@ export function ButtonPad({
           alignItems: 'center',
           justifyContent: 'center',
           boxShadow: isClearing
-            ? '0 0 16px #FF690066, inset 0 2px 1px rgba(255,255,255,0.08)'
+            ? '0 0 16px #D4A84366, inset 0 2px 1px rgba(255,255,255,0.08)'
             : 'inset 0 2px 1px rgba(255,255,255,0.07), inset 0 -1px 2px rgba(0,0,0,0.4), 0 4px 12px rgba(0,0,0,0.5)',
           transition: 'border-color 200ms, box-shadow 200ms',
           zIndex: 3,

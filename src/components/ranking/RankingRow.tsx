@@ -18,8 +18,8 @@ export function RankingRow({ rank, score, isMe }: RankingRowProps) {
         alignItems: 'center',
         padding: '10px 16px',
         borderRadius: 10,
-        backgroundColor: isMe ? 'rgba(255,105,0,0.15)' : 'transparent',
-        border: isMe ? '1px solid rgba(255,105,0,0.3)' : '1px solid transparent',
+        backgroundColor: isMe ? 'rgba(212,168,67,0.15)' : 'transparent',
+        border: isMe ? '1px solid rgba(212,168,67,0.3)' : '1px solid transparent',
         gap: 12,
       }}
     >
@@ -57,7 +57,7 @@ export function RankingRow({ rank, score, isMe }: RankingRowProps) {
         style={{
           fontSize: 15,
           fontWeight: 800,
-          color: isMe ? '#FF6900' : 'var(--vb-text)',
+          color: isMe ? '#D4A843' : 'var(--vb-text)',
           flexShrink: 0,
         }}
       >

@@ -21,7 +21,7 @@ export function TimerGauge({ timeLeft, duration, active }: TimerGaugeProps) {
           height: '100%',
           borderRadius: 6,
           width: `${ratio * 100}%`,
-          backgroundColor: active ? (isWarning ? '#ef4444' : '#FF6900') : '#2a2a3e',
+          backgroundColor: active ? (isWarning ? '#ef4444' : '#D4A843') : '#2a2a3e',
           transition: 'width 100ms linear, background-color 200ms ease',
         }} />
       </div>

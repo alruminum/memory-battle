@@ -31,7 +31,7 @@ export function RankingTab({ active, onChange }: RankingTabProps) {
               padding: '8px 0',
               borderRadius: 9,
               border: 'none',
-              backgroundColor: isActive ? '#FF6900' : 'transparent',
+              backgroundColor: isActive ? '#D4A843' : 'transparent',
               color: isActive ? '#fff' : 'var(--text-muted)',
               fontSize: 13,
               fontWeight: isActive ? 700 : 400,
