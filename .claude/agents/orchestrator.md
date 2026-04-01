@@ -20,7 +20,7 @@ model: opus
 
 1. `CLAUDE.md` 읽어 문서 목록 파악
 2. `backlog.md` 읽어 에픽 목록 파악
-3. 요청된 에픽의 `docs/epics/epic-NN-*/stories.md` 읽어 스토리/태스크 파악
+3. 요청된 에픽의 `docs/milestones/vNN/epics/epic-NN-*/stories.md` 읽어 스토리/태스크 파악
 4. `docs/impl/00-decisions.md` 읽어 기존 설계 결정 확인
 
 ---
@@ -40,7 +40,7 @@ model: opus
 ## 프로젝트 특화 — 에픽 문서 구조
 
 ```
-docs/epics/epic-NN-*/
+docs/milestones/vNN/epics/epic-NN-*/
   stories.md          ← 프로덕트 플래너 작성. 스토리 + 항목 (what 수준)
   design-plan.md      ← 아키텍트 작성. 전체 설계 플랜 (범위·의존성·리스크)
   impl/
@@ -77,10 +77,14 @@ base의 Phase 2/3 루프 대신 아래 루프를 따른다.
   오케스트레이터: 설계 검증 결과 유저에게 보고 후 대기
 
 [Phase 3 — 구현-검토 루프 (최대 3회)]
-  4. engineer: impl 파일 기반 구현
+  4. engineer: impl 파일 + `docs/ui-spec.md` + `docs/game-logic.md` 참고해 구현
+     (UI 레이아웃/색상은 ui-spec.md, 게임 메카닉·점수·속도 수치는 game-logic.md가 최종 기준)
   5. validator: 스펙 vs 구현 비교
-     - PASS → stories.md 해당 항목 체크, 리포트 출력 후 대기
-     - FAIL → 리포트 출력, 피드백 포함해 재실행
+     - PASS → stories.md 해당 항목 체크
+            → validator 전체 리포트(A/B/C 섹션) 요약 없이 그대로 출력
+            → git commit & push (메시지: "feat: Story NN — [스토리 제목]")
+            → 커밋 해시 출력 후 대기 (자동 진행 금지)
+     - FAIL → validator 전체 리포트 요약 없이 그대로 출력, 피드백 포함해 재실행
 3회 후 FAIL → 유저에게 에스컬레이션
 ```
 
@@ -109,7 +113,7 @@ base의 Phase 2/3 루프 대신 아래 루프를 따른다.
 
 ## 프로젝트 특화 — epic 파일 동기화 규칙
 
-- 태스크 PASS 즉시 `docs/epics/epic-NN-*/stories.md` 해당 태스크 체크
+- 태스크 PASS 즉시 `docs/milestones/vNN/epics/epic-NN-*/stories.md` 해당 태스크 체크
 - 에픽 내 모든 스토리 완료 시 `backlog.md` 해당 에픽 체크
 - 설계 변경 발생 시 관련 스토리/태스크 자동 추가
 - 요청 기다리지 않고 자동 처리
@@ -122,12 +126,12 @@ base의 Phase 2/3 루프 대신 아래 루프를 따른다.
 ```
 1. prd.md 수정 완료 확인
 2. backlog.md에 신규 에픽 추가 (Epic NN: 변경명 (PRD vX.X))
-3. docs/epics/epic-NN-*/stories.md 신규 스토리 초안 작성
+3. docs/milestones/vNN/epics/epic-NN-*/stories.md 신규 스토리 초안 작성
 
 [오케스트레이터 → 아키텍트]
 4. 아키텍트에게 변경된 PRD + 관련 설계 문서 기반으로 영향 범위 설계 요청:
    - 신규 작성 / 수정해야 할 모듈 목록
-   - docs/epics/epic-NN-*/impl/NN-*.md 계획 파일 작성
+   - docs/milestones/vNN/epics/epic-NN-*/impl/NN-*.md 계획 파일 작성
    - 변경 영향 받는 기존 impl 파일 목록 보고
 
 [아키텍트 보고 → 오케스트레이터]
