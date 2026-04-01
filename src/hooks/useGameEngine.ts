@@ -4,6 +4,7 @@ import { useTimer } from './useTimer'
 import { useCombo } from './useCombo'
 import { playTone, playGameStart, playGameOver, playApplause } from '../lib/sound'
 import { getFlashDuration, getInputTimeout } from '../lib/gameLogic'
+import { dbg, dbgWarn } from '../lib/debug'
 import type { ButtonColor } from '../types'
 
 const BUTTONS: ButtonColor[] = ['orange', 'blue', 'green', 'yellow']
@@ -27,7 +28,9 @@ export function useGameEngine() {
   const combo = useCombo()
 
   const handleExpire = useCallback(() => {
-    if (useGameStore.getState().status !== 'INPUT') return
+    const s = useGameStore.getState().status
+    dbg('[Engine] handleExpire status=', s, 'clearingRef=', clearingRef.current)
+    if (s !== 'INPUT') return
     if (clearingRef.current) return
     playGameOver()
     gameOver()
@@ -51,6 +54,7 @@ export function useGameEngine() {
     const next = () => {
       if (i >= sequence.length) {
         setFlashingButton(null)
+        dbg('[Engine] SHOWING→INPUT stage=', useGameStore.getState().stage, 'seqLen=', sequence.length)
         useGameStore.setState({ status: 'INPUT', currentIndex: 0 })
         timer.reset()
         showingRef.current = false
@@ -105,8 +109,16 @@ export function useGameEngine() {
 
   const handleInput = useCallback(
     (color: ButtonColor) => {
-      if (useGameStore.getState().status !== 'INPUT') return
-      if (clearingRef.current) return
+      const currentStatus = useGameStore.getState().status
+      dbg('[Engine] handleInput color=', color, 'storeStatus=', currentStatus)
+      if (currentStatus !== 'INPUT') {
+        dbgWarn('[Engine] INPUT BLOCKED — storeStatus=', currentStatus)
+        return
+      }
+      if (clearingRef.current) {
+        dbgWarn('[Engine] INPUT BLOCKED — clearing')
+        return
+      }
 
       playTone(color)
       combo.recordInput()

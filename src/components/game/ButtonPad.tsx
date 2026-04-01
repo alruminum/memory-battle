@@ -1,5 +1,6 @@
 import type { ButtonColor, GameStatus } from '../../types'
 import { dbg } from '../../lib/debug'
+import { dbg } from '../../lib/debug'
 
 interface ButtonPadProps {
   flashingButton: ButtonColor | null

@@ -1,4 +1,5 @@
 import { useRef, useState, useCallback, useEffect } from 'react'
+import { dbg } from '../lib/debug'
 
 export function useTimer(onExpire: () => void, duration = 2000) {
   const [timeLeft, setTimeLeft] = useState(duration)
@@ -11,17 +12,20 @@ export function useTimer(onExpire: () => void, duration = 2000) {
 
   const stop = useCallback(() => {
     if (intervalRef.current) {
+      dbg('[Timer] stop()')
       clearInterval(intervalRef.current)
       intervalRef.current = null
     }
   }, [])
 
   const reset = useCallback(() => {
+    dbg('[Timer] reset() duration=', duration)
     stop()
     setTimeLeft(duration)
     intervalRef.current = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 100) {
+          dbg('[Timer] EXPIRED')
           stop()
           onExpireRef.current()
           return 0
