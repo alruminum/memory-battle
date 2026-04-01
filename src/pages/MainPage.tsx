@@ -3,18 +3,11 @@ import { useGameStore } from '../store/gameStore'
 import { useRanking } from '../hooks/useRanking'
 import { useDailyReward } from '../hooks/useDailyReward'
 import { getUserId } from '../lib/ait'
-import type { Difficulty } from '../types'
 
 interface MainPageProps {
-  onStart: (difficulty: Difficulty) => void
+  onStart: () => void
   onRanking: () => void
 }
-
-const DIFFICULTIES: { value: Difficulty; label: string; mult: string }[] = [
-  { value: 'EASY',   label: 'EASY',   mult: 'x1' },
-  { value: 'MEDIUM', label: 'NORMAL', mult: 'x2' },
-  { value: 'HARD',   label: 'HARD',   mult: 'x3' },
-]
 
 const BTN_COLORS = {
   orange: { base: '#e85d04', dim: '#7a3002', ring: '#e85d0444' },
@@ -31,11 +24,10 @@ const CORNER_POS: { color: keyof typeof BTN_COLORS; top?: number; bottom?: numbe
 ]
 
 export function MainPage({ onStart, onRanking }: MainPageProps) {
-  const { userId, setUserId, difficulty } = useGameStore()
+  const { userId, setUserId } = useGameStore()
   const ranking = useRanking(userId || null)
   const { hasTodayReward } = useDailyReward()
 
-  const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>(difficulty)
   const [isInitializing, setIsInitializing] = useState(true)
   const [toast, setToast] = useState<string | null>(null)
 
@@ -61,7 +53,7 @@ export function MainPage({ onStart, onRanking }: MainPageProps) {
   }, [])
 
   function handleStart() {
-    onStart(selectedDifficulty)
+    onStart()
   }
 
   const startDisabled = isInitializing
@@ -175,47 +167,7 @@ export function MainPage({ onStart, onRanking }: MainPageProps) {
         </div>
       )}
 
-      {/* 난이도 탭 */}
-      <div style={{
-        display: 'flex',
-        gap: 8,
-        margin: '16px 20px 0',
-        flexShrink: 0,
-      }}>
-        {DIFFICULTIES.map((d) => {
-          const isActive = selectedDifficulty === d.value
-          return (
-            <button
-              key={d.value}
-              onClick={() => setSelectedDifficulty(d.value)}
-              style={{
-                flex: 1,
-                padding: '12px 0',
-                borderRadius: 6,
-                border: isActive ? '1.5px solid var(--vb-accent)' : '1.5px solid var(--vb-border)',
-                backgroundColor: isActive ? 'rgba(200,255,0,0.06)' : 'var(--vb-surface)',
-                color: isActive ? 'var(--vb-accent)' : 'var(--vb-text-dim)',
-                fontFamily: 'var(--vb-font-score)',
-                fontSize: 13,
-                fontWeight: 800,
-                letterSpacing: 2,
-                cursor: 'pointer',
-                lineHeight: 1.4,
-              }}
-            >
-              {d.label}<br />
-              <span style={{
-                fontSize: 10,
-                fontWeight: 600,
-                opacity: 0.5,
-                fontFamily: 'var(--vb-font-body)',
-              }}>{d.mult}</span>
-            </button>
-          )
-        })}
-      </div>
-
-      {/* 버튼 패드 — 292×292, 중앙 START */}
+      {/* 버튼 패드 — 292x292, 중앙 START */}
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ position: 'relative', width: 292, height: 292 }}>
           {/* 바디 */}

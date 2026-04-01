@@ -1,7 +1,6 @@
 import { useState, useCallback, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { submitScore as submitToGameCenter } from '../lib/ait'
-import type { Difficulty } from '../types'
 
 interface RankEntry {
   user_id: string
@@ -16,7 +15,7 @@ interface UseRankingReturn {
   myRanks: { daily: number; monthly: number; season: number }
   isLoading: boolean
   error: boolean
-  submitScore: (score: number, stage: number, difficulty: Difficulty, userId: string) => Promise<void>
+  submitScore: (score: number, stage: number, userId: string) => Promise<void>
   refetch: () => void
 }
 
@@ -63,12 +62,11 @@ export function useRanking(userId: string | null): UseRankingReturn {
   }, [])
 
   const submitScore = useCallback(
-    async (score: number, stage: number, difficulty: Difficulty, uid: string) => {
+    async (score: number, stage: number, uid: string) => {
       await supabase.from('scores').insert({
         user_id: uid,
         score,
         stage,
-        difficulty,
       })
       await submitToGameCenter(score)
       await fetchAll()
