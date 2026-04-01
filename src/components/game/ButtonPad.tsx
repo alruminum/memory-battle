@@ -10,6 +10,7 @@ interface ButtonPadProps {
   onPress: (color: ButtonColor) => void
   onStart: () => void
   onRetry: () => void
+  comboActive?: boolean
 }
 
 const COLORS = {
@@ -40,6 +41,7 @@ export function ButtonPad({
   onPress,
   onStart,
   onRetry,
+  comboActive = false,
 }: ButtonPadProps) {
   const isClearing = clearingStage !== null
   const isCounting = countdown !== null
@@ -134,7 +136,7 @@ export function ButtonPad({
               background: isFlashing
                 ? `radial-gradient(circle at 35% 30%, ${c.light}, ${c.base} 55%, ${c.dark})`
                 : `radial-gradient(circle at 35% 30%, ${c.light}99, ${c.base}88 55%, ${c.dark}77)`,
-              // 측면 그림자로 입체감 + 점등 글로우
+              // 측면 그림자로 입체감 + 점등 글로우 + 콤보 글로우
               boxShadow: isFlashing
                 ? [
                     `0 3px 0 ${c.dark}`,
@@ -142,10 +144,16 @@ export function ButtonPad({
                     `0 0 30px ${c.base}cc`,
                     `0 0 60px ${c.base}66`,
                   ].join(', ')
-                : [
-                    `0 6px 0 ${c.dark}99`,
-                    `0 8px 16px rgba(0,0,0,0.6)`,
-                  ].join(', '),
+                : comboActive
+                  ? [
+                      `0 0 16px 4px ${c.base}88`,
+                      `0 6px 0 ${c.dark}88`,
+                      `0 8px 16px rgba(0,0,0,0.4)`,
+                    ].join(', ')
+                  : [
+                      `0 6px 0 ${c.dark}99`,
+                      `0 8px 16px rgba(0,0,0,0.6)`,
+                    ].join(', '),
               transform: isFlashing ? 'scale(1.06) translateY(3px)' : 'scale(1)',
               filter: isFlashing ? 'brightness(1.4)' : 'brightness(0.75)',
               transition: 'transform 70ms ease, filter 70ms ease, box-shadow 70ms ease',

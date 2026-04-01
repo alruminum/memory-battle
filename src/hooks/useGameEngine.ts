@@ -19,6 +19,7 @@ export function useGameEngine() {
   const [flashingButton, setFlashingButton] = useState<ButtonColor | null>(null)
   const [clearingStage, setClearingStage] = useState<number | null>(null)
   const [countdown, setCountdown] = useState<number | null>(null)
+  const [isClearingFullCombo, setIsClearingFullCombo] = useState(false)
   const showingRef = useRef(false)
   const clearingRef = useRef(false)
   const startingRef = useRef(false)
@@ -129,11 +130,12 @@ export function useGameEngine() {
         setClearingStage(clearedStage)
 
         const isFullCombo = combo.checkFullCombo(clearedStage)
+        setIsClearingFullCombo(isFullCombo)
         // 스토어에 콤보/점수 반영
         useGameStore.getState().stageClear(isFullCombo)
 
         const isMilestone = clearedStage % 5 === 0
-        if (isMilestone) playApplause()
+        if (isMilestone || isFullCombo) playApplause()
 
         const newSeq = [...sequence, randomButton()]
         const pauseMs = isMilestone ? MILESTONE_PAUSE_MS : CLEAR_PAUSE_MS
@@ -142,6 +144,7 @@ export function useGameEngine() {
           combo.reset()
           clearingRef.current = false
           setClearingStage(null)
+          setIsClearingFullCombo(false)
           setSequence(newSeq)
           useGameStore.setState({ status: 'SHOWING', currentIndex: 0, stage: newSeq.length })
         }, pauseMs)
@@ -159,5 +162,7 @@ export function useGameEngine() {
     startGame,
     retryGame,
     timer,
+    isComboActive: combo.isActive,
+    isClearingFullCombo,
   }
 }

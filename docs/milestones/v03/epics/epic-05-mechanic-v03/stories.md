@@ -56,11 +56,11 @@
 
 유저가 콤보 상태를 실시간으로 인지할 수 있도록 시각/청각 피드백을 제공한다.
 
-- [ ] `src/hooks/useCombo.ts` — isActive state 추가, reset 시 setIsActive(false)
-- [ ] `src/components/game/ComboIndicator.tsx` (신규) — comboStreak 상시 표시 + isComboActive 텍스트
-- [ ] `src/components/game/ButtonPad.tsx` — comboActive prop 추가, 글로우 이펙트
-- [ ] `src/hooks/useGameEngine.ts` — isClearingFullCombo state 추가, isComboActive/isClearingFullCombo 반환
-- [ ] `src/pages/GamePage.tsx` — ComboIndicator 삽입, clearingStage 영역 FULL COMBO 분기 추가
+- [x] `src/hooks/useCombo.ts` — isActive state 추가, reset 시 setIsActive(false)
+- [x] `src/components/game/ComboIndicator.tsx` (신규) — comboStreak 상시 표시 + isComboActive 텍스트
+- [x] `src/components/game/ButtonPad.tsx` — comboActive prop 추가, 글로우 이펙트
+- [x] `src/hooks/useGameEngine.ts` — isClearingFullCombo state 추가, isComboActive/isClearingFullCombo 반환
+- [x] `src/pages/GamePage.tsx` — ComboIndicator 삽입, clearingStage 영역 FULL COMBO 분기 추가
 
 ---
 

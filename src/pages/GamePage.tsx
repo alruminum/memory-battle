@@ -4,29 +4,18 @@ import { useGameEngine } from '../hooks/useGameEngine'
 import { useRanking } from '../hooks/useRanking'
 import { getUserId } from '../lib/ait'
 import { ButtonPad } from '../components/game/ButtonPad'
+import { ComboIndicator } from '../components/game/ComboIndicator'
 import { BannerAd } from '../components/ads/BannerAd'
-import type { Difficulty } from '../types'
 
 interface GamePageProps {
   onGameOver: () => void
   onRanking: () => void
 }
 
-const DIFFICULTIES: {
-  value: Difficulty
-  label: string
-  multiplier: string
-}[] = [
-  { value: 'EASY',   label: 'EASY',   multiplier: 'x1' },
-  { value: 'MEDIUM', label: 'NORMAL', multiplier: 'x2' },
-  { value: 'HARD',   label: 'HARD',   multiplier: 'x3' },
-]
-
 export function GamePage({ onGameOver, onRanking }: GamePageProps) {
-  const { status, score, stage, userId, setUserId } = useGameStore()
-  const { flashingButton, clearingStage, countdown, handleInput, startGame, retryGame } = useGameEngine()
+  const { status, score, stage, comboStreak, userId, setUserId } = useGameStore()
+  const { flashingButton, clearingStage, countdown, handleInput, startGame, retryGame, isComboActive, isClearingFullCombo } = useGameEngine()
   const ranking = useRanking(userId || null)
-  const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>('EASY')
   const [isInitializing, setIsInitializing] = useState(true)
 
   useEffect(() => {
@@ -36,7 +25,7 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
         setUserId(uid)
         ranking.refetch()
       } catch {
-        // 실패 시 기본값(dailyChancesLeft=1) 유지
+        // 실패 시 기본값 유지
       } finally {
         setIsInitializing(false)
       }
@@ -50,19 +39,13 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
     }
   }, [status]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const isIdle = status === 'IDLE'
-  const isResult = status === 'RESULT'
   const isPlaying = status === 'SHOWING' || status === 'INPUT'
-  const canChangeDifficulty = isIdle || isResult
 
   function handleStart() {
-    startGame(selectedDifficulty)
+    startGame()
   }
 
   const rankLabel = (rank: number) => rank > 0 ? `#${rank}` : '#—'
-
-  // 현재 선택된 난이도 레이블
-  const diffLabel = DIFFICULTIES.find((d) => d.value === selectedDifficulty)?.label ?? 'EASY'
 
   // 스테이지 영역 — IDLE 상태에서는 랭킹 뱃지 + 일간 기회 표시
   const stageArea = () => {
@@ -95,7 +78,7 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
             fontWeight: 800,
             color: 'var(--vb-accent)',
             letterSpacing: 1,
-          }}>CLEAR</div>
+          }}>{isClearingFullCombo ? 'FULL COMBO!' : 'CLEAR'}</div>
         </div>
       )
     }
@@ -209,7 +192,7 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
           fontWeight: 800,
           color: 'var(--vb-text-mid)',
           letterSpacing: 1,
-        }}>{diffLabel}</div>
+        }}>&nbsp;</div>
         <div style={{ flex: 1, textAlign: 'center' }}>
           <div style={{
             fontFamily: 'var(--vb-font-score)',
@@ -236,43 +219,6 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
         }}>STG {String(stage).padStart(2, '0')}</div>
       </div>
 
-      {/* 난이도 탭 */}
-      <div style={{ display: 'flex', gap: 8, padding: '12px 20px 0', flexShrink: 0 }}>
-        {DIFFICULTIES.map(({ value, label, multiplier }) => {
-          const isSelected = selectedDifficulty === value
-          return (
-            <button
-              key={value}
-              onClick={() => canChangeDifficulty && setSelectedDifficulty(value)}
-              style={{
-                flex: 1,
-                padding: '8px 0',
-                borderRadius: 6,
-                border: isSelected ? '1.5px solid var(--vb-accent)' : '1.5px solid var(--vb-border)',
-                backgroundColor: isSelected ? 'rgba(200,255,0,0.06)' : 'var(--vb-surface)',
-                color: isSelected ? 'var(--vb-accent)' : 'var(--vb-text-dim)',
-                fontFamily: 'var(--vb-font-score)',
-                fontSize: 12,
-                fontWeight: 800,
-                letterSpacing: 1.5,
-                cursor: canChangeDifficulty ? 'pointer' : 'default',
-                opacity: !canChangeDifficulty && !isSelected ? 0.35 : 1,
-                lineHeight: 1.3,
-                transition: 'all 150ms ease',
-              }}
-            >
-              {label}<br />
-              <span style={{
-                fontSize: 10,
-                fontWeight: 600,
-                opacity: 0.5,
-                fontFamily: 'var(--vb-font-body)',
-              }}>{multiplier}</span>
-            </button>
-          )
-        })}
-      </div>
-
       {/* 스테이지/상태 영역 */}
       <div style={{
         flex: 2,
@@ -281,6 +227,17 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
         justifyContent: 'center',
       }}>
         {stageArea()}
+      </div>
+
+      {/* 콤보 인디케이터 */}
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: 56,
+        flexShrink: 0,
+      }}>
+        <ComboIndicator comboStreak={comboStreak} isComboActive={isComboActive} />
       </div>
 
       {/* 버튼 패드 */}
@@ -299,7 +256,8 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
           score={score}
           onPress={handleInput}
           onStart={handleStart}
-          onRetry={() => retryGame(selectedDifficulty)}
+          onRetry={() => retryGame()}
+          comboActive={isComboActive}
         />
       </div>
 
