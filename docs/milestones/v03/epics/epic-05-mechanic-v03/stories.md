@@ -31,8 +31,8 @@
 깜빡임 속도와 입력 제한 타이머를 스테이지에 따라 자동으로 변화시킨다.
 스테이지가 올라갈수록 속도는 빨라지고 타이머는 짧아진다. (PRD v0.3 섹션 2 기준값)
 
-- [ ] `src/lib/gameLogic.ts` (신규) — `getFlashDuration(stage)`, `getInputTimeout(stage)` 순수 함수 작성
-- [ ] `src/hooks/useGameEngine.ts` — FLASH_DURATION 상수 → getFlashDuration(stage) 교체, useTimer duration 동적 주입
+- [x] `src/lib/gameLogic.ts` (신규) — `getFlashDuration(stage)`, `getInputTimeout(stage)` 순수 함수 작성
+- [x] `src/hooks/useGameEngine.ts` — FLASH_DURATION 상수 → getFlashDuration(stage) 교체, useTimer duration 동적 주입
 
 ---
 

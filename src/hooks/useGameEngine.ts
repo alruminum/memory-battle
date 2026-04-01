@@ -3,6 +3,7 @@ import { useGameStore } from '../store/gameStore'
 import { useTimer } from './useTimer'
 import { useCombo } from './useCombo'
 import { playTone, playGameStart, playGameOver, playApplause } from '../lib/sound'
+import { getFlashDuration, getInputTimeout } from '../lib/gameLogic'
 import type { ButtonColor } from '../types'
 
 const BUTTONS: ButtonColor[] = ['orange', 'blue', 'green', 'yellow']
@@ -13,7 +14,7 @@ const COUNTDOWN_INTERVAL = 500  // ms per tick
 const randomButton = () => BUTTONS[Math.floor(Math.random() * BUTTONS.length)]
 
 export function useGameEngine() {
-  const { status, sequence, setSequence, addInput, gameOver, resetGame } =
+  const { status, sequence, stage, setSequence, addInput, gameOver, resetGame } =
     useGameStore()
   const [flashingButton, setFlashingButton] = useState<ButtonColor | null>(null)
   const [clearingStage, setClearingStage] = useState<number | null>(null)
@@ -31,7 +32,8 @@ export function useGameEngine() {
     gameOver()
   }, [gameOver])
 
-  const timer = useTimer(handleExpire)
+  const inputTimeout = getInputTimeout(stage)
+  const timer = useTimer(handleExpire, inputTimeout)
 
   // SHOWING: 시퀀스 순서대로 점등 + 사운드
   useEffect(() => {
@@ -42,7 +44,7 @@ export function useGameEngine() {
     if (showingRef.current) return
     showingRef.current = true
 
-    const flash = 500 // Story 15에서 getFlashDuration(stage)로 교체 예정
+    const flash = getFlashDuration(useGameStore.getState().stage)
     let i = 0
 
     const next = () => {

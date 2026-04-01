@@ -1,5 +1,27 @@
 /** 게임 로직 순수 함수 모듈 */
 
+/**
+ * 스테이지에 따른 버튼 점등 시간 (ms)
+ * Stage 1~9: 500ms / 10~19: 400ms / 20~29: 300ms / 30+: 250ms
+ */
+export const getFlashDuration = (stage: number): number => {
+  if (stage >= 30) return 250
+  if (stage >= 20) return 300
+  if (stage >= 10) return 400
+  return 500
+}
+
+/**
+ * 스테이지에 따른 버튼 입력 제한 시간 (ms)
+ * Stage 1~9: 2000ms / 10~19: 1800ms / 20~29: 1600ms / 30+: 1400ms
+ */
+export const getInputTimeout = (stage: number): number => {
+  if (stage >= 30) return 1400
+  if (stage >= 20) return 1600
+  if (stage >= 10) return 1800
+  return 2000
+}
+
 export const COMBO_ACTIVATION_STAGE = 5
 
 /**
