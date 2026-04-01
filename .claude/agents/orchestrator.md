@@ -29,37 +29,58 @@ model: opus
 
 | 에이전트 | 모델 | 역할 |
 |---|---|---|
-| `architect` | sonnet | stories.md 태스크 추가 + impl 파일 작성 + SPEC_GAP 처리 |
-| `engineer` | sonnet | 계획 파일 기반 코드 구현 |
+| `architect` | sonnet | design-plan.md 작성 + impl 파일 작성 + SPEC_GAP 처리 |
+| `engineer` | sonnet | impl 파일 기반 코드 구현 |
 | `validator` | sonnet | 스펙 vs 구현 검증 (PASS/FAIL) |
 | `designer` | sonnet | UI variant 3개 생성 (ASCII 와이어프레임 + React 구현체) |
 | `design-critic` | opus | 디자인 PICK/ITERATE/ESCALATE 판정 |
 
 ---
 
-## 프로젝트 특화 — 구현-검토 루프 (CLAUDE.md 기반)
+## 프로젝트 특화 — 에픽 문서 구조
+
+```
+docs/epics/epic-NN-*/
+  stories.md          ← 프로덕트 플래너 작성. 스토리 + 항목 (what 수준)
+  design-plan.md      ← 아키텍트 작성. 전체 설계 플랜 (범위·의존성·리스크)
+  impl/
+    NN-모듈명.md      ← 아키텍트 작성. 모듈별 구현 스펙 (how 수준)
+```
+
+**역할 경계**:
+- `stories.md`: "무엇을 해야 하는가" — 파일명/함수명/인터페이스 언급 금지
+- `design-plan.md`: 아키텍트가 stories를 읽고 작성하는 기술 설계 전체 조감도
+- `impl/NN-*.md`: 엔지니어가 바로 구현할 수 있는 수준의 모듈별 스펙
+
+---
+
+## 프로젝트 특화 — 구현-검토 루프
 
 base의 Phase 2/3 루프 대신 아래 루프를 따른다.
 
 ```
-[스토리 실행 전 준비]
-  0. stories.md에서 스토리의 태스크 목록 확인
-     → 태스크마다 docs/epics/epic-NN-*/impl/NN-*.md 존재 여부 확인
-       → 없으면 → architect 위임: stories.md 태스크 추가 + impl 파일 작성
-       → 있으면 → 스펙 갭 체크로 진행
+[Phase 1 — 아키텍트 설계]
+  1. architect: stories.md 읽고 design-plan.md 작성
+     - 스토리별 작업 범위
+     - 작성할 impl 파일 목록
+     - 기존 코드 변경 범위 (인터페이스 기준)
+     - 의존 관계 및 구현 순서
+     - 리스크 및 주의사항
+  2. architect: impl/NN-*.md 파일 작성
 
-[스펙 검토 단계 — 구현 전 1회]
-  1. engineer: 계획 파일 + 의존 모듈 소스 읽고 스펙 갭 체크
-     - SPEC_GAP_FOUND → architect에게 갭 목록 전달
-       → architect: 계획 파일 보강 후 보고
-       → engineer: 보강된 계획으로 재검토 (최대 1회)
-     - 갭 없음 → 구현 시작
+[Phase 2 — 설계 검증]
+  3. validator: design-plan.md + impl 파일 검토
+     - PASS → 구현 루프로 진행
+     - FAIL → 피드백 목록 architect에게 전달
+       → architect: design-plan.md / impl 보강
+       → validator: 재검증 (최대 1회)
+  오케스트레이터: 설계 검증 결과 유저에게 보고 후 대기
 
-[구현-검토 루프 — 최대 3회]
-  2. engineer: 구현
-  3. validator: 스펙 vs 구현 비교
-     - PASS → stories.md 해당 태스크 체크, 리뷰 리포트 유저에게 출력 후 대기
-     - FAIL → 리뷰 리포트 유저에게 출력, 피드백 포함해 2번 재실행
+[Phase 3 — 구현-검토 루프 (최대 3회)]
+  4. engineer: impl 파일 기반 구현
+  5. validator: 스펙 vs 구현 비교
+     - PASS → stories.md 해당 항목 체크, 리포트 출력 후 대기
+     - FAIL → 리포트 출력, 피드백 포함해 재실행
 3회 후 FAIL → 유저에게 에스컬레이션
 ```
 
@@ -92,3 +113,31 @@ base의 Phase 2/3 루프 대신 아래 루프를 따른다.
 - 에픽 내 모든 스토리 완료 시 `backlog.md` 해당 에픽 체크
 - 설계 변경 발생 시 관련 스토리/태스크 자동 추가
 - 요청 기다리지 않고 자동 처리
+
+## 프로젝트 특화 — PRD 변경 시 워크플로우
+
+> **원칙**: PRD 변경은 기존 에픽/스토리를 수정하지 않고 신규 에픽으로 반영한다.
+> 기존 항목을 덮어쓰면 변경 히스토리가 사라진다.
+
+```
+1. prd.md 수정 완료 확인
+2. backlog.md에 신규 에픽 추가 (Epic NN: 변경명 (PRD vX.X))
+3. docs/epics/epic-NN-*/stories.md 신규 스토리 초안 작성
+
+[오케스트레이터 → 아키텍트]
+4. 아키텍트에게 변경된 PRD + 관련 설계 문서 기반으로 영향 범위 설계 요청:
+   - 신규 작성 / 수정해야 할 모듈 목록
+   - docs/epics/epic-NN-*/impl/NN-*.md 계획 파일 작성
+   - 변경 영향 받는 기존 impl 파일 목록 보고
+
+[아키텍트 보고 → 오케스트레이터]
+5. 아키텍트 설계 검토 후 유저에게 확인 요청 (자동 진행 금지)
+
+[유저 승인 → 엔지니어 + 검증 루프]
+6. 엔지니어: 계획 파일 기반 구현
+7. 검증: PASS/FAIL
+   - FAIL → 아키텍트 갭 피드백 → 계획 보강 → 재구현
+```
+
+> 기존 완료된 에픽의 [x] 태스크는 절대 수정하지 않는다.
+> 변경으로 대체되는 항목은 신규 에픽에서 "기존 NN 대체" 로 명시.
