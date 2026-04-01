@@ -11,30 +11,30 @@
   <!-- BR yellow -->
   <circle cx="580" cy="594" r="170" fill="#F5D020" stroke="white" stroke-width="4"/>
 
-  <!-- Right text area — centered in x=860~1932, center x=1396 -->
+  <!-- Right text area — centered in x=760~1932, center x=1346 -->
   <text
-    x="1396" y="290"
+    x="1346" y="330"
     text-anchor="middle"
     font-family="'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif"
     font-size="210" font-weight="800"
-    fill="#FFFFFF" letter-spacing="-6">기억력</text>
+    fill="#FFFFFF" letter-spacing="4">기억력</text>
 
   <text
-    x="1396" y="510"
+    x="1346" y="555"
     text-anchor="middle"
     font-family="'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif"
     font-size="250" font-weight="800"
-    fill="#F5D020" letter-spacing="-8">배틀</text>
+    fill="#F5D020" letter-spacing="4">배틀</text>
 
   <text
-    x="1396" y="572"
+    x="1346" y="618"
     text-anchor="middle"
     font-family="'SF Pro Text', 'Helvetica Neue', Arial, sans-serif"
     font-size="26" font-weight="500"
     fill="#888888" letter-spacing="6">MEMORY BATTLE</text>
 
   <text
-    x="1396" y="640"
+    x="1346" y="686"
     text-anchor="middle"
     font-family="'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif"
     font-size="28" font-weight="400"
