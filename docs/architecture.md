@@ -10,7 +10,7 @@ graph TD
   end
 
   subgraph WebView["WebView (미니앱)"]
-    Main["MainPage\n시작·기회·내랭킹"]
+    Main["MainPage\n시작·랭킹"]
     Game["GamePage\n게임·타이머·배너광고"]
     Result["ResultPage\n결과·점수·리워드광고"]
     Ranking["RankingPage\n일간·월간·시즌"]
@@ -23,7 +23,7 @@ graph TD
 
   subgraph Supabase["Supabase (PostgreSQL)"]
     ScoresTable["scores 테이블"]
-    ChancesTable["daily_chances 테이블"]
+    DailyRewardTable["daily_reward 테이블"]
   end
 
   Main --> Game --> Result
@@ -39,7 +39,7 @@ graph TD
   AIT --> SDK
   AIT --> AdsSDK
   SB --> ScoresTable
-  SB --> ChancesTable
+  SB --> DailyRewardTable
 ```
 
 ---
@@ -50,7 +50,7 @@ graph TD
 stateDiagram-v2
   [*] --> IDLE : 앱 진입
 
-  IDLE --> SHOWING : startGame() — 기회 차감
+  IDLE --> SHOWING : startGame()
   SHOWING --> INPUT : 시퀀스 표시 완료
   INPUT --> SHOWING : 정답 입력 → 다음 라운드
   INPUT --> RESULT : 오답 또는 2초 초과
@@ -67,10 +67,9 @@ stateDiagram-v2
 
 ```mermaid
 flowchart TD
-  A["MainPage\n남은 기회 N회"] -->|시작 버튼| B["GamePage\n시퀀스 표시 → 입력"]
+  A["MainPage\n시작·랭킹"] -->|시작 버튼| B["GamePage\n시퀀스 표시 → 입력"]
   B -->|오답 / 타임아웃| C["ResultPage\n점수 + 랭킹 순위"]
   C -->|한 번 더 + 리워드광고| B
-  C -->|기회 소진| C2["한 번 더 버튼 비활성화"]
   C -->|랭킹 보기| D["RankingPage\n일간 / 월간 / 시즌"]
   D -->|뒤로| A
   A -->|랭킹 탭| D
@@ -90,13 +89,12 @@ erDiagram
     TIMESTAMPTZ played_at
   }
 
-  daily_chances {
-    TEXT user_id PK "getUserKeyForGame().hash"
-    INTEGER used_count "사용한 기회 수 (0~3)"
-    DATE last_date "마지막 사용일 (자정 리셋 기준)"
+  daily_reward {
+    TEXT user_id PK
+    DATE reward_date PK
   }
 
-  scores }o--|| daily_chances : "user_id"
+  scores }o--o{ daily_reward : "user_id"
 ```
 
 ---
