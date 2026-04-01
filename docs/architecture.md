@@ -105,13 +105,19 @@ erDiagram
 
 ```mermaid
 flowchart TD
-  A["버튼 입력"] --> B["+1점 누적"]
+  A["버튼 입력"] --> B["+1점 누적 (rawScore)"]
   B --> C{스테이지 클리어?}
-  C -->|No — 오답/타임아웃| Z["그 시점까지 누적 점수만 지급\n클리어 보너스 없음"]
+  C -->|No — 오답/타임아웃| Z["맞춘 버튼 점수만 지급\n클리어 보너스 없음\ncomboStreak 리셋"]
   C -->|Yes| D{스테이지 ≥ 10?}
-  D -->|No 1~9스테이지| E["버튼 점수만"]
-  D -->|Yes| F["+ 클리어 보너스\nfloor(stage / 5)"]
-  F --> G{풀콤보?\n모든 버튼 0.3초 이내}
-  G -->|Yes| H["스테이지 총점 × 2"]
-  G -->|No| I["스테이지 총점 그대로"]
+  D -->|No — 1~9스테이지| E["rawScore만 (클리어 보너스 없음)"]
+  D -->|Yes| F["rawScore + 클리어 보너스\nfloor(stage / 5)"]
+  E --> G{스테이지 ≥ 5?\n콤보 활성화}
+  F --> G
+  G -->|No — 1~4스테이지| I["× x1 (콤보 비활성)"]
+  G -->|Yes| H{풀콤보?\n모든 입력 간격 ≤ 300ms}
+  H -->|No| K["comboStreak 0 리셋 → × x1"]
+  H -->|Yes| J["comboStreak +1\n배율 = min(comboStreak+1, 5)\n원점수 × 배율"]
+  I --> L["누적 score에 반영"]
+  J --> L
+  K --> L
 ```
