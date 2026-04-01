@@ -13,13 +13,13 @@
 
 게임 시작 전 난이도 선택 화면을 제거한다. 난이도별 점수 배율 로직도 함께 제거한다.
 
-- [ ] `src/types/index.ts` — `Difficulty` 타입 삭제
-- [ ] `src/store/gameStore.ts` — difficulty 필드/DIFFICULTY_MULTIPLIER/calcFinalScore 제거, startGame 인자 제거, gameOver 인자 제거
-- [ ] `src/hooks/useGameEngine.ts` — startGame/retryGame/launchAfterCountdown difficulty 인자 제거
-- [ ] `src/hooks/useRanking.ts` — submitScore difficulty 인자 제거
-- [ ] `src/pages/MainPage.tsx` — 난이도 탭 UI 제거
-- [ ] `src/pages/GamePage.tsx` — 난이도 탭 UI 제거
-- [ ] `src/pages/ResultPage.tsx` — difficulty 참조 제거, submitScore 인자 수정
+- [x] `src/types/index.ts` — `Difficulty` 타입 삭제
+- [x] `src/store/gameStore.ts` — difficulty 필드/DIFFICULTY_MULTIPLIER/calcFinalScore 제거, startGame 인자 제거, gameOver 인자 제거
+- [x] `src/hooks/useGameEngine.ts` — startGame/retryGame/launchAfterCountdown difficulty 인자 제거
+- [x] `src/hooks/useRanking.ts` — submitScore difficulty 인자 제거
+- [x] `src/pages/MainPage.tsx` — 난이도 탭 UI 제거
+- [x] `src/pages/GamePage.tsx` — 난이도 탭 UI 제거
+- [x] `src/pages/ResultPage.tsx` — difficulty 참조 제거, submitScore 인자 수정
 
 ---
 
