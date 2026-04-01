@@ -12,7 +12,7 @@
 
 ## Story 23: Supabase 타입 자동화 도입
 
-- [ ] `npm install supabase --save-dev` (supabase CLI 설치)
+- [x] `npm install supabase --save-dev` (supabase CLI 설치)
 - [x] `supabase gen types typescript` 스크립트를 `package.json`의 `"gen:types"`로 등록
 - [x] `src/types/database.types.ts` 생성 (gen:types 실행 결과)
 - [x] `useRanking.ts` INSERT payload를 생성된 타입으로 교체
