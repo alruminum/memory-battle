@@ -42,21 +42,54 @@ VITE_APP_NAME=memory-battle
 구현/디자인 루프 상세는 `.claude/agents/orchestrator.md` 참조.
 사람이 해야 할 운영/출시 항목은 **`RELEASE.md`** 참조.
 
-| 모듈 | 계획 파일 |
-|---|---|
-| 02 sdk-wrapper | [docs/milestones/v01/epics/epic-01-game-core/impl/02-sdk-wrapper.md](docs/milestones/v01/epics/epic-01-game-core/impl/02-sdk-wrapper.md) |
-| 03 zustand-store | [docs/milestones/v01/epics/epic-01-game-core/impl/03-zustand-store.md](docs/milestones/v01/epics/epic-01-game-core/impl/03-zustand-store.md) |
-| 04 game-engine | [docs/milestones/v01/epics/epic-01-game-core/impl/04-game-engine.md](docs/milestones/v01/epics/epic-01-game-core/impl/04-game-engine.md) |
-| 05 game-components | [docs/milestones/v01/epics/epic-01-game-core/impl/05-game-components.md](docs/milestones/v01/epics/epic-01-game-core/impl/05-game-components.md) |
-| 07 ranking-hook | [docs/milestones/v01/epics/epic-02-backend/impl/07-ranking-hook.md](docs/milestones/v01/epics/epic-02-backend/impl/07-ranking-hook.md) |
-| 08 daily-chances | [docs/milestones/v01/epics/epic-02-backend/impl/08-daily-chances.md](docs/milestones/v01/epics/epic-02-backend/impl/08-daily-chances.md) |
-| 09 ad-components | [docs/milestones/v01/epics/epic-03-ads/impl/09-ad-components.md](docs/milestones/v01/epics/epic-03-ads/impl/09-ad-components.md) |
-| 10 result-page | [docs/milestones/v01/epics/epic-03-ads/impl/10-result-page.md](docs/milestones/v01/epics/epic-03-ads/impl/10-result-page.md) |
-| 11 main-page | [docs/milestones/v01/epics/epic-04-screens/impl/11-main-page.md](docs/milestones/v01/epics/epic-04-screens/impl/11-main-page.md) |
-| 12 ranking-page | [docs/milestones/v01/epics/epic-04-screens/impl/12-ranking-page.md](docs/milestones/v01/epics/epic-04-screens/impl/12-ranking-page.md) |
-| 13 routing | [docs/milestones/v01/epics/epic-04-screens/impl/13-routing.md](docs/milestones/v01/epics/epic-04-screens/impl/13-routing.md) |
+### v01
 
-> 06 (Supabase DB 세팅)은 콘솔 작업 → `docs/db-schema.md` + `RELEASE.md` 참고
+**Epic 01 — 게임 코어** · [stories](docs/milestones/v01/epics/epic-01-game-core/stories.md)
+
+| impl | 계획 파일 |
+|---|---|
+| 02 sdk-wrapper | [impl/02-sdk-wrapper.md](docs/milestones/v01/epics/epic-01-game-core/impl/02-sdk-wrapper.md) |
+| 03 zustand-store | [impl/03-zustand-store.md](docs/milestones/v01/epics/epic-01-game-core/impl/03-zustand-store.md) |
+| 04 game-engine | [impl/04-game-engine.md](docs/milestones/v01/epics/epic-01-game-core/impl/04-game-engine.md) |
+| 05 game-components | [impl/05-game-components.md](docs/milestones/v01/epics/epic-01-game-core/impl/05-game-components.md) |
+
+**Epic 02 — 백엔드/데이터** · [stories](docs/milestones/v01/epics/epic-02-backend/stories.md)
+
+| impl | 계획 파일 |
+|---|---|
+| 06 db-setup | 콘솔 작업 → `docs/db-schema.md` + `RELEASE.md` 참고 |
+| 07 ranking-hook | [impl/07-ranking-hook.md](docs/milestones/v01/epics/epic-02-backend/impl/07-ranking-hook.md) |
+| 08 daily-chances | [impl/08-daily-chances.md](docs/milestones/v01/epics/epic-02-backend/impl/08-daily-chances.md) |
+
+**Epic 03 — 광고/수익화** · [stories](docs/milestones/v01/epics/epic-03-ads/stories.md)
+
+| impl | 계획 파일 |
+|---|---|
+| 09 ad-components | [impl/09-ad-components.md](docs/milestones/v01/epics/epic-03-ads/impl/09-ad-components.md) |
+| 10 result-page | [impl/10-result-page.md](docs/milestones/v01/epics/epic-03-ads/impl/10-result-page.md) |
+
+**Epic 04 — 화면 완성** · [stories](docs/milestones/v01/epics/epic-04-screens/stories.md)
+
+| impl | 계획 파일 |
+|---|---|
+| 11 main-page | [impl/11-main-page.md](docs/milestones/v01/epics/epic-04-screens/impl/11-main-page.md) |
+| 12 ranking-page | [impl/12-ranking-page.md](docs/milestones/v01/epics/epic-04-screens/impl/12-ranking-page.md) |
+| 13 routing | [impl/13-routing.md](docs/milestones/v01/epics/epic-04-screens/impl/13-routing.md) |
+
+### v03
+
+**Epic 05 — 게임 메카닉 개편 (PRD v0.3)** · [stories](docs/milestones/v03/epics/epic-05-mechanic-v03/stories.md)
+
+| impl | 계획 파일 |
+|---|---|
+| 14 difficulty-removal | [impl/14-difficulty-removal.md](docs/milestones/v03/epics/epic-05-mechanic-v03/impl/14-difficulty-removal.md) |
+| 15 stage-speed-timer | [impl/15-stage-speed-timer.md](docs/milestones/v03/epics/epic-05-mechanic-v03/impl/15-stage-speed-timer.md) |
+| 16 combo-streak | [impl/16-combo-streak.md](docs/milestones/v03/epics/epic-05-mechanic-v03/impl/16-combo-streak.md) |
+| 17 combo-ui | [impl/17-combo-ui.md](docs/milestones/v03/epics/epic-05-mechanic-v03/impl/17-combo-ui.md) |
+| 18 result-update | [impl/18-result-update.md](docs/milestones/v03/epics/epic-05-mechanic-v03/impl/18-result-update.md) |
+
+**Epic 06 — 마일스톤 기반 문서 구조 개편** · [stories](docs/milestones/v03/epics/epic-06-milestone-docs/stories.md)
+_(impl 없음 — 문서 구조 작업만)_
 
 ---
 
@@ -68,7 +101,7 @@ VITE_APP_NAME=memory-battle
 | [RELEASE.md](RELEASE.md) | 사람이 해야 할 운영/출시 체크리스트 |
 | [docs/milestones/](docs/milestones/) | 마일스톤별 에픽 + 버전 문서 (v01, v03) |
 | [docs/architecture.md](docs/architecture.md) | 시스템 구조·상태머신·화면흐름·DB ERD·점수계산 (Mermaid) |
-| [docs/game-logic.md](docs/game-logic.md) | 시퀀스·깜빡임속도·점수·콤보·타이머·Zustand store |
+| [docs/game-logic.md](docs/game-logic.md) | 시퀀스·깜빡임속도·점수·스택형 콤보(x1~x5)·타이머·Zustand store (PRD v0.3) |
 | [docs/db-schema.md](docs/db-schema.md) | Supabase 테이블 DDL + 랭킹 쿼리 |
 | [docs/sdk.md](docs/sdk.md) | 앱인토스 SDK (유저ID·리워드광고·배너광고·granite.config) |
 | [docs/ui-spec.md](docs/ui-spec.md) | 화면별 컴포넌트 스펙 (현재 = v0.3) |
