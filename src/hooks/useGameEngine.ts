@@ -75,6 +75,7 @@ export function useGameEngine() {
   const launchAfterCountdown = useCallback(() => {
     if (startingRef.current) return
     startingRef.current = true
+    timer.stop()
     setCountdown(3)
     setTimeout(() => setCountdown(2), COUNTDOWN_INTERVAL)
     setTimeout(() => setCountdown(1), COUNTDOWN_INTERVAL * 2)
@@ -90,7 +91,7 @@ export function useGameEngine() {
       setSequence(firstSeq)
       useGameStore.setState({ sequence: firstSeq, status: 'SHOWING', stage: 1 })
     }, COUNTDOWN_INTERVAL * 3)
-  }, [combo, setSequence])
+  }, [combo, setSequence, timer])
 
   const startGame = useCallback(() => {
     launchAfterCountdown()
@@ -104,7 +105,7 @@ export function useGameEngine() {
 
   const handleInput = useCallback(
     (color: ButtonColor) => {
-      if (status !== 'INPUT') return
+      if (useGameStore.getState().status !== 'INPUT') return
       if (clearingRef.current) return
 
       playTone(color)
@@ -118,6 +119,7 @@ export function useGameEngine() {
       const result = addInput(color)
 
       if (result === 'wrong') {
+        timer.stop()
         playGameOver()
         gameOver()
         return
@@ -151,7 +153,7 @@ export function useGameEngine() {
         return
       }
     },
-    [status, sequence, addInput, gameOver, combo, timer, setSequence]
+    [sequence, addInput, gameOver, combo, timer, setSequence]
   )
 
   return {

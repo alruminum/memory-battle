@@ -1,4 +1,5 @@
 import type { ButtonColor, GameStatus } from '../../types'
+import { dbg } from '../../lib/debug'
 
 interface ButtonPadProps {
   flashingButton: ButtonColor | null
@@ -123,7 +124,10 @@ export function ButtonPad({
         return (
           <button
             key={color}
-            onPointerDown={() => !disabled && !isClearing && onPress(color)}
+            onPointerDown={() => {
+              dbg('[ButtonPad] pointerDown color=', color, 'disabled=', disabled, 'isClearing=', isClearing)
+              if (!disabled && !isClearing) onPress(color)
+            }}
             style={{
               position: 'absolute',
               ...pos,
@@ -157,7 +161,7 @@ export function ButtonPad({
               transform: isFlashing ? 'scale(1.06) translateY(3px)' : 'scale(1)',
               filter: isFlashing ? 'brightness(1.4)' : 'brightness(0.75)',
               transition: 'transform 70ms ease, filter 70ms ease, box-shadow 70ms ease',
-              pointerEvents: (disabled || isClearing) ? 'none' : 'auto',
+              pointerEvents: isClearing ? 'none' : 'auto',
               zIndex: 2,
             }}
           />
