@@ -1,15 +1,15 @@
 # Epic 02: 백엔드/데이터
 
-> 상태: 진행 중 (DB 세팅 미완)
+> 상태: 완료
 
 ## Story 6: Supabase DB 세팅
 
 > 콘솔 작업. DDL: `docs/db-schema.md` 참고.
 
-- [ ] `scores` 테이블 생성
-- [ ] `daily_reward` 테이블 생성
-- [ ] 인덱스 생성: `idx_scores_played_at`, `idx_scores_user_id`
-- [ ] RLS 정책 설정 — anon key로 INSERT/SELECT 허용
+- [x] `scores` 테이블 생성
+- [x] `daily_reward` 테이블 생성
+- [x] 인덱스 생성: `idx_scores_played_at`, `idx_scores_user_id`
+- [x] RLS 정책 설정 — anon key로 INSERT/SELECT 허용
 
 ## Story 7: 랭킹 훅
 
