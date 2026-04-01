@@ -65,10 +65,3 @@ docs/
 - [x] `CLAUDE.md` "현재 마일스톤" 섹션: 마일스톤 구조 및 B안 운영 원칙 명시
 - [x] Epic 05 impl `17-combo-ui.md`, `18-result-update.md`: 참고 문서 경로 `docs/ui-spec.md`로 정규화
 
----
-
-> **앞으로의 운영 원칙**: 새 마일스톤 시작 전
-> 1. 현재 루트 파일(prd, trd, ui-spec, game-logic) → `docs/milestones/vNN/`에 복사 (스냅샷)
-> 2. 현재 에픽 폴더 → `docs/milestones/vNN/epics/`에 복사
-> 3. 루트 파일 업데이트 (새 버전)
-> 4. `backlog.md` + `CLAUDE.md` 경로 업데이트

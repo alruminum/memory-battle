@@ -118,7 +118,14 @@ _(impl 없음 — 문서 구조 작업만)_
 - 게임 로직: `docs/game-logic.md`
 
 > **마일스톤 구조 (B안)**: 루트 = 항상 현재 최신. 과거 버전은 `docs/milestones/vNN/`에 스냅샷.
-> 과거 버전 참조 시: `docs/milestones/v01/` (Epic 01~04), `docs/milestones/v03/` (Epic 05)
+> 과거 버전 참조 시: `docs/milestones/v01/` (Epic 01~04), `docs/milestones/v03/` (Epic 05~06)
+
+### 새 마일스톤 시작 전 체크리스트
+
+1. 루트 파일(`prd.md`, `trd.md`, `docs/ui-spec.md`, `docs/game-logic.md`) → `docs/milestones/vNN/`에 복사 (스냅샷)
+2. 현재 에픽 폴더 → `docs/milestones/vNN/epics/`에 복사
+3. 루트 파일 업데이트 (새 버전)
+4. `backlog.md` + `CLAUDE.md` 경로 업데이트
 
 ---
 
