@@ -39,6 +39,13 @@ export const getComboMultiplier = (comboStreak: number): number =>
   Math.min(comboStreak + 1, 5)
 
 /**
+ * 배율 미적용 스테이지 점수 (콤보 보너스 = score - baseScore)
+ */
+export const calcBaseStageScore = (stage: number): number => {
+  return stage + calcClearBonus(stage)
+}
+
+/**
  * 스테이지 최종 점수
  * @param buttonScore  해당 스테이지에서 버튼 입력으로 누적된 rawScore
  * @param comboStreak  현재 연속 풀콤보 스트릭 (배율 결정에 사용)

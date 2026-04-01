@@ -71,9 +71,9 @@
 게임 오버 결과 화면에 콤보 관련 플레이 요약을 추가한다.
 유저가 이번 게임에서 얼마나 잘했는지 수치로 확인할 수 있어야 한다.
 
-- [ ] `src/lib/gameLogic.ts` — calcBaseStageScore 추가
-- [ ] `src/store/gameStore.ts` — baseScore 필드 추가, stageClear에서 baseScore 누적
-- [ ] `src/pages/ResultPage.tsx` — COMBO STATS 카드 추가 (fullComboCount, maxComboStreak, comboBonus), difficulty 참조 완전 제거
+- [x] `src/lib/gameLogic.ts` — calcBaseStageScore 추가
+- [x] `src/store/gameStore.ts` — baseScore 필드 추가, stageClear에서 baseScore 누적
+- [x] `src/pages/ResultPage.tsx` — COMBO STATS 카드 추가 (fullComboCount, maxComboStreak, comboBonus), difficulty 참조 완전 제거
 
 ---
 

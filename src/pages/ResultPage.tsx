@@ -11,7 +11,9 @@ interface ResultPageProps {
 }
 
 export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
-  const { score, stage, difficulty, userId } = useGameStore()
+  const { score, stage, userId, baseScore, fullComboCount, maxComboStreak } = useGameStore()
+
+  const comboBonus = score - baseScore
   const { daily, myRanks, isLoading, submitScore } = useRanking(userId)
   const { show: showAd, isLoading: adLoading } = useRewardAd()
   const { hasTodayReward, grantDailyReward } = useDailyReward()
@@ -33,7 +35,7 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
     prevBestRef.current = prevBest
     if (score > prevBest) setIsNewBest(true)
 
-    submitScore(score, stage, difficulty, userId)
+    submitScore(score, stage, userId)
   }, [userId, isLoading]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // 마운트 시 리워드광고 자동 시작
@@ -82,8 +84,6 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
   }
 
   const monthName = new Date().getMonth() + 2 > 12 ? 1 : new Date().getMonth() + 2
-
-  const diffLabel = difficulty === 'EASY' ? 'EASY' : difficulty === 'MEDIUM' ? 'NORMAL' : 'HARD'
 
   const rankDisplay = (rank: number) => rank > 0 ? `#${rank}` : '#—'
 
@@ -143,7 +143,7 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
           fontSize: 12,
           color: 'var(--vb-text-dim)',
           marginTop: 8,
-        }}>Stage {stage} ◆ {diffLabel}</div>
+        }}>Stage {stage}</div>
 
         {/* NEW PERSONAL BEST 배지 */}
         {isNewBest && (
@@ -165,6 +165,50 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
           </div>
         )}
       </div>
+
+      {/* COMBO STATS 카드 */}
+      {(fullComboCount > 0 || maxComboStreak > 0) && (
+        <div style={{
+          margin: '12px 20px 0',
+          padding: '16px',
+          backgroundColor: 'var(--vb-surface)',
+          borderRadius: 12,
+          border: '1px solid var(--vb-border)',
+          flexShrink: 0,
+        }}>
+          <div style={{
+            fontFamily: 'var(--vb-font-score)',
+            fontSize: 10,
+            color: 'var(--vb-text-dim)',
+            letterSpacing: 3,
+            marginBottom: 12,
+          }}>COMBO STATS</div>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+            {[
+              { label: 'FULL COMBO',  value: `${fullComboCount}x` },
+              { label: 'MAX STREAK',  value: `x${Math.min(maxComboStreak + 1, 5)}` },
+              { label: 'COMBO BONUS', value: `+${comboBonus.toLocaleString()}` },
+            ].map(({ label, value }) => (
+              <div key={label} style={{ textAlign: 'center', flex: 1 }}>
+                <div style={{
+                  fontFamily: 'var(--vb-font-body)',
+                  fontSize: 9,
+                  color: 'var(--vb-text-dim)',
+                  letterSpacing: 1.5,
+                  marginBottom: 4,
+                }}>{label}</div>
+                <div style={{
+                  fontFamily: 'var(--vb-font-score)',
+                  fontSize: 18,
+                  fontWeight: 900,
+                  color: 'var(--vb-accent)',
+                }}>{value}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* 랭킹 리스트 */}
       <div style={{

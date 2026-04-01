@@ -1,12 +1,13 @@
 import { create } from 'zustand'
 import type { GameStatus, ButtonColor } from '../types'
-import { calcStageScore } from '../lib/gameLogic'
+import { calcStageScore, calcBaseStageScore } from '../lib/gameLogic'
 
 interface GameStore {
   status: GameStatus
   sequence: ButtonColor[]
   currentIndex: number
   score: number
+  baseScore: number
   stage: number
   comboStreak: number
   fullComboCount: number
@@ -30,6 +31,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   sequence: [],
   currentIndex: 0,
   score: 0,
+  baseScore: 0,
   stage: 0,
   comboStreak: 0,
   fullComboCount: 0,
@@ -48,6 +50,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       sequence: [],
       currentIndex: 0,
       score: 0,
+      baseScore: 0,
       stage: 0,
       comboStreak: 0,
       fullComboCount: 0,
@@ -85,6 +88,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
         clearedStage,
         isFullCombo
       )
+      const baseStageScore = calcBaseStageScore(clearedStage)
 
       const newComboStreak = isFullCombo
         ? Math.min(state.comboStreak + 1, 4)
@@ -96,6 +100,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
       return {
         score: prevAccumulated + stageScore,
+        baseScore: state.baseScore + baseStageScore,
         comboStreak: newComboStreak,
         fullComboCount: newFullComboCount,
         maxComboStreak: newMaxComboStreak,
@@ -115,6 +120,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       sequence: [],
       currentIndex: 0,
       score: 0,
+      baseScore: 0,
       stage: 0,
       comboStreak: 0,
       fullComboCount: 0,
