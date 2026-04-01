@@ -68,13 +68,14 @@ base의 Phase 2/3 루프 대신 아래 루프를 따른다.
      - 리스크 및 주의사항
   2. architect: impl/NN-*.md 파일 작성
 
-[Phase 2 — 설계 검증]
+[Phase 2 — 설계 검증] ← 절대 건너뛰기 금지
   3. validator: design-plan.md + impl 파일 검토
-     - PASS → 구현 루프로 진행
+     - PASS → 설계 검증 결과 유저에게 보고 후 반드시 대기 (자동 Phase 3 진입 금지)
      - FAIL → 피드백 목록 architect에게 전달
        → architect: design-plan.md / impl 보강
        → validator: 재검증 (최대 1회)
-  오케스트레이터: 설계 검증 결과 유저에게 보고 후 대기
+       → 재검증 결과도 유저에게 보고 후 대기
+  ⛔ 유저 승인 없이 Phase 3(engineer 호출) 절대 금지
 
 [Phase 3 — 구현-검토 루프 (최대 3회)]
   4. engineer: impl 파일 + `docs/ui-spec.md` + `docs/game-logic.md` 참고해 구현

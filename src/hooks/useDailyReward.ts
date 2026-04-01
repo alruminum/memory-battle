@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { grantDailyReward as grantDailyRewardAit } from '../lib/ait'
 import { useGameStore } from '../store/gameStore'
+import type { DailyRewardInsert } from '../types/database.types'
 
 // KST 기준 오늘 날짜 YYYY-MM-DD
 const todayKST = (): string => {
@@ -38,9 +39,13 @@ export function useDailyReward() {
   async function markTodayRewarded(): Promise<void> {
     if (!userId) return
 
+    const rewardPayload: DailyRewardInsert = {
+      user_id: userId,
+      reward_date: todayKST(),
+    }
     const { error } = await supabase
       .from('daily_reward')
-      .insert({ user_id: userId, reward_date: todayKST() })
+      .insert(rewardPayload)
 
     if (error) {
       if (error.code === '23505') {

@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { submitScore as submitToGameCenter } from '../lib/ait'
+import type { ScoreInsert } from '../types/database.types'
 
 interface RankEntry {
   user_id: string
@@ -63,11 +64,12 @@ export function useRanking(userId: string | null): UseRankingReturn {
 
   const submitScore = useCallback(
     async (score: number, stage: number, uid: string) => {
-      await supabase.from('scores').insert({
+      const payload: ScoreInsert = {
         user_id: uid,
         score,
         stage,
-      })
+      }
+      await supabase.from('scores').insert(payload)
       await submitToGameCenter(score)
       await fetchAll()
     },

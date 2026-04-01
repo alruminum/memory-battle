@@ -42,6 +42,7 @@ VITE_APP_NAME=memory-battle
 구현/디자인 루프 상세는 `.claude/agents/orchestrator.md` 참조.
 사람이 해야 할 운영/출시 항목은 **`RELEASE.md`** 참조.
 
+
 ### v01
 
 **Epic 01 — 게임 코어** · [stories](docs/milestones/v01/epics/epic-01-game-core/stories.md)
@@ -92,7 +93,10 @@ VITE_APP_NAME=memory-battle
 _(impl 없음 — 문서 구조 작업만)_
 
 **Epic 07 — DB 타입 안전성** · [stories](docs/milestones/v03/epics/epic-07-db-type-safety/stories.md)
-_(기술 부채: difficulty 컬럼 마이그레이션 + supabase gen types 도입)_
+
+| impl | 계획 파일 |
+|---|---|
+| 23 supabase-gen-types | [impl/23-supabase-gen-types.md](docs/milestones/v03/epics/epic-07-db-type-safety/impl/23-supabase-gen-types.md) |
 
 ---
 
