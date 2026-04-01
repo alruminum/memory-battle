@@ -3,9 +3,8 @@ import { useGameStore } from '../store/gameStore'
 import { useTimer } from './useTimer'
 import { useCombo } from './useCombo'
 import { playTone, playGameStart, playGameOver, playApplause } from '../lib/sound'
-import type { ButtonColor, Difficulty } from '../types'
+import type { ButtonColor } from '../types'
 
-const FLASH_DURATION: Record<Difficulty, number> = { EASY: 500, MEDIUM: 400, HARD: 300 }
 const BUTTONS: ButtonColor[] = ['orange', 'blue', 'green', 'yellow']
 const CLEAR_PAUSE_MS = 1100
 const MILESTONE_PAUSE_MS = 1900
@@ -14,14 +13,14 @@ const COUNTDOWN_INTERVAL = 500  // ms per tick
 const randomButton = () => BUTTONS[Math.floor(Math.random() * BUTTONS.length)]
 
 export function useGameEngine() {
-  const { status, sequence, difficulty, setSequence, addInput, gameOver, resetGame } =
+  const { status, sequence, setSequence, addInput, gameOver, resetGame } =
     useGameStore()
   const [flashingButton, setFlashingButton] = useState<ButtonColor | null>(null)
   const [clearingStage, setClearingStage] = useState<number | null>(null)
   const [countdown, setCountdown] = useState<number | null>(null)
   const showingRef = useRef(false)
   const clearingRef = useRef(false)
-  const startingRef = useRef(false) // 카운트다운 중복 시작 방지
+  const startingRef = useRef(false)
 
   const combo = useCombo()
 
@@ -29,8 +28,8 @@ export function useGameEngine() {
     if (useGameStore.getState().status !== 'INPUT') return
     if (clearingRef.current) return
     playGameOver()
-    gameOver(combo.checkFullCombo(useGameStore.getState().sequence.length))
-  }, [gameOver, combo])
+    gameOver()
+  }, [gameOver])
 
   const timer = useTimer(handleExpire)
 
@@ -43,7 +42,7 @@ export function useGameEngine() {
     if (showingRef.current) return
     showingRef.current = true
 
-    const flash = FLASH_DURATION[difficulty]
+    const flash = 500 // Story 15에서 getFlashDuration(stage)로 교체 예정
     let i = 0
 
     const next = () => {
@@ -67,11 +66,11 @@ export function useGameEngine() {
     }
 
     next()
-  }, [status, sequence, difficulty, timer])
+  }, [status, sequence, timer])
 
   // 카운트다운 후 게임 실제 시작
-  const launchAfterCountdown = useCallback((diff: Difficulty) => {
-    if (startingRef.current) return  // 이미 카운트다운 진행 중 — 중복 방지
+  const launchAfterCountdown = useCallback(() => {
+    if (startingRef.current) return
     startingRef.current = true
     setCountdown(3)
     setTimeout(() => setCountdown(2), COUNTDOWN_INTERVAL)
@@ -84,24 +83,20 @@ export function useGameEngine() {
       setClearingStage(null)
       playGameStart()
       const firstSeq: ButtonColor[] = [randomButton()]
-      useGameStore.getState().startGame(diff)
+      useGameStore.getState().startGame()
       setSequence(firstSeq)
       useGameStore.setState({ sequence: firstSeq, status: 'SHOWING', stage: 1 })
     }, COUNTDOWN_INTERVAL * 3)
   }, [combo, setSequence])
 
-  const startGame = useCallback(
-    (diff: Difficulty) => {
-      launchAfterCountdown(diff)
-    },
-    [launchAfterCountdown]
-  )
+  const startGame = useCallback(() => {
+    launchAfterCountdown()
+  }, [launchAfterCountdown])
 
-  // RETRY: 바로 카운트다운 → 시작 (IDLE 안 거침, 선택한 난이도 사용)
-  const retryGame = useCallback((diff?: Difficulty) => {
-    const d = diff ?? useGameStore.getState().difficulty
+  // RETRY: 바로 카운트다운 -> 시작
+  const retryGame = useCallback(() => {
     resetGame()
-    launchAfterCountdown(d)
+    launchAfterCountdown()
   }, [resetGame, launchAfterCountdown])
 
   const handleInput = useCallback(
@@ -121,7 +116,7 @@ export function useGameEngine() {
 
       if (result === 'wrong') {
         playGameOver()
-        gameOver(combo.checkFullCombo(sequence.length))
+        gameOver()
         return
       }
 
@@ -130,6 +125,11 @@ export function useGameEngine() {
         clearingRef.current = true
         timer.stop()
         setClearingStage(clearedStage)
+
+        const isFullCombo = combo.checkFullCombo(clearedStage)
+        // 스토어에 콤보/점수 반영
+        useGameStore.getState().stageClear(isFullCombo)
+
         const isMilestone = clearedStage % 5 === 0
         if (isMilestone) playApplause()
 

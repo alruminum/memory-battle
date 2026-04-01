@@ -44,9 +44,9 @@
 연속 풀콤보 스트릭이 쌓일수록 점수 배율이 증가하는 구조로 교체한다.
 스트릭이 끊기면 배율이 초기화된다. (PRD v0.3 섹션 2 콤보 시스템 기준)
 
-- [ ] `src/lib/gameLogic.ts` — calcClearBonus, getComboMultiplier, calcStageScore 추가
-- [ ] `src/store/gameStore.ts` — comboStreak/fullComboCount/maxComboStreak 필드 추가, stageClear 액션 추가, addInput rawScore만 처리하도록 변경
-- [ ] `src/hooks/useGameEngine.ts` — round-clear 처리 시 stageClear 호출로 변경
+- [x] `src/lib/gameLogic.ts` — calcClearBonus, getComboMultiplier, calcStageScore 추가
+- [x] `src/store/gameStore.ts` — comboStreak/fullComboCount/maxComboStreak 필드 추가, stageClear 액션 추가, addInput rawScore만 처리하도록 변경
+- [x] `src/hooks/useGameEngine.ts` — round-clear 처리 시 stageClear 호출로 변경
 
 ---
 

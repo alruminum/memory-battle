@@ -1,10 +1,6 @@
 import { create } from 'zustand'
-import type { GameStatus, ButtonColor, Difficulty } from '../types'
-
-const DIFFICULTY_MULTIPLIER: Record<Difficulty, number> = { EASY: 1, MEDIUM: 2, HARD: 3 }
-
-const calcFinalScore = (raw: number, difficulty: Difficulty) =>
-  raw * DIFFICULTY_MULTIPLIER[difficulty]
+import type { GameStatus, ButtonColor } from '../types'
+import { calcStageScore } from '../lib/gameLogic'
 
 interface GameStore {
   status: GameStatus
@@ -12,8 +8,9 @@ interface GameStore {
   currentIndex: number
   score: number
   stage: number
-  isFullCombo: boolean
-  difficulty: Difficulty
+  comboStreak: number
+  fullComboCount: number
+  maxComboStreak: number
 
   userId: string
   hasTodayReward: boolean
@@ -21,9 +18,10 @@ interface GameStore {
   setUserId: (id: string) => void
   setTodayReward: (value: boolean) => void
   setSequence: (seq: ButtonColor[]) => void
-  startGame: (difficulty: Difficulty) => void
+  startGame: () => void
   addInput: (color: ButtonColor) => 'correct' | 'wrong' | 'round-clear'
-  gameOver: (isFullCombo: boolean) => void
+  stageClear: (isFullCombo: boolean) => void
+  gameOver: () => void
   resetGame: () => void
 }
 
@@ -33,8 +31,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
   currentIndex: 0,
   score: 0,
   stage: 0,
-  isFullCombo: false,
-  difficulty: 'EASY',
+  comboStreak: 0,
+  fullComboCount: 0,
+  maxComboStreak: 0,
 
   userId: '',
   hasTodayReward: false,
@@ -43,15 +42,16 @@ export const useGameStore = create<GameStore>((set, get) => ({
   setTodayReward: (value) => set({ hasTodayReward: value }),
   setSequence: (seq) => set({ sequence: seq }),
 
-  startGame: (difficulty) =>
+  startGame: () =>
     set({
       status: 'SHOWING',
-      difficulty,
       sequence: [],
       currentIndex: 0,
       score: 0,
       stage: 0,
-      isFullCombo: false,
+      comboStreak: 0,
+      fullComboCount: 0,
+      maxComboStreak: 0,
     }),
 
   addInput: (color) => {
@@ -73,11 +73,39 @@ export const useGameStore = create<GameStore>((set, get) => ({
     return 'correct'
   },
 
-  gameOver: (isFullCombo) =>
+  stageClear: (isFullCombo) => {
+    set((state) => {
+      const clearedStage = state.sequence.length
+      // state.score에는 이번 스테이지 버튼 입력분(+1씩)이 이미 포함됨
+      // 이번 스테이지 버튼 점수 = clearedStage (시퀀스 길이만큼 입력 성공)
+      const prevAccumulated = state.score - clearedStage
+      const stageScore = calcStageScore(
+        clearedStage,
+        state.comboStreak,
+        clearedStage,
+        isFullCombo
+      )
+
+      const newComboStreak = isFullCombo
+        ? Math.min(state.comboStreak + 1, 4)
+        : 0
+      const newFullComboCount = isFullCombo
+        ? state.fullComboCount + 1
+        : state.fullComboCount
+      const newMaxComboStreak = Math.max(state.maxComboStreak, newComboStreak)
+
+      return {
+        score: prevAccumulated + stageScore,
+        comboStreak: newComboStreak,
+        fullComboCount: newFullComboCount,
+        maxComboStreak: newMaxComboStreak,
+      }
+    })
+  },
+
+  gameOver: () =>
     set((state) => ({
       status: 'RESULT',
-      isFullCombo,
-      score: calcFinalScore(state.score, state.difficulty),
       stage: state.sequence.length,
     })),
 
@@ -88,6 +116,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       currentIndex: 0,
       score: 0,
       stage: 0,
-      isFullCombo: false,
+      comboStreak: 0,
+      fullComboCount: 0,
+      maxComboStreak: 0,
     }),
 }))
