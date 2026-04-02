@@ -64,19 +64,21 @@ API: `POST /repos/{owner}/{repo}/issues/{parent_number}/sub_issues` — body: `{
 | Step 6 | CLAUDE.md 워크플로우 업데이트 | ✅ |
 | Step 7 | backlog.md 아카이브 노트 추가 | ✅ |
 | Step 8 | Epic 부모 이슈 생성 (9개, #29~37, label=epic) + sub-issues 연결 | ✅ |
-| Step 9 | Milestones 재구성: `Epics-v01`, `Epics-v03`, `Story` 3개 체계로 정리 | ✅ |
+| Step 9 | Milestones 재구성: `Epics-v01`(closed), `Epics-v03`, `Story`, `issues-v03` 4개 체계 | ✅ |
+| Step 10 | 에이전트 GitHub MCP 완전 통합 (architect/engineer/qa — 구체적 툴·마일스톤 명시) | ✅ |
 
 ---
 
 ## GitHub 구조 설계 (최종)
 
-### Milestones (3개)
+### Milestones (4개)
 
-| 마일스톤 | GitHub # | 용도 |
-|---|---|---|
-| `Epics-v01` | #1 | v01 Epic 부모 이슈 (#29~32) |
-| `Epics-v03` | #2 | v03 Epic 부모 이슈 (#33~37) |
-| `Story` | #3 | 전체 스토리 이슈 (#1~28) |
+| 마일스톤 | GitHub # | 상태 | 용도 |
+|---|---|---|---|
+| `Epics-v01` | #1 | closed | v01 Epic 부모 이슈 (#29~32, 완료) |
+| `Epics-v03` | #2 | open | v03 Epic 부모 이슈 (#33~37) |
+| `Story` | #3 | open | 전체 스토리 이슈 (#1~28) |
+| `issues-v03` | #5 | open | v03 버그/이슈 추적 (QA 전용) |
 
 ### Labels (4개)
 
@@ -199,23 +201,18 @@ Issue 본문 템플릿:
 ...
 ```
 
-### Step 5: 에이전트 프롬프트 업데이트
+### Step 5: 에이전트 프롬프트 업데이트 ✅
 
-`.claude/agents/` 아래 프로젝트 에이전트 파일에 아래 내용 추가:
+**실제 GitHub MCP tool 이름** (`@modelcontextprotocol/server-github`):
+`create_issue`, `list_issues`, `get_issue`, `update_issue`, `search_issues`, `add_issue_comment`
+→ Claude namespace: `mcp__github__*`
+→ `create_milestone` 없음 — `gh api repos/{owner}/{repo}/milestones` 사용
 
-| 에이전트 | 추가 내용 | tools 추가 |
-|---|---|---|
-| `engineer.md` | 스토리 확인 시 stories.md 대신 GitHub Issues 참조. GitHub MCP 사용 | GitHub MCP read tools |
-| `architect.md` | 신규 에픽 impl/*.md 작성 후 GitHub Issue 생성 의무 (마일스톤 + 에픽 레이블 포함) | `mcp__github__create_issue`, `mcp__github__add_labels_to_issue` |
-| `qa.md` | 버그 발견 시 GitHub MCP `create_issue` 직접 호출해 Issue 등록. Issue 번호를 QA 리포트 상단에 기재 (`🐛 Issue: #NNN`) | `mcp__github__create_issue` |
-| `product-planner.md` | backlog.md 대신 GitHub Milestones/Issues로 관리. 새 마일스톤·에픽 이슈 생성, 기존 이슈 목록 조회 | `mcp__github__create_issue`, `mcp__github__list_issues`, `mcp__github__create_milestone` (API 지원 시) |
-
-> ⚠️ 실제 MCP tool 이름은 GitHub MCP 서버 설치 후 `claude mcp list` 로 확인. 위 이름은 예시이며 다를 수 있음.
-
-체크리스트 업데이트 도구:
-- **GitHub MCP `update_issue` 우선** (체크박스 토글 + state 변경 모두 지원)
-- MCP 없으면: 기존 body를 읽어서 수정 후 `gh api repos/{owner}/{repo}/issues/{number} --method PATCH --field body="..."` 로 전체 교체
-- 완료 시 MCP `update_issue` (state: "closed") 또는 `gh issue close <number>`
+| 에이전트 | 변경 내용 |
+|---|---|
+| `architect.md` | Epic 부모 이슈(`Epics-vNN`) + Story 이슈(`Story` 마일스톤) 생성 + sub-issue 연결 절차 명시 |
+| `engineer.md` | `list_issues`로 미완료 스토리 조회 → `get_issue`로 본문 확인 → `update_issue`로 체크리스트 업데이트 → close |
+| `qa.md` | 버그 이슈: milestone=`issues-v03`, labels=`type: bug` 명시 |
 
 ### Step 6: CLAUDE.md 워크플로우 업데이트
 
@@ -239,24 +236,23 @@ Issue 본문 템플릿:
 
 ## 새 에픽 생성 워크플로우 (이후)
 
-1. architect → impl/*.md 작성 (레포)
-2. **architect** → GitHub Issue 생성 (스토리 단위, impl 링크 포함)
-   - GitHub MCP `create_issue` 사용
-   - 마일스톤 + 에픽 레이블 연결
-3. engineer → 구현 → Issue 체크리스트 업데이트 → close
+1. **architect** → impl/*.md 작성 (레포)
+2. **architect** → GitHub Issues 생성:
+   - Epic 부모 이슈: `mcp__github__create_issue` (milestone=`Epics-v03`, labels=`epic`)
+   - Story 이슈: `mcp__github__create_issue` (milestone=`Story`, labels=`story`, body=impl 링크+체크리스트)
+   - sub-issue 연결: `gh api repos/alruminum/memory-battle/issues/{epic}/sub_issues`
+3. **engineer** → `mcp__github__list_issues`로 미완료 스토리 조회 → `mcp__github__get_issue`로 본문 확인 → 구현 → `mcp__github__update_issue`로 체크리스트 업데이트 → close
 
 ## QA 이슈 등록 워크플로우
 
-테스트 중 버그 발견 시 qa 에이전트는 **작업 시작 전 반드시 GitHub Issue를 먼저 등록**한다.
-qa 에이전트가 GitHub MCP `create_issue`를 **직접** 호출한다 (orchestrator 경유 불필요).
+버그 발견 시 qa 에이전트가 `mcp__github__create_issue`를 **직접** 호출한다.
 
-1. QA 리포트 작성 (`QA_REPORT` 마커)
-2. **qa 에이전트가 GitHub MCP `create_issue` 직접 호출**:
-   - 제목: `[Bug] {이슈 요약}`
-   - 레이블: `type: bug` + 해당 에픽 레이블
-   - 본문: QA 리포트의 위치/증거/기대 vs 실제/추천 액션 포함
-3. Issue 번호를 QA 리포트 상단에 기재: `🐛 Issue: #NNN`
-4. 이후 engineer → fix → Issue close 흐름으로 진행
+- 제목: `[Bug] {이슈 요약}`
+- milestone: `issues-v03`
+- labels: `["type: bug"]`
+- 본문: 위치/재현 조건/기대 vs 실제 동작
+- Issue 번호를 QA 리포트 상단에 기재: `🐛 Issue: #NNN`
+- 이후 engineer → fix → `mcp__github__update_issue`(state: closed) 흐름
 
 ---
 

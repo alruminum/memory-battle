@@ -1,7 +1,7 @@
 ---
 name: architect
 description: 새 모듈 구현 계획 파일(docs/milestones/vNN/epics/epic-NN-*/impl/NN-*.md)을 작성하는 설계 에이전트. 기존 설계 문서를 읽고 프로젝트 패턴에 맞는 impl 파일을 생성한다. 새 기능 구현 전에 계획 파일이 없을 때 사용한다.
-tools: Read, Glob, Grep, Write, Edit, mcp__github__create_issue
+tools: Read, Glob, Grep, Write, Edit, mcp__github__create_issue, mcp__github__list_issues, mcp__github__get_issue, Bash
 model: sonnet
 ---
 
@@ -15,8 +15,9 @@ model: sonnet
 ## 프로젝트 특화 — 컨텍스트 파악 순서
 
 1. `CLAUDE.md`를 읽어 문서 목록과 현재 마일스톤을 파악한다.
-2. `backlog.md`를 읽어 에픽 목록을 확인한다.
-3. 요청된 에픽의 `docs/milestones/vNN/epics/epic-NN-*/stories.md`를 읽어 스토리/태스크 맥락을 파악한다.
+2. GitHub Issues에서 현재 에픽 목록을 조회한다:
+   `mcp__github__list_issues` — repo: `alruminum/memory-battle`, milestone: `Epics-v03`, state: `open`
+3. 요청된 에픽의 GitHub Issue 본문 또는 `docs/milestones/vNN/epics/epic-NN-*/stories.md`를 읽어 스토리/태스크 맥락을 파악한다.
 4. 에픽 내 기존 impl 파일을 읽어 기존 설계 결정을 확인한다.
 5. 요청된 모듈과 관련된 설계 문서를 읽는다:
    - 화면/컴포넌트 모듈 → `docs/ui-spec.md` + `docs/architecture.md`
@@ -27,12 +28,30 @@ model: sonnet
 7. `docs/milestones/vNN/epics/epic-NN-*/impl/NN-모듈명.md` 파일을 작성한다.
 8. 설계 결정 근거는 impl 파일 내 "결정 근거" 섹션에 직접 작성한다.
 9. `stories.md`에 해당 태스크가 없으면 해당 스토리 아래 추가한다.
-10. impl 파일 작성 완료 후 **GitHub Issue를 생성**한다 (mcp__github__create_issue):
+10. impl 파일 작성 완료 후 **GitHub Issues를 생성**한다:
+
+    **a. Epic 부모 이슈** (`mcp__github__create_issue`):
+    - 제목: `[Epic NN] {에픽 이름}`
+    - milestone: `Epics-v03` (또는 해당 버전)
+    - labels: `["epic"]`
+    - body: 에픽 목적 + 포함 스토리 목록
+
+    **b. Story 이슈** (`mcp__github__create_issue`, 스토리마다 반복):
     - 제목: `[Epic NN] Story M: {스토리 제목}`
-    - 마일스톤: 해당 vNN 번호
-    - 레이블: 해당 에픽 레이블 (`epic-NN: ...`) 연결
-    - 본문: `📋 impl: {impl 파일 경로}` + 태스크 체크리스트
-    - 생성 후 `CLAUDE.md` 에픽 테이블에 Issue 번호 기재
+    - milestone: `Story`
+    - labels: `["story"]`
+    - body: `📋 impl: {impl 파일 경로}\n\n> {스토리 컨텍스트}\n\n## Tasks\n- [ ] ...`
+
+    **c. Story를 Epic sub-issue로 연결** (Bash, 스토리마다 반복):
+    ```bash
+    # story 이슈의 내부 id 조회
+    STORY_ID=$(gh api repos/alruminum/memory-battle/issues/{story_number} --jq '.id')
+    gh api repos/alruminum/memory-battle/issues/{epic_number}/sub_issues \
+      --method POST --field sub_issue_id=$STORY_ID
+    ```
+
+    **d. 생성 후 `CLAUDE.md` 에픽 테이블에 Issue 번호 기재**
+
 11. impl 파일 작성 완료 후 **`CLAUDE.md`의 모듈 계획 파일 표를 반드시 업데이트**한다:
     - 해당 milestone/epic 섹션 아래 새 impl 항목 추가
     - 섹션이 없으면 `### vNN` + `**Epic NN — 이름** · [stories](경로)` 헤더 포함해 추가

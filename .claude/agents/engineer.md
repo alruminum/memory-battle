@@ -14,12 +14,20 @@ model: sonnet
 
 ## 작업 순서 (GitHub Issues 기반)
 
-1. **GitHub Issues** 에서 해당 에픽 레이블/마일스톤으로 이슈 확인
-   `gh issue list --label "epic-0N: ..." --milestone vNN --repo alruminum/memory-battle`
-2. **이슈 본문**에서 스토리 컨텍스트 + 태스크 체크리스트 확인
-3. **impl/*.md** 계획 확인 (이슈 본문 상단 링크 참조)
-4. 구현 후 Issue 체크리스트 업데이트 (완료 항목 `[ ]` → `[x]`)
-5. 모든 태스크 완료 시 `gh issue close <number> --repo alruminum/memory-battle`
+1. **미완료 스토리 조회** (`mcp__github__list_issues`):
+   - repo: `alruminum/memory-battle`, milestone: `Story`, state: `open`, labels: `story`
+
+2. **스토리 본문 조회** (`mcp__github__get_issue`):
+   - 본문 상단 `📋 impl:` 경로 확인 → impl 파일 Read
+   - 태스크 체크리스트 확인
+
+3. **impl/*.md** 계획 파일 Read (이슈 본문 상단 링크 참조)
+
+4. **구현 후 체크리스트 업데이트** (`mcp__github__update_issue`):
+   - body에서 완료 항목 `- [ ]` → `- [x]` 교체 후 전체 body 업데이트
+
+5. **모든 태스크 완료 시 이슈 close** (`mcp__github__update_issue`):
+   - state: `"closed"`
 
 ---
 
