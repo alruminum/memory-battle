@@ -1,6 +1,5 @@
 import type { ButtonColor, GameStatus } from '../../types'
 import { dbg } from '../../lib/debug'
-import { dbg } from '../../lib/debug'
 
 interface ButtonPadProps {
   flashingButton: ButtonColor | null
@@ -15,11 +14,11 @@ interface ButtonPadProps {
   comboActive?: boolean
 }
 
-const COLORS = {
-  orange: { base: '#FF6200', light: '#FF8C35', dark: '#A83F00' },
-  blue:   { base: '#0A7AFF', light: '#3D9AFF', dark: '#0055BB' },
-  green:  { base: '#18B84A', light: '#38D46A', dark: '#0E7A30' },
-  yellow: { base: '#F5C000', light: '#FFD740', dark: '#A07C00' },
+const COLORS: Record<ButtonColor, { base: string; light: string; dark: string }> = {
+  orange: { base: 'var(--vb-orange-base)', light: 'var(--vb-orange-light)', dark: 'var(--vb-orange-dark)' },
+  blue:   { base: 'var(--vb-blue-base)',   light: 'var(--vb-blue-light)',   dark: 'var(--vb-blue-dark)'   },
+  green:  { base: 'var(--vb-green-base)',  light: 'var(--vb-green-light)',  dark: 'var(--vb-green-dark)'  },
+  yellow: { base: 'var(--vb-yellow-base)', light: 'var(--vb-yellow-light)', dark: 'var(--vb-yellow-dark)' },
 }
 
 const CORNER_BUTTONS: { color: ButtonColor; top?: number | string; bottom?: number | string; left?: number | string; right?: number | string }[] = [
@@ -29,9 +28,9 @@ const CORNER_BUTTONS: { color: ButtonColor; top?: number | string; bottom?: numb
   { color: 'yellow', bottom: 0, right: 0 },
 ]
 
-const PAD = 292
-const BTN = 110
-const CENTER = 88
+const PAD = 292   // 전체 패드 크기(px)
+const BTN = 110   // 색깔 버튼 크기(px)
+const CENTER = 88 // 중앙 버튼 크기(px)
 
 export function ButtonPad({
   flashingButton,
@@ -50,27 +49,27 @@ export function ButtonPad({
 
   const centerLabel = () => {
     if (isCounting) {
-      return <span style={{ fontSize: 14, fontWeight: 800, color: '#D4A843', letterSpacing: 1 }}>READY</span>
+      return <span style={{ fontSize: 14, fontWeight: 800, color: 'var(--vb-accent)', letterSpacing: 1 }}>READY</span>
     }
     if (isClearing) {
       return (
         <div style={{ textAlign: 'center', lineHeight: 1.15 }}>
-          <div style={{ fontSize: 9, color: '#D4A843', fontWeight: 800, letterSpacing: 1 }}>STAGE</div>
-          <div style={{ fontSize: 20, color: '#fff', fontWeight: 900 }}>{clearingStage}</div>
-          <div style={{ fontSize: 9, color: '#D4A843', fontWeight: 700 }}>CLEAR ✓</div>
+          <div style={{ fontSize: 9, color: 'var(--vb-accent)', fontWeight: 800, letterSpacing: 1 }}>STAGE</div>
+          <div style={{ fontSize: 20, color: 'var(--vb-text)', fontWeight: 900 }}>{clearingStage}</div>
+          <div style={{ fontSize: 9, color: 'var(--vb-accent)', fontWeight: 700 }}>CLEAR ✓</div>
         </div>
       )
     }
     if (status === 'IDLE') {
-      return <span style={{ fontSize: 13, fontWeight: 800, color: '#ccc', letterSpacing: 2 }}>START</span>
+      return <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--vb-label-inactive)', letterSpacing: 2 }}>START</span>
     }
     if (status === 'RESULT') {
-      return <span style={{ fontSize: 13, fontWeight: 800, color: '#ccc', letterSpacing: 1 }}>RETRY</span>
+      return <span style={{ fontSize: 13, fontWeight: 800, color: 'var(--vb-label-inactive)', letterSpacing: 1 }}>RETRY</span>
     }
     return (
       <div style={{ textAlign: 'center', lineHeight: 1.1 }}>
-        <div style={{ fontSize: 8, color: '#888', letterSpacing: 1, fontWeight: 700 }}>SCORE</div>
-        <div style={{ fontSize: 20, fontWeight: 900, color: '#fff' }}>{score}</div>
+        <div style={{ fontSize: 8, color: 'var(--vb-label-score-dim)', letterSpacing: 1, fontWeight: 700 }}>SCORE</div>
+        <div style={{ fontSize: 20, fontWeight: 900, color: 'var(--vb-text)' }}>{score}</div>
       </div>
     )
   }
@@ -91,7 +90,7 @@ export function ButtonPad({
         position: 'absolute',
         inset: 0,
         borderRadius: 36,
-        background: 'linear-gradient(145deg, #2a2a35 0%, #16161f 50%, #0e0e16 100%)',
+        background: 'linear-gradient(145deg, var(--vb-body-bg-start) 0%, var(--vb-body-bg-mid) 50%, var(--vb-body-bg-end) 100%)',
         boxShadow: [
           'inset 0 2px 1px rgba(255,255,255,0.07)',
           'inset 0 -2px 2px rgba(0,0,0,0.5)',
@@ -112,7 +111,7 @@ export function ButtonPad({
           width: 8,
           height: 8,
           borderRadius: '50%',
-          background: 'radial-gradient(circle at 35% 35%, #3a3a4a, #1a1a24)',
+          background: 'radial-gradient(circle at 35% 35%, var(--vb-screw-bg-start), var(--vb-screw-bg-end))',
           border: '1px solid rgba(255,255,255,0.08)',
           zIndex: 1,
         }} />
@@ -140,23 +139,23 @@ export function ButtonPad({
               // 3D 그라디언트
               background: isFlashing
                 ? `radial-gradient(circle at 35% 30%, ${c.light}, ${c.base} 55%, ${c.dark})`
-                : `radial-gradient(circle at 35% 30%, ${c.light}99, ${c.base}88 55%, ${c.dark}77)`,
+                : `radial-gradient(circle at 35% 30%, color-mix(in srgb, ${c.light} 60%, transparent), color-mix(in srgb, ${c.base} 53%, transparent) 55%, color-mix(in srgb, ${c.dark} 47%, transparent))`,
               // 측면 그림자로 입체감 + 점등 글로우 + 콤보 글로우
               boxShadow: isFlashing
                 ? [
                     `0 3px 0 ${c.dark}`,
                     `0 6px 20px rgba(0,0,0,0.5)`,
-                    `0 0 30px ${c.base}cc`,
-                    `0 0 60px ${c.base}66`,
+                    `0 0 30px color-mix(in srgb, ${c.base} 80%, transparent)`,
+                    `0 0 60px color-mix(in srgb, ${c.base} 40%, transparent)`,
                   ].join(', ')
                 : comboActive
                   ? [
-                      `0 0 16px 4px ${c.base}88`,
-                      `0 6px 0 ${c.dark}88`,
+                      `0 0 16px 4px color-mix(in srgb, ${c.base} 53%, transparent)`,
+                      `0 6px 0 color-mix(in srgb, ${c.dark} 53%, transparent)`,
                       `0 8px 16px rgba(0,0,0,0.4)`,
                     ].join(', ')
                   : [
-                      `0 6px 0 ${c.dark}99`,
+                      `0 6px 0 color-mix(in srgb, ${c.dark} 60%, transparent)`,
                       `0 8px 16px rgba(0,0,0,0.6)`,
                     ].join(', '),
               transform: isFlashing ? 'scale(1.06) translateY(3px)' : 'scale(1)',
@@ -181,16 +180,16 @@ export function ButtonPad({
           width: CENTER,
           height: CENTER,
           borderRadius: '50%',
-          border: `2px solid ${isClearing ? '#D4A843' : 'rgba(255,255,255,0.10)'}`,
+          border: `2px solid ${isClearing ? 'var(--vb-accent)' : 'rgba(255,255,255,0.10)'}`,
           cursor: isCenterClickable ? 'pointer' : 'default',
           background: isClearing
-            ? 'radial-gradient(circle at 40% 35%, #2a2a3e, #111120)'
-            : 'radial-gradient(circle at 40% 35%, #252535, #101018)',
+            ? 'radial-gradient(circle at 40% 35%, var(--vb-center-clear-bg-start), var(--vb-center-clear-bg-end))'
+            : 'radial-gradient(circle at 40% 35%, var(--vb-center-bg-start), var(--vb-center-bg-end))',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           boxShadow: isClearing
-            ? '0 0 16px #D4A84366, inset 0 2px 1px rgba(255,255,255,0.08)'
+            ? '0 0 16px color-mix(in srgb, var(--vb-accent) 40%, transparent), inset 0 2px 1px rgba(255,255,255,0.08)'
             : 'inset 0 2px 1px rgba(255,255,255,0.07), inset 0 -1px 2px rgba(0,0,0,0.4), 0 4px 12px rgba(0,0,0,0.5)',
           transition: 'border-color 200ms, box-shadow 200ms',
           zIndex: 3,

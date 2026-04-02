@@ -13,15 +13,38 @@
   --vb-danger: #ff3b3b;
   --vb-font-score: 'Barlow Condensed', sans-serif;
   --vb-font-body: 'Space Grotesk', sans-serif;
+
+  /* 중앙 버튼 / 게임기 바디 장식 색상 */
+  --vb-body-bg-start: #2a2a35;
+  --vb-body-bg-mid: #16161f;
+  --vb-body-bg-end: #0e0e16;
+  --vb-center-bg-start: #252535;
+  --vb-center-bg-end: #101018;
+  --vb-center-clear-bg-start: #2a2a3e;
+  --vb-center-clear-bg-end: #111120;
+  --vb-screw-bg-start: #3a3a4a;
+  --vb-screw-bg-end: #1a1a24;
+  --vb-label-inactive: #ccc;
+  --vb-label-score-dim: #888;
+
+  /* 버튼 색상 */
+  --vb-orange-base: #FF6200;
+  --vb-orange-light: #FF8C35;
+  --vb-orange-dark: #A83F00;
+  --vb-blue-base: #0A7AFF;
+  --vb-blue-light: #3D9AFF;
+  --vb-blue-dark: #0055BB;
+  --vb-green-base: #18B84A;
+  --vb-green-light: #38D46A;
+  --vb-green-dark: #0E7A30;
+  --vb-yellow-base: #F5C000;
+  --vb-yellow-light: #FFD740;
+  --vb-yellow-dark: #A07C00;
 }
 
 @keyframes slide-up { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 @keyframes pulse-accent { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
 @keyframes badge-shine { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
 * {
   box-sizing: border-box;

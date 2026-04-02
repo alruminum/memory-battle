@@ -22,6 +22,7 @@ afterEach(() => {
 })
 
 // COUNTDOWN_INTERVAL = 500ms, 3 ticks = 1500ms total before game starts
+// 타이머 수치 근거: docs/game-logic.md 참조
 
 // ── C-1. IDLE → SHOWING → INPUT 전환 ─────────────────────────────────────
 
@@ -35,7 +36,7 @@ describe('C-1. IDLE → SHOWING → INPUT 전환', () => {
 
     // 카운트다운 3 tick(각 500ms) 완료 → 게임 시작
     act(() => {
-      vi.advanceTimersByTime(1500)
+      vi.advanceTimersByTime(1500) // 500ms × 3 ticks
     })
 
     expect(useGameStore.getState().status).toBe('SHOWING')
@@ -55,9 +56,9 @@ describe('C-1. IDLE → SHOWING → INPUT 전환', () => {
 
     // sequence.length=1, flashDuration=500ms
     // 점등: flash*0.8=400ms, 소등 후 flash*0.2=100ms → 총 500ms per button
-    // 1개 버튼 → 500ms 후 INPUT 전환
+    // 1개 버튼 → 500ms + 여유 500ms = 1000ms 후 INPUT 전환
     act(() => {
-      vi.advanceTimersByTime(1000)
+      vi.advanceTimersByTime(1000) // flashDuration × sequenceLength + clearance
     })
 
     expect(useGameStore.getState().status).toBe('INPUT')
@@ -91,10 +92,10 @@ function setupToInput(result: { current: ReturnType<typeof useGameEngine> }) {
     result.current.startGame()
   })
   act(() => {
-    vi.advanceTimersByTime(1500) // 카운트다운 완료
+    vi.advanceTimersByTime(1500) // 카운트다운 완료 (500ms × 3)
   })
   act(() => {
-    vi.advanceTimersByTime(1000) // SHOWING 완료 → INPUT
+    vi.advanceTimersByTime(1000) // SHOWING 완료 → INPUT (flashDuration × sequenceLength)
   })
   return useGameStore.getState().sequence[0]
 }
@@ -124,7 +125,7 @@ describe('C-2. INPUT → ROUND-CLEAR → SHOWING', () => {
 
     // CLEAR_PAUSE_MS = 1100ms 후 다음 SHOWING 시작
     act(() => {
-      vi.advanceTimersByTime(1100)
+      vi.advanceTimersByTime(1100) // CLEAR_PAUSE_MS
     })
 
     expect(useGameStore.getState().status).toBe('SHOWING')
@@ -139,7 +140,7 @@ describe('C-2. INPUT → ROUND-CLEAR → SHOWING', () => {
     })
 
     act(() => {
-      vi.advanceTimersByTime(1100)
+      vi.advanceTimersByTime(1100) // CLEAR_PAUSE_MS
     })
 
     expect(useGameStore.getState().sequence.length).toBe(2)
@@ -154,7 +155,7 @@ describe('C-2. INPUT → ROUND-CLEAR → SHOWING', () => {
     })
 
     act(() => {
-      vi.advanceTimersByTime(1100)
+      vi.advanceTimersByTime(1100) // CLEAR_PAUSE_MS
     })
 
     expect(result.current.clearingStage).toBeNull()
@@ -219,11 +220,11 @@ describe('C-4. sequence.length === stage 불변식', () => {
     })
 
     act(() => {
-      vi.advanceTimersByTime(1500) // 카운트다운 완료
+      vi.advanceTimersByTime(1500) // 카운트다운 완료 (500ms × 3)
     })
 
     act(() => {
-      vi.advanceTimersByTime(1000) // SHOWING → INPUT
+      vi.advanceTimersByTime(1000) // SHOWING → INPUT (flashDuration × sequenceLength)
     })
 
     const firstBtn = useGameStore.getState().sequence[0]
@@ -233,7 +234,7 @@ describe('C-4. sequence.length === stage 불변식', () => {
     })
 
     act(() => {
-      vi.advanceTimersByTime(1100) // CLEAR_PAUSE → 다음 SHOWING
+      vi.advanceTimersByTime(1100) // CLEAR_PAUSE_MS
     })
 
     const state = useGameStore.getState()
@@ -249,7 +250,7 @@ describe('C-4. sequence.length === stage 불변식', () => {
     })
 
     act(() => {
-      vi.advanceTimersByTime(1500) // 카운트다운 완료 → SHOWING
+      vi.advanceTimersByTime(1500) // 카운트다운 완료 → SHOWING (500ms × 3)
     })
 
     // SHOWING 중에 입력 시도
@@ -269,11 +270,11 @@ describe('C-4. sequence.length === stage 불변식', () => {
     })
 
     act(() => {
-      vi.advanceTimersByTime(1500)
+      vi.advanceTimersByTime(1500) // 카운트다운 완료 (500ms × 3)
     })
 
     act(() => {
-      vi.advanceTimersByTime(1000) // INPUT 진입
+      vi.advanceTimersByTime(1000) // INPUT 진입 (flashDuration × sequenceLength)
     })
 
     const firstBtn = useGameStore.getState().sequence[0]
