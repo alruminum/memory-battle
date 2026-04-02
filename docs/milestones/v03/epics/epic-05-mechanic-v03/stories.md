@@ -61,6 +61,9 @@
 - [x] `src/components/game/ButtonPad.tsx` — comboActive prop 추가, 글로우 이펙트
 - [x] `src/hooks/useGameEngine.ts` — isClearingFullCombo state 추가, isComboActive/isClearingFullCombo 반환
 - [x] `src/pages/GamePage.tsx` — ComboIndicator 삽입, clearingStage 영역 FULL COMBO 분기 추가
+- [ ] `MultiplierBurst.tsx` 신규 컴포넌트 — 배율 상승 시 xN 버스트 오버레이 (scale-up + 파티클, 배율별 색상)
+- [ ] `useGameEngine.ts` — stageClear 결과에 multiplierIncreased 플래그 추가
+- [ ] `GamePage.tsx` — clearingStage 시퀀스에 MultiplierBurst 삽입
 
 ---
 
@@ -77,4 +80,5 @@
 
 ---
 
-> impl 계획 파일: `docs/epics/epic-05-mechanic-v03/impl/` (아키텍트 작성 예정)
+
+> impl 계획 파일: `docs/milestones/v03/epics/epic-05-mechanic-v03/impl/`

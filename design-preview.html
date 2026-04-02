@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>랭킹 UI 디자인 시안</title>
+<style>
+:root {
+  --vb-bg: #0e0e10;
+  --vb-surface: #18181b;
+  --vb-border: #2a2a2e;
+  --vb-accent: #D4A843;
+  --vb-text: #e8e8ea;
+  --vb-text-mid: #8b8b90;
+  --vb-text-dim: #55555a;
+  --vb-font-score: 'Courier New', Courier, monospace;
+  --vb-font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: #111;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 32px 24px;
+  gap: 16px;
+  font-family: var(--vb-font-body);
+}
+
+h2 {
+  color: #444;
+  font-size: 11px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  font-family: monospace;
+  width: 100%;
+  text-align: center;
+  padding: 8px 0;
+  border-top: 1px solid #222;
+  margin-top: 8px;
+}
+
+.row {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+}
+
+/* ── 폰 프레임 ── */
+.phone {
+  width: 320px;
+  height: 580px;
+  background: var(--vb-bg);
+  border-radius: 20px;
+  border: 1.5px solid #2a2a2e;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.phone.picked { border-color: var(--vb-accent); }
+
+.variant-name {
+  font-size: 10px;
+  color: #444;
+  text-align: center;
+  font-family: monospace;
+  letter-spacing: 1.5px;
+  padding-bottom: 6px;
+}
+.variant-name.picked { color: var(--vb-accent); }
+
+/* ── 헤더 (원본 동일) ── */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--vb-border);
+  flex-shrink: 0;
+}
+.h-left { flex:1; font-family: var(--vb-font-score); font-size:14px; font-weight:800; color:var(--vb-text-mid); }
+.h-center { flex:1; text-align:center; }
+.h-score-lbl { font-family:var(--vb-font-score); font-size:10px; color:var(--vb-text-dim); letter-spacing:2px; }
+.h-score-val { font-family:var(--vb-font-score); font-size:24px; font-weight:900; color:var(--vb-accent); letter-spacing:1px; }
+.h-right { flex:1; text-align:right; font-family:var(--vb-font-score); font-size:14px; font-weight:800; color:var(--vb-text-mid); letter-spacing:1px; }
+
+/* ── stageArea (flex:2) ── */
+.stage-area {
+  flex: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── 콤보 인디케이터 자리 ── */
+.combo-area {
+  min-height: 56px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── 게임 버튼 패드 (원본 동일) ── */
+.pad-area {
+  flex: 3;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+.pad {
+  width: 260px;
+  height: 260px;
+  background: radial-gradient(ellipse at 40% 35%, #1c1c26 0%, #0d0d14 100%);
+  border-radius: 20px;
+  border: 1px solid #1e1e26;
+  position: relative;
+  flex-shrink: 0;
+}
+.pb {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+}
+.pb-or {
+  top: 14px; left: 14px;
+  background: radial-gradient(circle at 35% 30%, #c87038 0%, #6a3010 55%, #3a1808 100%);
+  box-shadow: inset 0 -3px 8px rgba(0,0,0,0.4), 0 2px 12px rgba(160,70,20,0.2);
+}
+.pb-bl {
+  top: 14px; right: 14px;
+  background: radial-gradient(circle at 35% 30%, #3870c8 0%, #103068 55%, #081840 100%);
+  box-shadow: inset 0 -3px 8px rgba(0,0,0,0.4), 0 2px 12px rgba(20,70,160,0.2);
+}
+.pb-gr {
+  bottom: 14px; left: 14px;
+  background: radial-gradient(circle at 35% 30%, #38b060 0%, #105828 55%, #082010 100%);
+  box-shadow: inset 0 -3px 8px rgba(0,0,0,0.4), 0 2px 12px rgba(20,140,60,0.2);
+}
+.pb-ye {
+  bottom: 14px; right: 14px;
+  background: radial-gradient(circle at 35% 30%, #c8a038 0%, #685010 55%, #383008 100%);
+  box-shadow: inset 0 -3px 8px rgba(0,0,0,0.4), 0 2px 12px rgba(160,120,20,0.2);
+}
+.pb-center {
+  position: absolute;
+  top:50%; left:50%;
+  transform: translate(-50%,-50%);
+  width:76px; height:76px;
+  border-radius:50%;
+  background: radial-gradient(circle at 35% 30%, #2a2a34 0%, #16161e 100%);
+  border: 1.5px solid #30303a;
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--vb-font-score);
+  font-size:11px; font-weight:900;
+  color:var(--vb-text-mid); letter-spacing:2px;
+}
+
+/* ── 타이머 바 (원본 동일) ── */
+.timer-wrap {
+  margin: 0 20px 8px;
+  height: 4px;
+  background: var(--vb-surface);
+  border-radius: 2px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+/* ── 배너 ── */
+.banner {
+  height: 44px;
+  background: var(--vb-surface);
+  border-top: 1px solid var(--vb-border);
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
+}
+.banner span { font-size:9px; color:var(--vb-text-dim); letter-spacing:2px; font-family:monospace; }
+
+
+/* ══════════════════════════════════
+   현재 (원본) — 비교용
+   ══════════════════════════════════ */
+.orig-badges {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  width: 100%;
+  padding: 0 24px;
+}
+.orig-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 14px;
+  background: var(--vb-surface);
+  border-radius: 8px;
+  border: 1px solid var(--vb-border);
+  min-width: 60px;
+}
+.orig-badge-lbl {
+  font-family: var(--vb-font-body);
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--vb-text-dim);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 3px;
+}
+.orig-badge-val {
+  font-family: var(--vb-font-score);
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--vb-text);
+}
+.orig-free {
+  font-size:11px;
+  color:var(--vb-text-dim);
+  font-family:var(--vb-font-body);
+  margin-bottom:8px;
+}
+.orig-link {
+  font-size:12px;
+  font-family:var(--vb-font-body);
+  color:var(--vb-text-mid);
+  text-decoration:underline;
+  cursor:pointer;
+  background:none; border:none;
+}
+
+
+/* ══════════════════════════════════
+   A — 뱃지 + 고스트 버튼
+   ══════════════════════════════════ */
+.a-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--vb-surface);
+  border: 1px solid var(--vb-border);
+  border-radius: 8px;
+  padding: 10px 20px;
+  margin-bottom: 0;
+}
+.a-lbl { font-family:var(--vb-font-body); font-size:9px; font-weight:700; color:var(--vb-text-dim); letter-spacing:2px; text-transform:uppercase; }
+.a-sep { width:1px; height:18px; background:var(--vb-border); }
+.a-rank { font-family:var(--vb-font-score); font-size:24px; font-weight:900; color:var(--vb-text); line-height:1; }
+.a-btn {
+  width:100%; padding:11px 0;
+  background:transparent; border:1px solid var(--vb-border); border-radius:8px;
+  color:var(--vb-text-mid); font-family:var(--vb-font-score); font-size:11px; font-weight:700;
+  letter-spacing:2px; cursor:pointer; text-align:center; margin:0 20px; width:calc(100% - 40px);
+}
+.a-btn-wrap { padding: 8px 20px 4px; display:flex; }
+
+
+/* ══════════════════════════════════
+   B — 숫자 강조 + accent 솔리드 버튼
+   ══════════════════════════════════ */
+.b-block { text-align:center; }
+.b-lbl { font-family:var(--vb-font-score); font-size:9px; font-weight:700; color:var(--vb-text-dim); letter-spacing:3px; text-transform:uppercase; margin-bottom:2px; }
+.b-rank { font-family:var(--vb-font-score); font-size:40px; font-weight:900; color:var(--vb-text); line-height:1; }
+.b-btn {
+  width:calc(100% - 40px); padding:13px 0;
+  background:var(--vb-accent); border:none; border-radius:8px;
+  color:#0a0a0a; font-family:var(--vb-font-score); font-size:12px; font-weight:900;
+  letter-spacing:2px; cursor:pointer; text-align:center;
+}
+.b-btn-wrap { padding:8px 20px 4px; display:flex; }
+
+
+/* ══════════════════════════════════
+   C — HUD 카드 + accent 아웃라인 버튼
+   ══════════════════════════════════ */
+.c-card {
+  display:flex; align-items:center;
+  background:var(--vb-surface); border:1px solid var(--vb-border); border-radius:8px;
+  overflow:hidden; width:calc(100% - 48px);
+}
+.c-line { width:3px; align-self:stretch; background:var(--vb-accent); flex-shrink:0; }
+.c-inner { flex:1; display:flex; justify-content:space-between; align-items:center; padding:10px 16px; }
+.c-lbl { font-family:var(--vb-font-body); font-size:9px; font-weight:700; color:var(--vb-text-dim); letter-spacing:2px; text-transform:uppercase; }
+.c-rank { font-family:var(--vb-font-score); font-size:20px; font-weight:900; color:var(--vb-text); }
+.c-btn {
+  width:calc(100% - 40px); padding:12px 0;
+  background:transparent; border:1px solid var(--vb-accent); border-radius:8px;
+  color:var(--vb-accent); font-family:var(--vb-font-score); font-size:11px; font-weight:700;
+  letter-spacing:2px; cursor:pointer; text-align:center;
+}
+.c-btn-wrap { padding:8px 20px 4px; display:flex; }
+.c-card-wrap { display:flex; justify-content:center; width:100%; padding:0 24px; }
+</style>
+</head>
+<body>
+
+<h2 style="border-top:none; margin-top:0;">현재 (원본) vs 변경 시안 3가지</h2>
+
+<div class="row">
+
+  <!-- 현재 원본 -->
+  <div>
+    <div class="variant-name">현재 (원본)</div>
+    <div class="phone">
+      <div class="header">
+        <div class="h-left">&nbsp;</div>
+        <div class="h-center">
+          <div class="h-score-lbl">SCORE</div>
+          <div class="h-score-val">0</div>
+        </div>
+        <div class="h-right">STG 00</div>
+      </div>
+      <div class="stage-area">
+        <div style="text-align:center; width:100%; padding:0 24px;">
+          <div class="orig-badges">
+            <div class="orig-badge"><div class="orig-badge-lbl">DAILY</div><div class="orig-badge-val">#10</div></div>
+            <div class="orig-badge"><div class="orig-badge-lbl">MONTHLY</div><div class="orig-badge-val">#10</div></div>
+            <div class="orig-badge"><div class="orig-badge-lbl">SEASON</div><div class="orig-badge-val">#17</div></div>
+          </div>
+          <div class="orig-free">무한 플레이 가능</div>
+          <button class="orig-link">View Rankings</button>
+        </div>
+      </div>
+      <div class="combo-area"></div>
+      <div class="pad-area">
+        <div class="pad">
+          <div class="pb pb-or"></div><div class="pb pb-bl"></div>
+          <div class="pb pb-gr"></div><div class="pb pb-ye"></div>
+          <div class="pb-center">START</div>
+        </div>
+      </div>
+      <div class="timer-wrap"></div>
+      <div class="banner"><span>AD BANNER</span></div>
+    </div>
+  </div>
+
+  <!-- A -->
+  <div>
+    <div class="variant-name">A — 뱃지 + 고스트 버튼</div>
+    <div class="phone">
+      <div class="header">
+        <div class="h-left">&nbsp;</div>
+        <div class="h-center">
+          <div class="h-score-lbl">SCORE</div>
+          <div class="h-score-val">0</div>
+        </div>
+        <div class="h-right">STG 00</div>
+      </div>
+      <div class="stage-area">
+        <div class="a-badge">
+          <span class="a-lbl">Daily</span>
+          <div class="a-sep"></div>
+          <span class="a-rank">#10</span>
+        </div>
+      </div>
+      <div class="combo-area"></div>
+      <div class="pad-area">
+        <div class="pad">
+          <div class="pb pb-or"></div><div class="pb pb-bl"></div>
+          <div class="pb pb-gr"></div><div class="pb pb-ye"></div>
+          <div class="pb-center">START</div>
+        </div>
+      </div>
+      <div class="a-btn-wrap"><button class="a-btn">RANKINGS  ▸</button></div>
+      <div class="timer-wrap"></div>
+      <div class="banner"><span>AD BANNER</span></div>
+    </div>
+  </div>
+
+  <!-- B -->
+  <div>
+    <div class="variant-name">B — 숫자 강조 + 솔리드 버튼</div>
+    <div class="phone">
+      <div class="header">
+        <div class="h-left">&nbsp;</div>
+        <div class="h-center">
+          <div class="h-score-lbl">SCORE</div>
+          <div class="h-score-val">0</div>
+        </div>
+        <div class="h-right">STG 00</div>
+      </div>
+      <div class="stage-area">
+        <div class="b-block">
+          <div class="b-lbl">Daily Rank</div>
+          <div class="b-rank">#10</div>
+        </div>
+      </div>
+      <div class="combo-area"></div>
+      <div class="pad-area">
+        <div class="pad">
+          <div class="pb pb-or"></div><div class="pb pb-bl"></div>
+          <div class="pb pb-gr"></div><div class="pb pb-ye"></div>
+          <div class="pb-center">START</div>
+        </div>
+      </div>
+      <div class="b-btn-wrap"><button class="b-btn">RANKINGS</button></div>
+      <div class="timer-wrap"></div>
+      <div class="banner"><span>AD BANNER</span></div>
+    </div>
+  </div>
+
+  <!-- C -->
+  <div>
+    <div class="variant-name picked">C — HUD 카드 + accent 버튼  ★ PICK</div>
+    <div class="phone picked">
+      <div class="header">
+        <div class="h-left">&nbsp;</div>
+        <div class="h-center">
+          <div class="h-score-lbl">SCORE</div>
+          <div class="h-score-val">0</div>
+        </div>
+        <div class="h-right">STG 00</div>
+      </div>
+      <div class="stage-area">
+        <div class="c-card-wrap">
+          <div class="c-card">
+            <div class="c-line"></div>
+            <div class="c-inner">
+              <span class="c-lbl">Daily</span>
+              <span class="c-rank">#10</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="combo-area"></div>
+      <div class="pad-area">
+        <div class="pad">
+          <div class="pb pb-or"></div><div class="pb pb-bl"></div>
+          <div class="pb pb-gr"></div><div class="pb pb-ye"></div>
+          <div class="pb-center">START</div>
+        </div>
+      </div>
+      <div class="c-btn-wrap"><button class="c-btn">VIEW RANKINGS</button></div>
+      <div class="timer-wrap"></div>
+      <div class="banner"><span>AD BANNER</span></div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

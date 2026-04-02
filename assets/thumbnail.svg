@@ -3,13 +3,13 @@
 
   <!-- 4 circles: radius 170, centered vertically at y=414 -->
   <!-- TL orange -->
-  <circle cx="220" cy="234" r="170" fill="#E85018" stroke="white" stroke-width="4"/>
+  <circle cx="435" cy="234" r="170" fill="#E85018" stroke="white" stroke-width="4"/>
   <!-- TR blue -->
-  <circle cx="580" cy="234" r="170" fill="#4AAFF0" stroke="white" stroke-width="4"/>
+  <circle cx="795" cy="234" r="170" fill="#4AAFF0" stroke="white" stroke-width="4"/>
   <!-- BL green -->
-  <circle cx="220" cy="594" r="170" fill="#22B55A" stroke="white" stroke-width="4"/>
+  <circle cx="435" cy="594" r="170" fill="#22B55A" stroke="white" stroke-width="4"/>
   <!-- BR yellow -->
-  <circle cx="580" cy="594" r="170" fill="#F5D020" stroke="white" stroke-width="4"/>
+  <circle cx="795" cy="594" r="170" fill="#F5D020" stroke="white" stroke-width="4"/>
 
   <!-- Right text area — centered in x=760~1932, center x=1346 -->
   <text

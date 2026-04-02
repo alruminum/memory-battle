@@ -1,8 +1,17 @@
-# 화면별 UI 스펙 v0.3
+# 화면별 UI 스펙 v0.3.1
 
-> PRD v0.3 (2026-04-01) 기준. 이전 버전: `docs/ui-spec.md` (v0.1 — 기회제·난이도 선택 포함)
+> PRD v0.3.1 (2026-04-02) 기준. 이전 버전: `docs/milestones/v03/` (v0.3 스냅샷)
 >
-> **주요 변경점**
+> **v0.3.1 주요 변경점**
+> - 타이머 게이지 (스테이지별 입력 제한 시간 바) 제거
+> - 콤보 시스템 개편: `isComboActive` 기반 → 타임워치 기반 풀콤보 판정
+> - `xN` 배율 상한 제거: `min(comboStreak+1, 5)` → `floor(comboStreak/5)+1` (5연속마다 +1, 무제한)
+> - 스테이지 헤더에 현재 배율 `xN` 상시 표시 추가 (comboStreak 5 이상일 때)
+> - ComboTimer 컴포넌트 신규 추가 (타임워치 UI)
+> - MultiplierBurst 컴포넌트 신규 추가 (배율 상승 인터랙션)
+> - clearingStage 오버레이 시퀀스에 배율 상승 케이스 추가
+>
+> **v0.3 주요 변경점 (참고)**
 > - 기회제 완전 폐지 → 플레이 횟수 무제한
 > - 난이도 선택(Easy/Medium/Hard) 제거 → 스테이지 자동 난이도
 > - 스택형 콤보 시스템 UI 추가 (5스테이지~)
@@ -29,41 +38,100 @@
 | 요소 | 스펙 |
 |---|---|
 | 색깔 버튼 4개 | 200×200px 원형, 탭 시 밝기 증가 애니메이션 |
-| 버튼 글로우 | `comboActive` 상태 시 버튼 외곽 ring glow 강화 (`box-shadow` 증가) |
-| 타이머 게이지 | 버튼 하단 프로그레스바. 스테이지별 동적 제한 (아래 표). 줄어들면서 빨간색으로 변화 |
+| 버튼 글로우 | 풀콤보 달성 후 다음 스테이지 진입 시 버튼 외곽 ring glow 강화 (`box-shadow` 증가) |
+| 스테이지 헤더 | 스테이지 번호 + 현재 배율 상시 표시 (아래 규칙 참조) |
 | 배너 광고 | 하단 고정, width 100%, max-width 360px, height 96px |
 | ComboIndicator | 버튼 패드 위 고정 영역 (minHeight 56px, 레이아웃 shift 방지) |
+| ComboTimer | 게임 화면 하단 (배너 광고 바로 위). INPUT 상태에서만 표시 |
+| MultiplierBurst | 화면 중앙 오버레이. 배율 상승 시 트리거 |
 
-### 타이머 게이지 — 스테이지별 제한 시간
+**제거된 요소 (v0.3 대비)**
+- 타이머 게이지 (스테이지별 입력 제한 시간 프로그레스 바) → 삭제
 
-| 스테이지 구간 | 버튼당 입력 제한 |
+**제거된 요소 (v0.1 대비)**
+- 헤더 좌측 난이도 레이블 (`EASY` / `MEDIUM` / `HARD`) → 삭제
+
+### 스테이지 헤더 배율 표시 규칙
+
+| 조건 | 표시 |
 |---|---|
-| 1~9 | 2.0초 |
-| 10~19 | 1.8초 |
-| 20~29 | 1.6초 |
-| 30+ | 1.4초 (하한) |
+| `comboStreak` 0~4 | `STAGE N` (배율 x1이므로 표시 생략) |
+| `comboStreak` 5 이상 | `STAGE N  x{floor(comboStreak/5)+1}` |
 
 ### ComboIndicator 표시 규칙
 
 | 조건 | 표시 |
 |---|---|
-| `comboStreak === 0 && !isComboActive` | null (미표시) |
-| `comboStreak > 0` | `xN COMBO STREAK` 텍스트 상시 표시 (N = min(comboStreak + 1, 5)) |
-| `isComboActive === true` | `COMBO!` 텍스트 + pulse 애니메이션 |
+| `comboStreak === 0` | null (미표시) |
+| `comboStreak > 0` | `x{floor(comboStreak/5)+1} COMBO STREAK` 텍스트 상시 표시 |
+| 풀콤보 클리어 직후 | 디자인 중심 "컴퓨터를 이겼다" 피드백 (텍스트 최소화) |
 
-> `isComboActive`: 현재 스테이지 내 300ms 이내 연속 입력 중 여부
+> 배율 공식: `floor(comboStreak / 5) + 1` (상한 없음)
+> 구버전 `isComboActive` 기반 300ms 연속 입력 판정 및 `COMBO!` 글로우 텍스트 제거
 
-### 스테이지 클리어 오버레이 (clearingStage 영역)
+### ComboTimer 컴포넌트 (신규)
 
-| 조건 | 표시 |
+**역할**: 컴퓨터 시연 시간을 타임워치 형태로 표시해, 유저가 컴퓨터와 경쟁하는 느낌을 유발
+
+| 속성 | 스펙 |
 |---|---|
-| 일반 클리어 | `STAGE N` + `CLEAR` |
-| 풀콤보 클리어 | `STAGE N` + `FULL COMBO!` |
+| 위치 | 게임 화면 하단 (배너 광고 바로 위, 기존 타이머 게이지 위치) |
+| 표시 시점 | INPUT 상태 (유저 입력 대기 중)에만 노출 |
+| 기준 시간 | `flashDuration × sequenceLength` (컴퓨터 시연 총 시간) |
+| 경과 표시 | 입력 시작 시점부터 현재까지 경과 시간을 타임워치 형태로 표시 |
+| 색상 — 기준 시간 이내 | 초록/파란 계열 (콤보 가능 상태) |
+| 색상 — 기준 시간 초과 | 빨간 계열 (콤보 실패 상태) |
 
-> 풀콤보: 해당 스테이지 모든 버튼 입력 간격 ≤ 300ms
+**Props**
 
-**제거된 요소 (v0.1 대비)**
-- 헤더 좌측 난이도 레이블 (`EASY` / `MEDIUM` / `HARD`) → 삭제
+| Prop | 타입 | 설명 |
+|---|---|---|
+| `computerShowTime` | `number` (ms) | 컴퓨터 시연 총 시간 (`flashDuration × sequenceLength`) |
+| `inputStartTime` | `number` | 유저 입력 시작 시각 (timestamp) |
+| `isActive` | `boolean` | INPUT 상태 여부 |
+
+### 스테이지 클리어 오버레이 (clearingStage 시퀀스)
+
+| 조건 | 시퀀스 |
+|---|---|
+| 일반 클리어 | `STAGE N CLEAR` → 다음 스테이지 |
+| 풀콤보 (배율 유지) | 디자인 중심 풀콤보 피드백 → 다음 스테이지 |
+| 풀콤보 (배율 상승) | 디자인 중심 풀콤보 피드백 → MultiplierBurst → 다음 스테이지 |
+
+> 풀콤보 조건: 유저의 전체 입력 완료 시간 < 컴퓨터 시연 시간 (`flashDuration × sequenceLength`)
+> 배율 상승 여부: 클리어 후 `floor(comboStreak/5)+1` 값이 이전 배율보다 증가했는지로 판단
+
+### MultiplierBurst 컴포넌트 (신규)
+
+**역할**: 배율 상승 순간 화면 중앙에 `xN` scale-up + 파티클 버스트 연출
+
+| 속성 | 스펙 |
+|---|---|
+| 트리거 | stageClear 후 배율이 상승한 순간 (`multiplierIncreased === true`) |
+| 위치 | 화면 중앙 오버레이 |
+
+**애니메이션 시퀀스**
+
+1. `xN` 숫자 작은 크기에서 scale-up (400ms)
+2. 숫자 주변 파티클 버스트 (8~12개, 방사형, 200ms)
+3. 페이드 아웃
+
+**배율별 색상**
+
+| 배율 | 색상 | 헥스 |
+|---|---|---|
+| x2 | 노란색 | `#FACC15` |
+| x3 | 주황색 | `#FB923C` |
+| x4 | 빨간색 | `#F87171` |
+| x5 이상 | 마젠타/보라 | `#E879F9` (배율 높을수록 진해짐) |
+
+**Props**
+
+| Prop | 타입 | 설명 |
+|---|---|---|
+| `multiplier` | `number` | 상승한 배율 값 |
+| `isVisible` | `boolean` | 표시 여부 |
+| `onComplete` | `() => void` | 애니메이션 완료 콜백 |
 
 ---
 
@@ -89,11 +157,11 @@
 └─────────────────────────────┘
 ```
 
-| 필드 | 데이터 소스 |
-|---|---|
-| 풀콤보 달성 횟수 | `store.fullComboCount` |
-| 최고 콤보 스택 | `store.maxComboStreak` (배율로 표시: `x{maxComboStreak + 1}`) |
-| 콤보 보너스 점수 | `store.score - store.baseScore` |
+| 필드 | 데이터 소스 | 비고 |
+|---|---|---|
+| 풀콤보 달성 횟수 | `store.fullComboCount` | |
+| 최고 콤보 스택 | `store.maxComboStreak` | 배율로 표시: `x{floor(maxComboStreak/5)+1}` |
+| 콤보 보너스 점수 | `store.score - store.baseScore` | |
 
 > 풀콤보 달성이 없으면 (fullComboCount === 0) 카드 미표시 또는 회색 처리
 

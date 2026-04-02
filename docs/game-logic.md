@@ -35,23 +35,40 @@ const getFlashDuration = (stage: number): number => {
 
 ---
 
-## 타이머 (스테이지 기반) ⚠️ v0.3 변경
+## 입력 제한 타이머 (스테이지 기반) ⚠️ v0.3
 
-| 스테이지 구간 | 버튼당 입력 제한 |
+> INPUT 상태에서 버튼 미입력 시 게임오버. 타이머 바 UI는 v0.3.1에서 제거됨 (로직은 유지).
+> 버튼 1개 입력 간격 제한 — 시퀀스 전체가 아닌 매 버튼마다 독립 적용.
+
+| 스테이지 구간 | 버튼 입력 제한 시간 |
 |---|---|
 | 1~9 | 2000ms |
 | 10~19 | 1800ms |
 | 20~29 | 1600ms |
-| 30+ | 1400ms (하한) |
+| 30+ | 1400ms |
 
 ```typescript
-const getInputTimeout = (stage: number): number => {
+/**
+ * 스테이지에 따른 버튼 입력 제한 시간 (ms)
+ * Stage 1~9: 2000ms / 10~19: 1800ms / 20~29: 1600ms / 30+: 1400ms
+ *
+ * 시퀀스 전체 제한이 아닌 버튼 1개 입력 간격 제한이다.
+ * (시퀀스 길이와 무관하게 매 버튼마다 독립 적용)
+ */
+export const getInputTimeout = (stage: number): number => {
   if (stage >= 30) return 1400
   if (stage >= 20) return 1600
   if (stage >= 10) return 1800
   return 2000
 }
 ```
+
+### useTimer 연동 규칙
+
+- INPUT 진입 시: `timer.reset()` → 타이머 시작
+- 정답 입력 시: `timer.reset()` → 다음 버튼 타이머 재시작
+- 오답 / 라운드 클리어 시: `timer.stop()`
+- 타이머 만료 시: `handleExpire` 콜백 → `gameOver()` 호출
 
 ---
 
@@ -70,53 +87,83 @@ const calcClearBonus = (stage: number): number => {
 
 ---
 
-## 스택형 콤보 시스템 ⚠️ v0.3 변경
+## 스택형 콤보 시스템 ⚠️ v0.3.1 변경
 
-> 기존: 10스테이지 이상, 풀콤보 시 x2 고정
-> 변경: 5스테이지 이상, 연속 풀콤보 스트릭으로 x1~x5 누적
+> 컴퓨터보다 빠르게 입력하면 콤보. 5연속 콤보마다 배율 상승 (상한 없음).
 
-### 배율표
+### 풀콤보 조건
+
+유저의 전체 입력 완료 시간 < 컴퓨터 시연 시간
+
+```
+computerShowTime = flashDuration × sequenceLength
+```
+
+시퀀스 시작 시각을 저장하고, 마지막 버튼 입력 완료 시점까지의 소요 시간을 `computerShowTime`과 비교한다.
+
+### 배율표 ⚠️ v0.3.1 변경
 
 | 연속 풀콤보 스트릭 | 해당 스테이지 점수 배율 |
 |---|---|
-| 0 | x1 |
-| 1 | x2 |
-| 2 | x3 |
-| 3 | x4 |
-| 4 이상 | x5 (상한) |
+| 0~4 | x1 |
+| 5~9 | x2 |
+| 10~14 | x3 |
+| N×5 ~ (N+1)×5-1 | x(N+1) … 무제한 |
 
 ### 규칙
 
-- **활성화**: 5스테이지 이상
-- **풀콤보 조건**: 해당 스테이지 모든 버튼 입력 간격 ≤ 300ms
+- **풀콤보 조건**: 시퀀스 시작부터 전체 입력 완료까지 총 소요 시간 < `computerShowTime`
 - **배율 적용**: 풀콤보 달성 시 해당 스테이지 즉시 적용 (버튼점수 + 클리어보너스) × 배율
-- **스택 증가**: 풀콤보 달성 후 스택 +1 (다음 스테이지 배율에 반영)
+- **스택 증가**: 풀콤보 달성 후 스택 +1 (상한 없음)
 - **스택 리셋**: 풀콤보 실패 시 스택 0으로 리셋
+- **multiplierIncreased 플래그**: stageClear 처리 시 이전 배율과 새 배율 비교, 상승했으면 `true`
 
 ```typescript
-const COMBO_THRESHOLD = 300  // ms
-const COMBO_ACTIVATION_STAGE = 5
-
-// 콤보 배율
+// 콤보 배율 ⚠️ v0.3.1: 상한 없음, 5연속마다 +1
 const getComboMultiplier = (comboStreak: number): number =>
-  Math.min(comboStreak + 1, 5)
+  Math.floor(comboStreak / 5) + 1
 
 // 스테이지 최종 점수 (풀콤보 달성 시 해당 스테이지에 즉시 적용)
 const calcStageScore = (
   rawScore: number,
-  comboStreak: number,
-  stage: number
-): number => {
-  if (stage < COMBO_ACTIVATION_STAGE) return rawScore
-  return rawScore * getComboMultiplier(comboStreak)
+  comboStreak: number
+): number => rawScore * getComboMultiplier(comboStreak)
+```
+
+### 스테이지 클리어 처리
+
+```typescript
+// 스테이지 클리어 시
+const onStageClear = (
+  sequenceStartTime: number,   // INPUT 페이즈 시작 시각 (Date.now())
+  inputCompleteTime: number,   // 마지막 버튼 입력 완료 시각
+  flashDuration: number,
+  sequenceLength: number,
+  prevComboStreak: number
+): { comboStreak: number; isFullCombo: boolean; multiplierIncreased: boolean } => {
+  const computerShowTime = flashDuration * sequenceLength
+  const userInputTime = inputCompleteTime - sequenceStartTime
+  const isFullCombo = userInputTime < computerShowTime
+
+  const newStreak = isFullCombo ? prevComboStreak + 1 : 0  // 상한 없음
+
+  const prevMultiplier = getComboMultiplier(prevComboStreak)
+  const newMultiplier = getComboMultiplier(newStreak)
+  const multiplierIncreased = newMultiplier > prevMultiplier
+
+  return { comboStreak: newStreak, isFullCombo, multiplierIncreased }
 }
 ```
 
-### 인게임 UX
+### 인게임 UX ⚠️ v0.3.1 변경
 
-- 300ms 이내 연속 입력 중: "COMBO!" 텍스트 + 버튼 글로우 이펙트
-- 풀콤보 확정 시: "FULL COMBO!" 메시지 + 사운드
-- 현재 콤보 스택 숫자 상시 표시 (게임 화면)
+- **타임워치**: 컴퓨터 시연 시간(`computerShowTime`)을 시각적 타임바로 표시, 유저가 컴퓨터와 경쟁하는 느낌 제공
+- **실시간 힌트**: 입력 중 컴퓨터 시간 대비 현재 진행 상황 색상/애니메이션으로 표시
+- **풀콤보 클리어 시**: "컴퓨터를 이겼다" 피드백
+- **배율 상승 시**: `multiplierIncreased` 플래그가 `true`이면 `MultiplierBurst` 컴포넌트 트리거
+  - scale-up + 파티클 버스트 애니메이션
+  - 배율별 색상: x2=`#FACC15`, x3=`#FB923C`, x4=`#F87171`, x5+=`#E879F9`
+- **스테이지 번호 옆**: 현재 배율 `xN` 상시 표시
 
 ### 결과 화면 표시 항목
 
@@ -126,51 +173,25 @@ const calcStageScore = (
 
 ---
 
-## 콤보 감지
+## Zustand Store 구조 (`store/gameStore.ts`) ⚠️ v0.3.1 변경
 
 ```typescript
-const COMBO_THRESHOLD = 300  // ms
-
-let lastInputTime = 0
-let comboCount = 0
-let comboStreak = 0  // 연속 풀콤보 스트릭 (스테이지 간 유지)
-
-const onButtonInput = (timestamp: number) => {
-  const gap = timestamp - lastInputTime
-  if (gap <= COMBO_THRESHOLD) comboCount++
-  else comboCount = 0
-  lastInputTime = timestamp
-}
-
-// 스테이지 클리어 시
-const onStageClear = (sequenceLength: number) => {
-  const isFullCombo = comboCount >= sequenceLength
-  if (isFullCombo) {
-    comboStreak = Math.min(comboStreak + 1, 4)  // 스택 상한 4 (배율 x5)
-  } else {
-    comboStreak = 0
-  }
-  comboCount = 0
-}
-```
-
----
-
-## Zustand Store 구조 (`store/gameStore.ts`) ⚠️ v0.3 변경
-
-```typescript
-// Difficulty 타입 제거
+// Difficulty 타입 제거 (v0.3)
 
 interface GameStore {
   // 게임 상태
   status: 'IDLE' | 'SHOWING' | 'INPUT' | 'RESULT'
   sequence: string[]
   currentIndex: number
-  score: number             // 누적 점수 (콤보 배율 적용 후)
+  score: number              // 누적 점수 (콤보 배율 적용 후)
+  baseScore: number          // 누적 점수 (콤보 배율 미적용, 콤보 보너스 계산용)
   stage: number
-  comboStreak: number       // 현재 연속 풀콤보 스트릭
-  fullComboCount: number    // 이번 게임 풀콤보 달성 횟수
-  maxComboStreak: number    // 이번 게임 최고 콤보 스택
+  comboStreak: number        // 현재 연속 풀콤보 스트릭 (상한 없음, v0.3.1)
+  fullComboCount: number     // 이번 게임 풀콤보 달성 횟수
+  maxComboStreak: number     // 이번 게임 최고 콤보 스택
+
+  // 콤보 판정용 타임스탬프 (v0.3.1)
+  sequenceStartTime: number  // INPUT 페이즈 시작 시각 (ms)
 
   // 유저
   userId: string
@@ -178,6 +199,10 @@ interface GameStore {
   // 액션
   startGame: () => void
   addInput: (color: string) => void
+  stageClear: (inputCompleteTime: number, flashDuration: number) => {
+    isFullCombo: boolean
+    multiplierIncreased: boolean
+  }
   gameOver: () => void
   resetGame: () => void
 }
@@ -187,7 +212,7 @@ interface GameStore {
 
 ## 누적 점수 시뮬
 
-| 도달 스테이지 | 콤보 없음 | 중간급 (2연속 반복) | 완벽 풀콤보 (x5 유지) |
+| 도달 스테이지 | 콤보 없음 | 중간급 (2연속 반복) | 완벽 풀콤보 (배율 계속 상승) |
 |---|---|---|---|
 | 10 | 57 | 100 | 211 |
 | 15 | 133 | 269 | 591 |
