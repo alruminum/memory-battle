@@ -39,11 +39,11 @@ VITE_APP_NAME=memory-battle
 
 ## 작업 순서 (반드시 준수)
 
-1. **`backlog.md`** 에서 에픽 목록 확인
-2. **`docs/milestones/vNN/epics/epic-NN-*/stories.md`** 에서 스토리/태스크 확인
-3. **`docs/milestones/vNN/epics/epic-NN-*/impl/NN-*.md`** 계획 확인 (없으면 architect에게 요청)
-   - 설계 결정 근거는 **`docs/impl/00-decisions.md`** 참조
-4. 구현 후 **`stories.md`** 해당 태스크 체크
+1. **GitHub Issues** 에서 해당 에픽 레이블/마일스톤으로 미완료 이슈 확인
+   `gh issue list --label "epic-0N: ..." --milestone vNN --repo alruminum/memory-battle`
+2. **이슈 본문**에서 스토리 컨텍스트 + 태스크 체크리스트 확인
+3. **`docs/milestones/vNN/epics/epic-NN-*/impl/NN-*.md`** 계획 확인 (이슈 본문 상단 링크 참조, 없으면 architect에게 요청)
+4. 구현 후 GitHub Issue 체크리스트 업데이트 / 모든 태스크 완료 시 이슈 close
 
 사람이 해야 할 운영/출시 항목은 **`RELEASE.md`** 참조.
 
@@ -52,70 +52,71 @@ VITE_APP_NAME=memory-battle
 
 **Epic 01 — 게임 코어** · [stories](docs/milestones/v01/epics/epic-01-game-core/stories.md)
 
-| impl | 계획 파일 |
-|---|---|
-| 02 sdk-wrapper | [impl/02-sdk-wrapper.md](docs/milestones/v01/epics/epic-01-game-core/impl/02-sdk-wrapper.md) |
-| 03 zustand-store | [impl/03-zustand-store.md](docs/milestones/v01/epics/epic-01-game-core/impl/03-zustand-store.md) |
-| 04 game-engine | [impl/04-game-engine.md](docs/milestones/v01/epics/epic-01-game-core/impl/04-game-engine.md) |
-| 05 game-components | [impl/05-game-components.md](docs/milestones/v01/epics/epic-01-game-core/impl/05-game-components.md) |
+| impl | 계획 파일 | Issue |
+|---|---|---|
+| 02 sdk-wrapper | [impl/02-sdk-wrapper.md](docs/milestones/v01/epics/epic-01-game-core/impl/02-sdk-wrapper.md) | [#2](https://github.com/alruminum/memory-battle/issues/2) |
+| 03 zustand-store | [impl/03-zustand-store.md](docs/milestones/v01/epics/epic-01-game-core/impl/03-zustand-store.md) | [#3](https://github.com/alruminum/memory-battle/issues/3) |
+| 04 game-engine | [impl/04-game-engine.md](docs/milestones/v01/epics/epic-01-game-core/impl/04-game-engine.md) | [#4](https://github.com/alruminum/memory-battle/issues/4) |
+| 05 game-components | [impl/05-game-components.md](docs/milestones/v01/epics/epic-01-game-core/impl/05-game-components.md) | [#5](https://github.com/alruminum/memory-battle/issues/5) |
 
 **Epic 02 — 백엔드/데이터** · [stories](docs/milestones/v01/epics/epic-02-backend/stories.md)
 
-| impl | 계획 파일 |
-|---|---|
-| 06 db-setup | 콘솔 작업 → `docs/db-schema.md` + `RELEASE.md` 참고 |
-| 07 ranking-hook | [impl/07-ranking-hook.md](docs/milestones/v01/epics/epic-02-backend/impl/07-ranking-hook.md) |
-| 08 daily-chances | [impl/08-daily-chances.md](docs/milestones/v01/epics/epic-02-backend/impl/08-daily-chances.md) |
+| impl | 계획 파일 | Issue |
+|---|---|---|
+| 06 db-setup | 콘솔 작업 → `docs/db-schema.md` + `RELEASE.md` 참고 | [#6](https://github.com/alruminum/memory-battle/issues/6) |
+| 07 ranking-hook | [impl/07-ranking-hook.md](docs/milestones/v01/epics/epic-02-backend/impl/07-ranking-hook.md) | [#7](https://github.com/alruminum/memory-battle/issues/7) |
+| 08 daily-chances | [impl/08-daily-chances.md](docs/milestones/v01/epics/epic-02-backend/impl/08-daily-chances.md) | [#8](https://github.com/alruminum/memory-battle/issues/8) |
 
 **Epic 03 — 광고/수익화** · [stories](docs/milestones/v01/epics/epic-03-ads/stories.md)
 
-| impl | 계획 파일 |
-|---|---|
-| 09 ad-components | [impl/09-ad-components.md](docs/milestones/v01/epics/epic-03-ads/impl/09-ad-components.md) |
-| 10 result-page | [impl/10-result-page.md](docs/milestones/v01/epics/epic-03-ads/impl/10-result-page.md) |
+| impl | 계획 파일 | Issue |
+|---|---|---|
+| 09 ad-components | [impl/09-ad-components.md](docs/milestones/v01/epics/epic-03-ads/impl/09-ad-components.md) | [#9](https://github.com/alruminum/memory-battle/issues/9) |
+| 10 result-page | [impl/10-result-page.md](docs/milestones/v01/epics/epic-03-ads/impl/10-result-page.md) | [#10](https://github.com/alruminum/memory-battle/issues/10) |
 
 **Epic 04 — 화면 완성** · [stories](docs/milestones/v01/epics/epic-04-screens/stories.md)
 
-| impl | 계획 파일 |
-|---|---|
-| 11 main-page | [impl/11-main-page.md](docs/milestones/v01/epics/epic-04-screens/impl/11-main-page.md) |
-| 12 ranking-page | [impl/12-ranking-page.md](docs/milestones/v01/epics/epic-04-screens/impl/12-ranking-page.md) |
-| 13 routing | [impl/13-routing.md](docs/milestones/v01/epics/epic-04-screens/impl/13-routing.md) |
+| impl | 계획 파일 | Issue |
+|---|---|---|
+| 11 main-page | [impl/11-main-page.md](docs/milestones/v01/epics/epic-04-screens/impl/11-main-page.md) | [#11](https://github.com/alruminum/memory-battle/issues/11) |
+| 12 ranking-page | [impl/12-ranking-page.md](docs/milestones/v01/epics/epic-04-screens/impl/12-ranking-page.md) | [#12](https://github.com/alruminum/memory-battle/issues/12) |
+| 13 routing | [impl/13-routing.md](docs/milestones/v01/epics/epic-04-screens/impl/13-routing.md) | [#13](https://github.com/alruminum/memory-battle/issues/13) |
 
 ### v03
 
 **Epic 05 — 게임 메카닉 개편 (PRD v0.3)** · [stories](docs/milestones/v03/epics/epic-05-mechanic-v03/stories.md)
 
-| impl | 계획 파일 |
-|---|---|
-| 14 difficulty-removal | [impl/14-difficulty-removal.md](docs/milestones/v03/epics/epic-05-mechanic-v03/impl/14-difficulty-removal.md) |
-| 15 stage-speed-timer | [impl/15-stage-speed-timer.md](docs/milestones/v03/epics/epic-05-mechanic-v03/impl/15-stage-speed-timer.md) |
-| 16 combo-streak | [impl/16-combo-streak.md](docs/milestones/v03/epics/epic-05-mechanic-v03/impl/16-combo-streak.md) |
-| 17 combo-ui | [impl/17-combo-ui.md](docs/milestones/v03/epics/epic-05-mechanic-v03/impl/17-combo-ui.md) |
-| 18 result-update | [impl/18-result-update.md](docs/milestones/v03/epics/epic-05-mechanic-v03/impl/18-result-update.md) |
+| impl | 계획 파일 | Issue |
+|---|---|---|
+| 14 difficulty-removal | [impl/14-difficulty-removal.md](docs/milestones/v03/epics/epic-05-mechanic-v03/impl/14-difficulty-removal.md) | [#14](https://github.com/alruminum/memory-battle/issues/14) |
+| 15 stage-speed-timer | [impl/15-stage-speed-timer.md](docs/milestones/v03/epics/epic-05-mechanic-v03/impl/15-stage-speed-timer.md) | [#15](https://github.com/alruminum/memory-battle/issues/15) |
+| 16 combo-streak | [impl/16-combo-streak.md](docs/milestones/v03/epics/epic-05-mechanic-v03/impl/16-combo-streak.md) | [#16](https://github.com/alruminum/memory-battle/issues/16) |
+| 17 combo-ui | [impl/17-combo-ui.md](docs/milestones/v03/epics/epic-05-mechanic-v03/impl/17-combo-ui.md) | [#17](https://github.com/alruminum/memory-battle/issues/17) |
+| 18 result-update | [impl/18-result-update.md](docs/milestones/v03/epics/epic-05-mechanic-v03/impl/18-result-update.md) | [#18](https://github.com/alruminum/memory-battle/issues/18) |
+
 **Epic 06 — 마일스톤 기반 문서 구조 개편** · [stories](docs/milestones/v03/epics/epic-06-milestone-docs/stories.md)
-_(impl 없음 — 문서 구조 작업만)_
+_(impl 없음 — 문서 구조 작업만)_ · Issues: [#19](https://github.com/alruminum/memory-battle/issues/19) [#20](https://github.com/alruminum/memory-battle/issues/20) [#21](https://github.com/alruminum/memory-battle/issues/21)
 
 **Epic 07 — DB 타입 안전성** · [stories](docs/milestones/v03/epics/epic-07-db-type-safety/stories.md)
 
-| impl | 계획 파일 |
-|---|---|
-| 23 supabase-gen-types | [impl/23-supabase-gen-types.md](docs/milestones/v03/epics/epic-07-db-type-safety/impl/23-supabase-gen-types.md) |
+| impl | 계획 파일 | Issue |
+|---|---|---|
+| 23 supabase-gen-types | [impl/23-supabase-gen-types.md](docs/milestones/v03/epics/epic-07-db-type-safety/impl/23-supabase-gen-types.md) | [#22](https://github.com/alruminum/memory-battle/issues/22) [#23](https://github.com/alruminum/memory-battle/issues/23) |
 
 **Epic 08 — GamePage 품질 개선 & UI 리팩토링** · [stories](docs/milestones/v03/epics/epic-08-gamepage-refactor/stories.md)
 
-| impl | 계획 파일 |
-|---|---|
-| 01 quality-fix | [impl/01-quality-fix.md](docs/milestones/v03/epics/epic-08-gamepage-refactor/impl/01-quality-fix.md) |
+| impl | 계획 파일 | Issue |
+|---|---|---|
+| 01 quality-fix | [impl/01-quality-fix.md](docs/milestones/v03/epics/epic-08-gamepage-refactor/impl/01-quality-fix.md) | [#24](https://github.com/alruminum/memory-battle/issues/24) |
 
 **Epic 09 — 콤보 시스템 전면 개편 (PRD v0.3.1)** · [stories](docs/milestones/v03/epics/epic-09-combo-v031/stories.md)
 
-| impl | 계획 파일 |
-|---|---|
-| 01 combo-logic-v031 | [impl/01-combo-logic-v031.md](docs/milestones/v03/epics/epic-09-combo-v031/impl/01-combo-logic-v031.md) |
-| 02 combo-timer-ui | [impl/02-combo-timer-ui.md](docs/milestones/v03/epics/epic-09-combo-v031/impl/02-combo-timer-ui.md) |
-| 03 multiplier-burst-ui | [impl/03-multiplier-burst-ui.md](docs/milestones/v03/epics/epic-09-combo-v031/impl/03-multiplier-burst-ui.md) |
-| 04 timer-restore | [impl/04-timer-restore.md](docs/milestones/v03/epics/epic-09-combo-v031/impl/04-timer-restore.md) |
+| impl | 계획 파일 | Issue |
+|---|---|---|
+| 01 combo-logic-v031 | [impl/01-combo-logic-v031.md](docs/milestones/v03/epics/epic-09-combo-v031/impl/01-combo-logic-v031.md) | [#25](https://github.com/alruminum/memory-battle/issues/25) |
+| 02 combo-timer-ui | [impl/02-combo-timer-ui.md](docs/milestones/v03/epics/epic-09-combo-v031/impl/02-combo-timer-ui.md) | [#26](https://github.com/alruminum/memory-battle/issues/26) |
+| 03 multiplier-burst-ui | [impl/03-multiplier-burst-ui.md](docs/milestones/v03/epics/epic-09-combo-v031/impl/03-multiplier-burst-ui.md) | [#27](https://github.com/alruminum/memory-battle/issues/27) |
+| 04 timer-restore | [impl/04-timer-restore.md](docs/milestones/v03/epics/epic-09-combo-v031/impl/04-timer-restore.md) | [#28](https://github.com/alruminum/memory-battle/issues/28) |
 
 ---
 

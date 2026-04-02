@@ -1,5 +1,7 @@
 # 기억력배틀 — Backlog
 
+> ⚠️ 이 파일은 아카이브입니다. 현재 이슈 관리는 [GitHub Issues](https://github.com/alruminum/memory-battle/issues) 에서 진행합니다.
+
 > 기술 에픽 목록. 사람이 해야 할 운영/출시 항목은 `RELEASE.md` 참고.
 
 | 상태 | 에픽 | 파일 |

@@ -1,7 +1,7 @@
 ---
 name: architect
 description: 새 모듈 구현 계획 파일(docs/milestones/vNN/epics/epic-NN-*/impl/NN-*.md)을 작성하는 설계 에이전트. 기존 설계 문서를 읽고 프로젝트 패턴에 맞는 impl 파일을 생성한다. 새 기능 구현 전에 계획 파일이 없을 때 사용한다.
-tools: Read, Glob, Grep, Write, Edit
+tools: Read, Glob, Grep, Write, Edit, mcp__github__create_issue
 model: sonnet
 ---
 
@@ -27,7 +27,13 @@ model: sonnet
 7. `docs/milestones/vNN/epics/epic-NN-*/impl/NN-모듈명.md` 파일을 작성한다.
 8. 설계 결정 근거는 impl 파일 내 "결정 근거" 섹션에 직접 작성한다.
 9. `stories.md`에 해당 태스크가 없으면 해당 스토리 아래 추가한다.
-10. impl 파일 작성 완료 후 **`CLAUDE.md`의 모듈 계획 파일 표를 반드시 업데이트**한다:
+10. impl 파일 작성 완료 후 **GitHub Issue를 생성**한다 (mcp__github__create_issue):
+    - 제목: `[Epic NN] Story M: {스토리 제목}`
+    - 마일스톤: 해당 vNN 번호
+    - 레이블: 해당 에픽 레이블 (`epic-NN: ...`) 연결
+    - 본문: `📋 impl: {impl 파일 경로}` + 태스크 체크리스트
+    - 생성 후 `CLAUDE.md` 에픽 테이블에 Issue 번호 기재
+11. impl 파일 작성 완료 후 **`CLAUDE.md`의 모듈 계획 파일 표를 반드시 업데이트**한다:
     - 해당 milestone/epic 섹션 아래 새 impl 항목 추가
     - 섹션이 없으면 `### vNN` + `**Epic NN — 이름** · [stories](경로)` 헤더 포함해 추가
 

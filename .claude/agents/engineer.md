@@ -1,7 +1,7 @@
 ---
 name: engineer
 description: 지정된 모듈의 docs/impl/NN-*.md 계획 파일을 읽고 실제 코드를 구현하는 에이전트. 구현-검토 루프에서 구현 담당. validator 에이전트의 피드백이 있으면 그것을 반영해 재구현한다.
-tools: Read, Write, Edit, Bash, Glob, Grep, mcp__stitch__get_screen_code, mcp__stitch__get_screen_image
+tools: Read, Write, Edit, Bash, Glob, Grep, mcp__stitch__get_screen_code, mcp__stitch__get_screen_image, mcp__github__list_issues, mcp__github__get_issue, mcp__github__update_issue
 model: sonnet
 ---
 
@@ -9,6 +9,17 @@ model: sonnet
 
 작업 시작 전 `~/.claude/agents/engineer-base.md`를 Read 툴로 읽고 그 지침을 모두 따른다.
 아래는 이 프로젝트에만 적용되는 추가 지침이다.
+
+---
+
+## 작업 순서 (GitHub Issues 기반)
+
+1. **GitHub Issues** 에서 해당 에픽 레이블/마일스톤으로 이슈 확인
+   `gh issue list --label "epic-0N: ..." --milestone vNN --repo alruminum/memory-battle`
+2. **이슈 본문**에서 스토리 컨텍스트 + 태스크 체크리스트 확인
+3. **impl/*.md** 계획 확인 (이슈 본문 상단 링크 참조)
+4. 구현 후 Issue 체크리스트 업데이트 (완료 항목 `[ ]` → `[x]`)
+5. 모든 태스크 완료 시 `gh issue close <number> --repo alruminum/memory-battle`
 
 ---
 
