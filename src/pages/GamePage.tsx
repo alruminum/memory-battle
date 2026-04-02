@@ -1,13 +1,14 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useGameStore } from '../store/gameStore'
 import { useGameEngine } from '../hooks/useGameEngine'
 import { useRanking } from '../hooks/useRanking'
 import { getUserId } from '../lib/ait'
-import { getFlashDuration } from '../lib/gameLogic'
+import { getFlashDuration, getComboMultiplier } from '../lib/gameLogic'
 import { ButtonPad } from '../components/game/ButtonPad'
 import { ComboIndicator } from '../components/game/ComboIndicator'
 import { ComboTimer } from '../components/game/ComboTimer'
 import { BannerAd } from '../components/ads/BannerAd'
+import { MultiplierBurst } from '../components/game/MultiplierBurst'
 
 function rankLabel(rank: number): string {
   return rank > 0 ? '#' + rank : '#—'
@@ -86,7 +87,7 @@ interface GamePageProps {
 
 export function GamePage({ onGameOver, onRanking }: GamePageProps) {
   const { status, score, stage, comboStreak, userId, setUserId, sequenceStartTime } = useGameStore()
-  const { flashingButton, clearingStage, countdown, handleInput, startGame, retryGame, isClearingFullCombo } = useGameEngine()
+  const { flashingButton, clearingStage, countdown, handleInput, startGame, retryGame, isClearingFullCombo, multiplierIncreased } = useGameEngine()
   const ranking = useRanking(userId || null)
 
   useEffect(() => {
@@ -110,6 +111,13 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
   // status 변화만 감시하는 것이 의도. onGameOver를 deps에 추가하면 부모 리렌더 시 중복 호출 가능
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status])
+
+  const [showBurst, setShowBurst] = useState(false)
+  useEffect(() => {
+    if (multiplierIncreased) setShowBurst(true)
+  }, [multiplierIncreased])
+
+  const currentMultiplier = getComboMultiplier(comboStreak)
 
   const isPlaying = status === 'SHOWING' || status === 'INPUT'
 
@@ -231,6 +239,13 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
       <div style={{ flexShrink: 0 }}>
         <BannerAd />
       </div>
+
+      {/* 배율 상승 알림 오버레이 */}
+      <MultiplierBurst
+        multiplier={currentMultiplier}
+        isVisible={showBurst}
+        onComplete={() => setShowBurst(false)}
+      />
     </div>
   )
 }

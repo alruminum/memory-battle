@@ -43,5 +43,5 @@
 배율이 상승하는 순간 화면 중앙에 `xN` scale-up + 파티클 버스트 오버레이를 표시한다.
 배율별 색상(x2=노랑, x3=주황, x4=빨강, x5+=마젠타)으로 단계감을 시각화한다.
 
-- [ ] `MultiplierBurst` 컴포넌트 구현
-- [ ] `GamePage` clearingStage 시퀀스에 통합
+- [x] `MultiplierBurst` 컴포넌트 구현
+- [x] `GamePage` clearingStage 시퀀스에 통합
