@@ -1,33 +1,6 @@
-import { useRef, useCallback, useState } from 'react'
-
-const COMBO_THRESHOLD = 300 // ms
-
+// useCombo.ts — v0.3.1: 역할 없음. 하위 호환을 위해 파일 유지
 export function useCombo() {
-  const lastInputTime = useRef<number | null>(null)
-  const comboCount = useRef(0)
-  const [isActive, setIsActive] = useState(false)
-
-  const recordInput = useCallback(() => {
-    const now = Date.now()
-    if (lastInputTime.current !== null && now - lastInputTime.current > COMBO_THRESHOLD) {
-      comboCount.current = 0
-      setIsActive(false)
-    } else if (comboCount.current > 0) {
-      setIsActive(true)
-    }
-    comboCount.current += 1
-    lastInputTime.current = now
-  }, [])
-
-  const checkFullCombo = useCallback((sequenceLength: number) => {
-    return comboCount.current >= sequenceLength
-  }, [])
-
-  const reset = useCallback(() => {
-    lastInputTime.current = null
-    comboCount.current = 0
-    setIsActive(false)
-  }, [])
-
-  return { recordInput, checkFullCombo, reset, isActive }
+  // 300ms 기반 콤보 판정 제거 (v0.3.1: sequenceStartTime 기반 판정으로 교체)
+  // useGameEngine에서 더 이상 이 훅을 사용하지 않음
+  return {}
 }

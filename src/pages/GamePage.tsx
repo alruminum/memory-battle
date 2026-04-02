@@ -84,7 +84,7 @@ interface GamePageProps {
 
 export function GamePage({ onGameOver, onRanking }: GamePageProps) {
   const { status, score, stage, comboStreak, userId, setUserId } = useGameStore()
-  const { flashingButton, clearingStage, countdown, handleInput, startGame, retryGame, isComboActive, isClearingFullCombo, timerProgress } = useGameEngine()
+  const { flashingButton, clearingStage, countdown, handleInput, startGame, retryGame, isClearingFullCombo } = useGameEngine()
   const ranking = useRanking(userId || null)
 
   useEffect(() => {
@@ -189,7 +189,7 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
         minHeight: 56,
         flexShrink: 0,
       }}>
-        <ComboIndicator comboStreak={comboStreak} isComboActive={isComboActive} />
+        <ComboIndicator comboStreak={comboStreak} />
       </div>
 
       {/* 버튼 패드 */}
@@ -209,27 +209,7 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
           onPress={handleInput}
           onStart={handleStart}
           onRetry={() => retryGame()}
-          comboActive={isComboActive}
         />
-      </div>
-
-      {/* 타이머 바 */}
-      <div style={{
-        margin: '0 20px 8px',
-        height: 4,
-        backgroundColor: 'var(--vb-surface)',
-        borderRadius: 2,
-        overflow: 'hidden',
-        flexShrink: 0,
-      }}>
-        <div style={{
-          width: isPlaying ? (timerProgress * 100).toFixed(1) + '%' : '0%',
-          height: '100%',
-          backgroundColor: 'var(--vb-accent)',
-          borderRadius: 2,
-          boxShadow: '0 0 8px rgba(200,255,0,0.3)',
-          transition: 'width 200ms linear',
-        }} />
       </div>
 
       {/* 광고 배너 */}

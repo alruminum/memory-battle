@@ -1,9 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useGameStore } from '../store/gameStore'
-import { useTimer } from './useTimer'
-import { useCombo } from './useCombo'
 import { playTone, playGameStart, playGameOver, playApplause } from '../lib/sound'
-import { getFlashDuration, getInputTimeout } from '../lib/gameLogic'
+import { getFlashDuration } from '../lib/gameLogic'
 import { dbg, dbgWarn } from '../lib/debug'
 import type { ButtonColor } from '../types'
 
@@ -15,29 +13,16 @@ const COUNTDOWN_INTERVAL = 500  // ms per tick
 const randomButton = () => BUTTONS[Math.floor(Math.random() * BUTTONS.length)]
 
 export function useGameEngine() {
-  const { status, sequence, stage, setSequence, addInput, gameOver, resetGame } =
+  const { status, sequence, setSequence, addInput, gameOver, resetGame } =
     useGameStore()
   const [flashingButton, setFlashingButton] = useState<ButtonColor | null>(null)
   const [clearingStage, setClearingStage] = useState<number | null>(null)
   const [countdown, setCountdown] = useState<number | null>(null)
   const [isClearingFullCombo, setIsClearingFullCombo] = useState(false)
+  const [multiplierIncreased, setMultiplierIncreased] = useState(false)
   const showingRef = useRef(false)
   const clearingRef = useRef(false)
   const startingRef = useRef(false)
-
-  const combo = useCombo()
-
-  const handleExpire = useCallback(() => {
-    const s = useGameStore.getState().status
-    dbg('[Engine] handleExpire status=', s, 'clearingRef=', clearingRef.current)
-    if (s !== 'INPUT') return
-    if (clearingRef.current) return
-    playGameOver()
-    gameOver()
-  }, [gameOver])
-
-  const inputTimeout = getInputTimeout(stage)
-  const timer = useTimer(handleExpire, inputTimeout)
 
   // SHOWING: 시퀀스 순서대로 점등 + 사운드
   useEffect(() => {
@@ -55,8 +40,11 @@ export function useGameEngine() {
       if (i >= sequence.length) {
         setFlashingButton(null)
         dbg('[Engine] SHOWING→INPUT stage=', useGameStore.getState().stage, 'seqLen=', sequence.length)
-        useGameStore.setState({ status: 'INPUT', currentIndex: 0 })
-        timer.reset()
+        useGameStore.setState({
+          status: 'INPUT',
+          currentIndex: 0,
+          sequenceStartTime: Date.now(),  // INPUT 페이즈 시작 시각 저장
+        })
         showingRef.current = false
         return
       }
@@ -73,20 +61,18 @@ export function useGameEngine() {
     }
 
     next()
-  }, [status, sequence, timer])
+  }, [status, sequence])
 
   // 카운트다운 후 게임 실제 시작
   const launchAfterCountdown = useCallback(() => {
     if (startingRef.current) return
     startingRef.current = true
-    timer.stop()
     setCountdown(3)
     setTimeout(() => setCountdown(2), COUNTDOWN_INTERVAL)
     setTimeout(() => setCountdown(1), COUNTDOWN_INTERVAL * 2)
     setTimeout(() => {
       startingRef.current = false
       setCountdown(null)
-      combo.reset()
       clearingRef.current = false
       setClearingStage(null)
       playGameStart()
@@ -95,7 +81,7 @@ export function useGameEngine() {
       setSequence(firstSeq)
       useGameStore.setState({ sequence: firstSeq, status: 'SHOWING', stage: 1 })
     }, COUNTDOWN_INTERVAL * 3)
-  }, [combo, setSequence, timer])
+  }, [setSequence])
 
   const startGame = useCallback(() => {
     launchAfterCountdown()
@@ -121,8 +107,6 @@ export function useGameEngine() {
       }
 
       playTone(color)
-      combo.recordInput()
-      timer.reset()
 
       // 유저 입력 flash
       setFlashingButton(color)
@@ -131,7 +115,6 @@ export function useGameEngine() {
       const result = addInput(color)
 
       if (result === 'wrong') {
-        timer.stop()
         playGameOver()
         gameOver()
         return
@@ -140,13 +123,17 @@ export function useGameEngine() {
       if (result === 'round-clear') {
         const clearedStage = sequence.length
         clearingRef.current = true
-        timer.stop()
         setClearingStage(clearedStage)
 
-        const isFullCombo = combo.checkFullCombo(clearedStage)
+        const now = Date.now()
+        const flash = getFlashDuration(clearedStage)
+
+        // stageClear에 inputCompleteTime과 flashDuration 전달
+        const { isFullCombo, multiplierIncreased: increased } =
+          useGameStore.getState().stageClear(now, flash)
+
         setIsClearingFullCombo(isFullCombo)
-        // 스토어에 콤보/점수 반영
-        useGameStore.getState().stageClear(isFullCombo)
+        setMultiplierIncreased(increased)
 
         const isMilestone = clearedStage % 5 === 0
         if (isMilestone || isFullCombo) playApplause()
@@ -155,20 +142,18 @@ export function useGameEngine() {
         const pauseMs = isMilestone ? MILESTONE_PAUSE_MS : CLEAR_PAUSE_MS
 
         setTimeout(() => {
-          combo.reset()
           clearingRef.current = false
           setClearingStage(null)
           setIsClearingFullCombo(false)
+          setMultiplierIncreased(false)
           setSequence(newSeq)
           useGameStore.setState({ status: 'SHOWING', currentIndex: 0, stage: newSeq.length })
         }, pauseMs)
         return
       }
     },
-    [sequence, addInput, gameOver, combo, timer, setSequence]
+    [sequence, addInput, gameOver, setSequence]
   )
-
-  const timerProgress = inputTimeout > 0 ? timer.timeLeft / inputTimeout : 0
 
   return {
     flashingButton,
@@ -177,9 +162,7 @@ export function useGameEngine() {
     handleInput,
     startGame,
     retryGame,
-    timer,
-    isComboActive: combo.isActive,
     isClearingFullCombo,
-    timerProgress,
+    multiplierIncreased,
   }
 }

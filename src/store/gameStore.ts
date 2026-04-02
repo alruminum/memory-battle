@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import type { GameStatus, ButtonColor } from '../types'
-import { calcStageScore, calcBaseStageScore } from '../lib/gameLogic'
+import { getComboMultiplier, calcClearBonus, calcBaseStageScore } from '../lib/gameLogic'
 
 interface GameStore {
   status: GameStatus
@@ -12,6 +12,7 @@ interface GameStore {
   comboStreak: number
   fullComboCount: number
   maxComboStreak: number
+  sequenceStartTime: number  // INPUT 페이즈 시작 시각 (ms). 0 = 미설정
 
   userId: string
   hasTodayReward: boolean
@@ -21,7 +22,10 @@ interface GameStore {
   setSequence: (seq: ButtonColor[]) => void
   startGame: () => void
   addInput: (color: ButtonColor) => 'correct' | 'wrong' | 'round-clear'
-  stageClear: (isFullCombo: boolean) => void
+  stageClear: (inputCompleteTime: number, flashDuration: number) => {
+    isFullCombo: boolean
+    multiplierIncreased: boolean
+  }
   gameOver: () => void
   resetGame: () => void
 }
@@ -36,6 +40,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   comboStreak: 0,
   fullComboCount: 0,
   maxComboStreak: 0,
+  sequenceStartTime: 0,
 
   userId: '',
   hasTodayReward: false,
@@ -55,6 +60,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       comboStreak: 0,
       fullComboCount: 0,
       maxComboStreak: 0,
+      sequenceStartTime: 0,
     }),
 
   addInput: (color) => {
@@ -76,27 +82,36 @@ export const useGameStore = create<GameStore>((set, get) => ({
     return 'correct'
   },
 
-  stageClear: (isFullCombo) => {
+  stageClear: (inputCompleteTime, flashDuration) => {
+    let result = { isFullCombo: false, multiplierIncreased: false }
+
     set((state) => {
       const clearedStage = state.sequence.length
-      // state.score에는 이번 스테이지 버튼 입력분(+1씩)이 이미 포함됨
-      // 이번 스테이지 버튼 점수 = clearedStage (시퀀스 길이만큼 입력 성공)
+      const computerShowTime = flashDuration * clearedStage
+      const userInputTime = inputCompleteTime - state.sequenceStartTime
+      const isFullCombo = userInputTime < computerShowTime
+
+      const prevComboStreak = state.comboStreak
+      const newComboStreak = isFullCombo ? prevComboStreak + 1 : 0  // 상한 없음
+
+      const prevMultiplier = getComboMultiplier(prevComboStreak)
+      const newMultiplier = getComboMultiplier(newComboStreak)
+      const multiplierIncreased = newMultiplier > prevMultiplier
+
+      // 점수 계산
+      // addInput이 clearedStage번 호출되었으므로 state.score에 이번 스테이지 rawScore가 포함됨
       const prevAccumulated = state.score - clearedStage
-      const stageScore = calcStageScore(
-        clearedStage,
-        state.comboStreak,
-        clearedStage,
-        isFullCombo
-      )
+      const bonus = calcClearBonus(clearedStage)
+      const rawScore = clearedStage + bonus
+      const stageScore = isFullCombo
+        ? rawScore * getComboMultiplier(prevComboStreak)  // 풀콤보: 이전(클리어 직전) streak 기준 배율
+        : rawScore
       const baseStageScore = calcBaseStageScore(clearedStage)
 
-      const newComboStreak = isFullCombo
-        ? Math.min(state.comboStreak + 1, 4)
-        : 0
-      const newFullComboCount = isFullCombo
-        ? state.fullComboCount + 1
-        : state.fullComboCount
+      const newFullComboCount = isFullCombo ? state.fullComboCount + 1 : state.fullComboCount
       const newMaxComboStreak = Math.max(state.maxComboStreak, newComboStreak)
+
+      result = { isFullCombo, multiplierIncreased }
 
       return {
         score: prevAccumulated + stageScore,
@@ -106,6 +121,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
         maxComboStreak: newMaxComboStreak,
       }
     })
+
+    return result
   },
 
   gameOver: () =>
@@ -125,5 +142,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
       comboStreak: 0,
       fullComboCount: 0,
       maxComboStreak: 0,
+      sequenceStartTime: 0,
     }),
 }))

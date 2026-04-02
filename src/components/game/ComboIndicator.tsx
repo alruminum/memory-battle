@@ -1,10 +1,9 @@
 interface ComboIndicatorProps {
-  comboStreak: number    // 현재 연속 풀콤보 스트릭 (0이면 비표시)
-  isComboActive: boolean // 현재 스테이지 내 300ms 이내 연속 입력 중 여부
+  comboStreak: number  // 현재 연속 풀콤보 스트릭 (0이면 비표시)
 }
 
-export function ComboIndicator({ comboStreak, isComboActive }: ComboIndicatorProps) {
-  if (comboStreak === 0 && !isComboActive) return null
+export function ComboIndicator({ comboStreak }: ComboIndicatorProps) {
+  if (comboStreak === 0) return null
 
   return (
     <div style={{
@@ -23,21 +22,7 @@ export function ComboIndicator({ comboStreak, isComboActive }: ComboIndicatorPro
           color: 'var(--vb-accent)',
           letterSpacing: 2,
         }}>
-          {`x${Math.min(comboStreak + 1, 5)} COMBO STREAK`}
-        </div>
-      )}
-
-      {/* COMBO! 텍스트 -- 입력 중 300ms 이내 연속 입력 시 */}
-      {isComboActive && (
-        <div style={{
-          fontFamily: 'var(--vb-font-score)',
-          fontSize: 11,
-          fontWeight: 700,
-          color: 'var(--vb-text-mid)',
-          letterSpacing: 3,
-          animation: 'pulse 0.3s ease-in-out',
-        }}>
-          COMBO!
+          {`x${Math.floor(comboStreak / 5) + 1} COMBO STREAK`}
         </div>
       )}
     </div>
