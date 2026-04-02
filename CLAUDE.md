@@ -31,6 +31,19 @@ VITE_APP_NAME=memory-battle
 
 ---
 
+## GitHub Issues 마일스톤 (현재)
+
+| 용도 | 마일스톤 |
+|---|---|
+| 버그/이슈 추적 (QA) | `Bugs` |
+| 스토리 이슈 | `Story` |
+| 에픽 | `Epics` |
+| 현재 버전 레이블 | `v03` |
+
+> 버전이 올라가면 "현재 버전 레이블" 항목만 업데이트하면 된다. 에이전트는 이 표를 참조한다.
+
+---
+
 ## 오케스트레이션 워크플로우
 
 - 전역 룰: `~/.claude/orchestration-rules.md` (디자인 루프·구현 루프·에이전트 역할 경계)
@@ -162,6 +175,18 @@ _(impl 없음 — 문서 구조 작업만)_ · Issues: [#19](https://github.com/
 Remote: https://github.com/alruminum/memory-battle.git
 Branch: main
 ```
+
+### 커밋 메시지 규칙
+
+- 연관 GitHub Issue가 있으면 커밋 메시지 본문에 반드시 명시
+- 해당 작업으로 이슈가 완료되는 경우: `Closes #NNN`
+- 참조만 하는 경우: `Related to #NNN`
+- 예시:
+  ```
+  chore: GitHub Issues 구조 개편 (마일스톤 통합 + 버전 레이블)
+
+  Closes #43
+  ```
 
 ---
 

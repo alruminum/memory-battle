@@ -16,7 +16,7 @@ model: sonnet
 
 1. `CLAUDE.md`를 읽어 문서 목록과 현재 마일스톤을 파악한다.
 2. GitHub Issues에서 현재 에픽 목록을 조회한다:
-   `mcp__github__list_issues` — repo: `alruminum/memory-battle`, milestone: `Epics-v03`, state: `open`
+   `mcp__github__list_issues` — repo: `alruminum/memory-battle`, milestone: `Epics`, label: CLAUDE.md "현재 버전 레이블", state: `open`
 3. 요청된 에픽의 GitHub Issue 본문 또는 `docs/milestones/vNN/epics/epic-NN-*/stories.md`를 읽어 스토리/태스크 맥락을 파악한다.
 4. 에픽 내 기존 impl 파일을 읽어 기존 설계 결정을 확인한다.
 5. 요청된 모듈과 관련된 설계 문서를 읽는다:
@@ -32,14 +32,14 @@ model: sonnet
 
     **a. Epic 부모 이슈** (`mcp__github__create_issue`):
     - 제목: `[Epic NN] {에픽 이름}`
-    - milestone: `Epics-v03` (또는 해당 버전)
-    - labels: `["epic"]`
+    - milestone: `CLAUDE.md`의 **GitHub Issues 마일스톤 표** → "현재 에픽" 항목 참조
+    - labels: `["{CLAUDE.md 현재 버전 레이블}"]`
     - body: 에픽 목적 + 포함 스토리 목록
 
     **b. Story 이슈** (`mcp__github__create_issue`, 스토리마다 반복):
     - 제목: `[Epic NN] Story M: {스토리 제목}`
     - milestone: `Story`
-    - labels: `["story"]`
+    - labels: `["{CLAUDE.md 현재 버전 레이블}"]`
     - body: `📋 impl: {impl 파일 경로}\n\n> {스토리 컨텍스트}\n\n## Tasks\n- [ ] ...`
 
     **c. Story를 Epic sub-issue로 연결** (Bash, 스토리마다 반복):

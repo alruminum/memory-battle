@@ -15,7 +15,7 @@ model: sonnet
 ## 작업 순서 (GitHub Issues 기반)
 
 1. **미완료 스토리 조회** (`mcp__github__list_issues`):
-   - repo: `alruminum/memory-battle`, milestone: `Story`, state: `open`, labels: `story`
+   - repo: `alruminum/memory-battle`, milestone: `Story`, state: `open`
 
 2. **스토리 본문 조회** (`mcp__github__get_issue`):
    - 본문 상단 `📋 impl:` 경로 확인 → impl 파일 Read

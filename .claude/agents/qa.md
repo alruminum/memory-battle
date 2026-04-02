@@ -12,17 +12,11 @@ model: sonnet
 
 ---
 
-## 버그 Issue 등록 워크플로우 (분석 전 필수)
+## GitHub Issues 버그 등록 오버라이드
 
-버그 발견 시 **원인 분석 전에** GitHub Issue를 먼저 등록한다 (mcp__github__create_issue):
-
-1. 제목: `[Bug] {이슈 요약}`
-2. milestone: `issues-v03`
-3. labels: `["type: bug"]`
-4. 본문: 위치/재현 조건/기대 vs 실제 동작 포함
-5. Issue 번호를 QA 리포트 상단에 기재: `🐛 Issue: #NNN`
-
-이후 원인 분석 → 오케스트레이터에게 라우팅 추천 → engineer fix → Issue close 흐름.
+- **repo**: `alruminum/memory-battle`
+- **milestone**: `CLAUDE.md` → "버그/이슈 추적 (QA)" 항목 (`Bugs`)
+- **labels**: `["{CLAUDE.md 현재 버전 레이블}"]`
 
 ---
 
