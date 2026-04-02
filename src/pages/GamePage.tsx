@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useEffect } from 'react'
 import { useGameStore } from '../store/gameStore'
 import { useGameEngine } from '../hooks/useGameEngine'
 import { useRanking } from '../hooks/useRanking'
@@ -7,6 +7,76 @@ import { ButtonPad } from '../components/game/ButtonPad'
 import { ComboIndicator } from '../components/game/ComboIndicator'
 import { BannerAd } from '../components/ads/BannerAd'
 
+function rankLabel(rank: number): string {
+  return rank > 0 ? '#' + rank : '#—'
+}
+
+interface StageAreaProps {
+  countdown: number | null
+  clearingStage: number | null
+  isPlaying: boolean
+  isClearingFullCombo: boolean
+  stage: number
+}
+
+function StageArea({ countdown, clearingStage, isPlaying, isClearingFullCombo, stage }: StageAreaProps): JSX.Element {
+  if (countdown !== null) {
+    return (
+      <div style={{
+        fontFamily: 'var(--vb-font-score)',
+        fontSize: 56,
+        fontWeight: 900,
+        color: 'var(--vb-accent)',
+        lineHeight: 1,
+        textShadow: '0 0 24px rgba(200,255,0,0.4)',
+      }}>
+        {countdown}
+      </div>
+    )
+  }
+  if (clearingStage !== null) {
+    return (
+      <div style={{ textAlign: 'center' }}>
+        <div style={{
+          fontFamily: 'var(--vb-font-score)',
+          fontSize: 11,
+          color: 'var(--vb-accent)',
+          letterSpacing: 2,
+        }}>STAGE {clearingStage}</div>
+        <div style={{
+          fontFamily: 'var(--vb-font-score)',
+          fontSize: 18,
+          fontWeight: 800,
+          color: 'var(--vb-accent)',
+          letterSpacing: 1,
+        }}>{isClearingFullCombo ? 'FULL COMBO!' : 'CLEAR'}</div>
+      </div>
+    )
+  }
+  if (isPlaying) {
+    return (
+      <div style={{ textAlign: 'center' }}>
+        <div style={{
+          fontFamily: 'var(--vb-font-score)',
+          fontSize: 11,
+          color: 'var(--vb-text-dim)',
+          letterSpacing: 3,
+          marginBottom: 4,
+        }}>STAGE</div>
+        <div style={{
+          fontFamily: 'var(--vb-font-score)',
+          fontSize: 56,
+          fontWeight: 900,
+          color: 'var(--vb-text)',
+          lineHeight: 1,
+        }}>{String(stage).padStart(2, '0')}</div>
+      </div>
+    )
+  }
+  // IDLE — 빈 공간 (랭킹은 HUD 스트립에 표시)
+  return <div />
+}
+
 interface GamePageProps {
   onGameOver: () => void
   onRanking: () => void
@@ -14,9 +84,8 @@ interface GamePageProps {
 
 export function GamePage({ onGameOver, onRanking }: GamePageProps) {
   const { status, score, stage, comboStreak, userId, setUserId } = useGameStore()
-  const { flashingButton, clearingStage, countdown, handleInput, startGame, retryGame, isComboActive, isClearingFullCombo } = useGameEngine()
+  const { flashingButton, clearingStage, countdown, handleInput, startGame, retryGame, isComboActive, isClearingFullCombo, timerProgress } = useGameEngine()
   const ranking = useRanking(userId || null)
-  const [isInitializing, setIsInitializing] = useState(true)
 
   useEffect(() => {
     ;(async () => {
@@ -26,84 +95,24 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
         ranking.refetch()
       } catch {
         // 실패 시 기본값 유지
-      } finally {
-        setIsInitializing(false)
       }
     })()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  // 마운트 1회만 실행. ranking.refetch를 deps에 추가하면 refetch 참조 변경마다 재실행되어 무한 루프 발생
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   useEffect(() => {
     if (status === 'RESULT') {
       onGameOver()
     }
-  }, [status]) // eslint-disable-line react-hooks/exhaustive-deps
+  // status 변화만 감시하는 것이 의도. onGameOver를 deps에 추가하면 부모 리렌더 시 중복 호출 가능
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status])
 
   const isPlaying = status === 'SHOWING' || status === 'INPUT'
 
   function handleStart() {
     startGame()
-  }
-
-  const rankLabel = (rank: number) => rank > 0 ? `#${rank}` : '#—'
-
-  // 스테이지 영역 — IDLE 상태에서는 랭킹 뱃지 + 일간 기회 표시
-  const stageArea = () => {
-    if (countdown !== null) {
-      return (
-        <div style={{
-          fontFamily: 'var(--vb-font-score)',
-          fontSize: 56,
-          fontWeight: 900,
-          color: 'var(--vb-accent)',
-          lineHeight: 1,
-          textShadow: '0 0 24px rgba(200,255,0,0.4)',
-        }}>
-          {countdown}
-        </div>
-      )
-    }
-    if (clearingStage !== null) {
-      return (
-        <div style={{ textAlign: 'center' }}>
-          <div style={{
-            fontFamily: 'var(--vb-font-score)',
-            fontSize: 11,
-            color: 'var(--vb-accent)',
-            letterSpacing: 2,
-          }}>STAGE {clearingStage}</div>
-          <div style={{
-            fontFamily: 'var(--vb-font-score)',
-            fontSize: 18,
-            fontWeight: 800,
-            color: 'var(--vb-accent)',
-            letterSpacing: 1,
-          }}>{isClearingFullCombo ? 'FULL COMBO!' : 'CLEAR'}</div>
-        </div>
-      )
-    }
-    if (isPlaying) {
-      return (
-        <div style={{ textAlign: 'center' }}>
-          <div style={{
-            fontFamily: 'var(--vb-font-score)',
-            fontSize: 11,
-            color: 'var(--vb-text-dim)',
-            letterSpacing: 3,
-            marginBottom: 4,
-          }}>STAGE</div>
-          <div style={{
-            fontFamily: 'var(--vb-font-score)',
-            fontSize: 56,
-            fontWeight: 900,
-            color: 'var(--vb-text)',
-            lineHeight: 1,
-          }}>{String(stage).padStart(2, '0')}</div>
-        </div>
-      )
-    }
-    // IDLE — 빈 공간 (랭킹은 HUD 스트립에 표시)
-    return <div />
   }
 
   return (
@@ -169,7 +178,7 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
         alignItems: 'center',
         justifyContent: 'center',
       }}>
-        {stageArea()}
+        <StageArea countdown={countdown} clearingStage={clearingStage} isPlaying={isPlaying} isClearingFullCombo={isClearingFullCombo} stage={stage} />
       </div>
 
       {/* 콤보 인디케이터 */}
@@ -214,7 +223,7 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
         flexShrink: 0,
       }}>
         <div style={{
-          width: isPlaying ? '65%' : '0%',
+          width: isPlaying ? (timerProgress * 100).toFixed(1) + '%' : '0%',
           height: '100%',
           backgroundColor: 'var(--vb-accent)',
           borderRadius: 2,

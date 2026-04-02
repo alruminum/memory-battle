@@ -11,3 +11,4 @@
 | [x] | Epic 05: 게임 메카닉 개편 (PRD v0.3) | [docs/milestones/v03/epics/epic-05-mechanic-v03/stories.md](docs/milestones/v03/epics/epic-05-mechanic-v03/stories.md) |
 | [x] | Epic 06: 마일스톤 기반 문서 구조 개편 | [docs/milestones/v03/epics/epic-06-milestone-docs/stories.md](docs/milestones/v03/epics/epic-06-milestone-docs/stories.md) |
 | [x] | Epic 07: DB 타입 안전성 | [docs/milestones/v03/epics/epic-07-db-type-safety/stories.md](docs/milestones/v03/epics/epic-07-db-type-safety/stories.md) |
+| [x] | Epic 08: GamePage 품질 개선 & UI 리팩토링 | [docs/milestones/v03/epics/epic-08-gamepage-refactor/stories.md](docs/milestones/v03/epics/epic-08-gamepage-refactor/stories.md) |

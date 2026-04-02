@@ -168,6 +168,8 @@ export function useGameEngine() {
     [sequence, addInput, gameOver, combo, timer, setSequence]
   )
 
+  const timerProgress = inputTimeout > 0 ? timer.timeLeft / inputTimeout : 0
+
   return {
     flashingButton,
     clearingStage,
@@ -178,5 +180,6 @@ export function useGameEngine() {
     timer,
     isComboActive: combo.isActive,
     isClearingFullCombo,
+    timerProgress,
   }
 }
