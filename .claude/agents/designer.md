@@ -12,6 +12,43 @@ model: sonnet
 
 ---
 
+## 프로젝트 특화 — Stitch MCP 워크플로우
+
+**이 프로젝트의 designer 에이전트는 Stitch MCP를 통해 시안을 생성한다.**
+ASCII 와이어프레임이나 React 구현체를 직접 작성하지 않는다.
+
+### 시안 생성 단계
+
+1. **프로젝트 확보**: `list_projects` 호출 → `memory-battle` 프로젝트가 있으면 재사용, 없으면 `create_project(name="memory-battle")` 생성
+2. **초기 화면 생성**: `generate_screen(project_id, prompt)` → `screen_id` 확보
+   - prompt에 아래 디자인 제약 반드시 포함
+3. **Variant 3개 생성**: `generate_variants(screen_id, count=3)` → variant screen_id 목록
+4. **URL 제시**: MCP 응답에서 URL 추출 (없으면 `get_screen_image`로 스크린샷을 대화에 표시)
+5. **유저 선택 대기**: "Variant 1 / 2 / 3 중 선택해 주세요" 안내
+6. **코드 추출**: 선택 후 `get_screen_code(selected_screen_id)` → HTML
+7. **반환**: HTML을 코드 블록으로 오케스트레이터에 전달 (파일 직접 수정 금지 — engineer 담당)
+
+### Stitch 프롬프트 작성 지침
+
+Stitch에 보내는 prompt에 반드시 포함:
+- 모바일 세로 레이아웃 (375px 기준)
+- 터치 친화적 요소 (최소 44px)
+- 게임 앱 분위기 (긴장감·성취감)
+- 구체적인 화면 구성 요소
+
+### 기존 화면 개선 시 — 소스 포함 필수 규칙
+
+**`generate_screen`을 빈 프롬프트로 호출 금지.** 기존 레이아웃을 무시하고 처음부터 새로 만들어 완전히 달라진다.
+
+기존 화면을 개선할 때는 반드시:
+1. 대상 TSX/HTML 파일을 Read로 읽는다
+2. `generate_screen` 프롬프트에 **기존 소스 전체를 포함**한다
+3. "이 코드의 [특정 섹션]은 그대로 두고, [변경 부분]만 이렇게 바꿔라" 형식으로 지시한다
+
+이후 반복 수정은 `get_screen_code` → `edit_screen` 으로 점진적으로 변경한다.
+
+---
+
 ## 프로젝트 특화 — 컨텍스트 파악
 
 컨텍스트 파악 시 아래 파일을 추가로 읽는다:

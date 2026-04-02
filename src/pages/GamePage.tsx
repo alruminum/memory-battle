@@ -102,69 +102,8 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
         </div>
       )
     }
-    // IDLE — 랭킹 뱃지 + 일간 기회
-    return (
-      <div style={{ textAlign: 'center', width: '100%', padding: '0 24px' }}>
-        <div style={{ display: 'flex', justifyContent: 'center', gap: 8, marginBottom: 12 }}>
-          {([
-            { label: 'Daily',   rank: ranking.myRanks.daily },
-            { label: 'Monthly', rank: ranking.myRanks.monthly },
-            { label: 'Season',  rank: ranking.myRanks.season },
-          ] as const).map(({ label, rank }) => (
-            <div key={label} style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              padding: '8px 14px',
-              backgroundColor: 'var(--vb-surface)',
-              borderRadius: 8,
-              border: '1px solid var(--vb-border)',
-              minWidth: 60,
-            }}>
-              <div style={{
-                fontFamily: 'var(--vb-font-body)',
-                fontSize: 9,
-                fontWeight: 600,
-                color: 'var(--vb-text-dim)',
-                textTransform: 'uppercase',
-                letterSpacing: 1.5,
-                marginBottom: 3,
-              }}>{label}</div>
-              <div style={{
-                fontFamily: 'var(--vb-font-score)',
-                fontSize: 18,
-                fontWeight: 900,
-                color: 'var(--vb-text)',
-              }}>
-                {ranking.isLoading ? '#—' : rankLabel(rank)}
-              </div>
-            </div>
-          ))}
-        </div>
-        <div style={{
-          fontSize: 11,
-          color: 'var(--vb-text-dim)',
-          fontFamily: 'var(--vb-font-body)',
-          marginBottom: 8,
-        }}>
-          {isInitializing ? 'Loading...' : '무한 플레이 가능'}
-        </div>
-        <button
-          onClick={onRanking}
-          style={{
-            background: 'none',
-            border: 'none',
-            color: 'var(--vb-text-mid)',
-            fontSize: 12,
-            fontFamily: 'var(--vb-font-body)',
-            cursor: 'pointer',
-            textDecoration: 'underline',
-          }}
-        >
-          View Rankings
-        </button>
-      </div>
-    )
+    // IDLE — 빈 공간 (랭킹은 HUD 스트립에 표시)
+    return <div />
   }
 
   return (
@@ -176,47 +115,51 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
       color: 'var(--vb-text)',
       fontFamily: 'var(--vb-font-body)',
     }}>
-      {/* 헤더 스코어보드 */}
+      {/* 타이틀 */}
       <div style={{
+        padding: '14px 20px 12px',
         display: 'flex',
-        justifyContent: 'space-between',
         alignItems: 'center',
-        padding: '12px 20px',
+        justifyContent: 'center',
         borderBottom: '1px solid var(--vb-border)',
         flexShrink: 0,
       }}>
         <div style={{
-          flex: 1,
           fontFamily: 'var(--vb-font-score)',
-          fontSize: 14,
-          fontWeight: 800,
-          color: 'var(--vb-text-mid)',
-          letterSpacing: 1,
-        }}>&nbsp;</div>
-        <div style={{ flex: 1, textAlign: 'center' }}>
-          <div style={{
-            fontFamily: 'var(--vb-font-score)',
-            fontSize: 10,
-            color: 'var(--vb-text-dim)',
-            letterSpacing: 2,
-          }}>SCORE</div>
-          <div style={{
-            fontFamily: 'var(--vb-font-score)',
-            fontSize: 24,
-            fontWeight: 900,
-            color: 'var(--vb-accent)',
-            letterSpacing: 1,
-          }}>{score.toLocaleString()}</div>
+          fontSize: 20,
+          fontWeight: 900,
+          letterSpacing: 2,
+          textTransform: 'uppercase',
+        }}>
+          <span style={{ color: 'var(--vb-accent)' }}>M</span>EMORY BATTLE
         </div>
-        <div style={{
-          flex: 1,
-          textAlign: 'right',
-          fontFamily: 'var(--vb-font-score)',
-          fontSize: 14,
-          fontWeight: 800,
-          color: 'var(--vb-text-mid)',
-          letterSpacing: 1,
-        }}>STG {String(stage).padStart(2, '0')}</div>
+      </div>
+
+      {/* HUD 스트립 */}
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr 1fr',
+        backgroundColor: 'var(--vb-surface)',
+        borderBottom: '1px solid var(--vb-border)',
+        flexShrink: 0,
+      }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '10px 8px', gap: 3 }}>
+          <span style={{ fontSize: 9, fontWeight: 600, color: 'var(--vb-text-dim)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>SCORE</span>
+          <span style={{ fontFamily: 'var(--vb-font-score)', fontSize: 22, fontWeight: 900, color: 'var(--vb-text)', lineHeight: 1 }}>{score.toLocaleString()}</span>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '10px 8px', gap: 3, borderLeft: '1px solid var(--vb-border)', borderRight: '1px solid var(--vb-border)' }}>
+          <span style={{ fontSize: 9, fontWeight: 600, color: 'var(--vb-text-dim)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>STG</span>
+          <span style={{ fontFamily: 'var(--vb-font-score)', fontSize: 22, fontWeight: 900, color: 'var(--vb-text)', lineHeight: 1 }}>{String(stage).padStart(2, '0')}</span>
+        </div>
+        <button
+          onClick={onRanking}
+          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '10px 8px', gap: 3, background: 'none', border: 'none', cursor: 'pointer' }}
+        >
+          <span style={{ fontSize: 9, fontWeight: 600, color: 'var(--vb-text-dim)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>DAILY</span>
+          <span style={{ fontFamily: 'var(--vb-font-score)', fontSize: 22, fontWeight: 900, color: 'var(--vb-accent)', lineHeight: 1 }}>
+            {ranking.isLoading ? '#—' : rankLabel(ranking.myRanks.daily)} ›
+          </span>
+        </button>
       </div>
 
       {/* 스테이지/상태 영역 */}

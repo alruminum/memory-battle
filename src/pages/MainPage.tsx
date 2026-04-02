@@ -24,7 +24,7 @@ const CORNER_POS: { color: keyof typeof BTN_COLORS; top?: number; bottom?: numbe
 ]
 
 export function MainPage({ onStart, onRanking }: MainPageProps) {
-  const { userId, setUserId } = useGameStore()
+  const { userId, setUserId, score, stage } = useGameStore()
   const ranking = useRanking(userId || null)
   const { hasTodayReward } = useDailyReward()
 
@@ -81,7 +81,7 @@ export function MainPage({ onStart, onRanking }: MainPageProps) {
         padding: '16px 20px 12px',
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        justifyContent: 'center',
         borderBottom: '1px solid var(--vb-border)',
         flexShrink: 0,
       }}>
@@ -94,60 +94,37 @@ export function MainPage({ onStart, onRanking }: MainPageProps) {
         }}>
           <span style={{ color: 'var(--vb-accent)' }}>M</span>EMORY BATTLE
         </div>
-        <div style={{
-          fontSize: 10,
-          color: 'var(--vb-text-dim)',
-          fontWeight: 600,
-          letterSpacing: 1,
-        }}>SEASON 1</div>
       </div>
 
-      {/* 스코어보드 행 */}
+      {/* HUD 스트립 */}
       <div style={{
-        display: 'flex',
-        margin: '16px 20px 0',
+        display: 'grid',
+        gridTemplateColumns: '1fr 1fr 1fr',
         backgroundColor: 'var(--vb-surface)',
-        borderRadius: 8,
-        border: '1px solid var(--vb-border)',
-        overflow: 'hidden',
+        borderTop: '1px solid var(--vb-border)',
+        borderBottom: '1px solid var(--vb-border)',
         flexShrink: 0,
       }}>
-        {(
-          [
-            { label: 'Daily',   rank: ranking.myRanks.daily },
-            { label: 'Monthly', rank: ranking.myRanks.monthly },
-            { label: 'Season',  rank: ranking.myRanks.season },
-          ] as const
-        ).map(({ label, rank }, i, arr) => (
-          <div key={label} style={{ display: 'flex', flex: 1 }}>
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              padding: '10px 0',
-              flex: 1,
-            }}>
-              <div style={{
-                fontFamily: 'var(--vb-font-body)',
-                fontSize: 10,
-                fontWeight: 600,
-                color: 'var(--vb-text-dim)',
-                textTransform: 'uppercase',
-                letterSpacing: 2,
-                marginBottom: 4,
-              }}>{label}</div>
-              <div style={{
-                fontFamily: 'var(--vb-font-score)',
-                fontSize: 22,
-                fontWeight: 900,
-                color: 'var(--vb-text)',
-              }}>{rankLabel(rank, ranking.isLoading)}</div>
-            </div>
-            {i < arr.length - 1 && (
-              <div style={{ width: 1, backgroundColor: 'var(--vb-border)' }} />
-            )}
-          </div>
-        ))}
+        {/* SCORE */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '10px 8px', gap: 3 }}>
+          <span style={{ fontSize: 9, fontWeight: 600, color: 'var(--vb-text-dim)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>SCORE</span>
+          <span style={{ fontFamily: 'var(--vb-font-score)', fontSize: 22, fontWeight: 900, color: 'var(--vb-text)', lineHeight: 1 }}>{score.toLocaleString()}</span>
+        </div>
+        {/* STG */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '10px 8px', gap: 3, borderLeft: '1px solid var(--vb-border)', borderRight: '1px solid var(--vb-border)' }}>
+          <span style={{ fontSize: 9, fontWeight: 600, color: 'var(--vb-text-dim)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>STG</span>
+          <span style={{ fontFamily: 'var(--vb-font-score)', fontSize: 22, fontWeight: 900, color: 'var(--vb-text)', lineHeight: 1 }}>{String(stage).padStart(2, '0')}</span>
+        </div>
+        {/* DAILY RANK */}
+        <button
+          onClick={onRanking}
+          style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '10px 8px', gap: 3, background: 'none', border: 'none', cursor: 'pointer' }}
+        >
+          <span style={{ fontSize: 9, fontWeight: 600, color: 'var(--vb-text-dim)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>DAILY</span>
+          <span style={{ fontFamily: 'var(--vb-font-score)', fontSize: 22, fontWeight: 900, color: 'var(--vb-accent)', lineHeight: 1 }}>
+            {rankLabel(ranking.myRanks.daily, ranking.isLoading)} ›
+          </span>
+        </button>
       </div>
 
       {hasTodayReward && (
@@ -237,26 +214,6 @@ export function MainPage({ onStart, onRanking }: MainPageProps) {
         </div>
       </div>
 
-      {/* View Rankings 버튼 */}
-      <div style={{ padding: '0 20px 32px', flexShrink: 0 }}>
-        <button
-          onClick={onRanking}
-          style={{
-            width: '100%',
-            padding: '14px 0',
-            borderRadius: 8,
-            border: '1px solid var(--vb-border)',
-            backgroundColor: 'transparent',
-            color: 'var(--vb-text-mid)',
-            fontFamily: 'var(--vb-font-body)',
-            fontSize: 13,
-            fontWeight: 600,
-            cursor: 'pointer',
-          }}
-        >
-          View Rankings
-        </button>
-      </div>
 
       {/* 토스트 */}
       {toast && (
