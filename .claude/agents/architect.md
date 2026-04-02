@@ -71,6 +71,7 @@ interface 파일명Props {
 - 파일 경로는 `src/` 기준 절대경로로 작성한다.
 - 모듈 번호는 `CLAUDE.md`의 테이블 기준을 따른다.
 - 계획 파일 작성 후 유저에게 파일 경로와 주요 내용을 간략히 보고한다.
+- **어떤 방식으로 호출되든 base의 TRD 현행화 규칙을 항상 적용한다.** Mode 명시 없이 특정 파일 직접 수정 지시를 받은 경우에도 base(`~/.claude/agents/architect-base.md`)의 TRD 현행화 섹션을 따라 trd.md를 비교·업데이트한다.
 - **앱인토스 SDK API를 사용하는 모듈 설계 시, 반드시 MCP 도구로 공식 스펙을 먼저 확인한다.**
   - `Read` 도구로 `node_modules/@apps-in-toss/web-bridge/dist/index.d.ts` 직접 참조 (MCP보다 우선)
   - 또는 MCP 도구 사용 가능 시: `mcp__apps-in-toss__search_docs`, `mcp__apps-in-toss__get_doc`

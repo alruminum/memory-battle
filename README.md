@@ -91,10 +91,11 @@ src/
 | 에이전트 | 역할 |
 |---|---|
 | **product-planner** | 요구사항 수집 → 기능 스펙 → 스코프 결정 |
-| **orchestrator** | 단계별 워크플로 조율, 스토리별 구현-검증-커밋 루프 관리 |
 | **architect** | 시스템 설계 및 모듈별 구현 계획 작성 (`impl/NN-*.md`) |
 | **engineer** | impl 파일 + ui-spec + game-logic 참고해 코드 구현 |
+| **test-engineer** | 구현 완료 코드 기반 테스트 작성·실행, TESTS_PASS/FAIL 판정 |
 | **validator** | 설계/코드 검증 — PASS/FAIL 판정 (읽기 전용) |
+| **pr-reviewer** | 커밋 전 코드 품질 리뷰 — 패턴·컨벤션·가독성 (읽기 전용) |
 | **designer** | UI variant 3개 생성 (ASCII 와이어프레임 + React 구현체) |
 | **design-critic** | 디자인 variant 점수화 및 PICK/ITERATE/ESCALATE 판정 (읽기 전용) |
 | **qa** | 이슈 원인 분석 및 라우팅 추천 (읽기 전용) |
@@ -103,11 +104,12 @@ src/
 
 ```
 product-planner (기획 + 스코프 결정)
-  └→ orchestrator
-       ├→ [병렬] architect + validator (설계 잠금)
-       ├→ [병렬] designer + design-critic (UI 디자인)
-       ├→ architect + engineer (구현)
-       └→ validator (코드 검증) → DONE
+  └→ [병렬] architect + validator (설계 잠금)
+  └→ [병렬] designer + design-critic (UI 디자인)
+  └→ architect → engineer (구현)
+       └→ test-engineer (테스트 작성·실행)
+       └→ validator (코드 검증)
+       └→ pr-reviewer (커밋 전 코드 리뷰) → DONE
 ```
 
 각 단계는 유저 명시적 승인 후 다음 단계로 진행합니다.
