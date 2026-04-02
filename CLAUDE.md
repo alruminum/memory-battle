@@ -130,6 +130,7 @@ _(impl 없음 — 문서 구조 작업만)_ · Issues: [#19](https://github.com/
 | 02 combo-timer-ui | [impl/02-combo-timer-ui.md](docs/milestones/v03/epics/epic-09-combo-v031/impl/02-combo-timer-ui.md) | [#26](https://github.com/alruminum/memory-battle/issues/26) |
 | 03 multiplier-burst-ui | [impl/03-multiplier-burst-ui.md](docs/milestones/v03/epics/epic-09-combo-v031/impl/03-multiplier-burst-ui.md) | [#27](https://github.com/alruminum/memory-battle/issues/27) |
 | 04 timer-restore | [impl/04-timer-restore.md](docs/milestones/v03/epics/epic-09-combo-v031/impl/04-timer-restore.md) | [#28](https://github.com/alruminum/memory-battle/issues/28) |
+| 05 combo-timer-interval-fix | [impl/05-combo-timer-interval-fix.md](docs/milestones/v03/epics/epic-09-combo-v031/impl/05-combo-timer-interval-fix.md) | [#44](https://github.com/alruminum/memory-battle/issues/44) |
 
 ---
 

@@ -14,6 +14,10 @@
   --vb-font-score: 'Barlow Condensed', sans-serif;
   --vb-font-body: 'Space Grotesk', sans-serif;
 
+  /* 콤보 타이머 색상 */
+  --vb-combo-ok: #34D399;
+  --vb-combo-over: #F87171;
+
   /* 중앙 버튼 / 게임기 바디 장식 색상 */
   --vb-body-bg-start: #2a2a35;
   --vb-body-bg-mid: #16161f;

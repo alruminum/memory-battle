@@ -9,6 +9,12 @@ interface ComboTimerProps {
 export function ComboTimer({ computerShowTime, inputStartTime, isActive }: ComboTimerProps) {
   const [elapsedMs, setElapsedMs] = useState(0)
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+  const computerShowTimeRef = useRef(computerShowTime)
+
+  // computerShowTime이 바뀔 때마다 ref 동기화 (interval 재시작 없이 최신값 유지)
+  useEffect(() => {
+    computerShowTimeRef.current = computerShowTime
+  }, [computerShowTime])
 
   useEffect(() => {
     if (!isActive || inputStartTime === 0) {
@@ -23,7 +29,15 @@ export function ComboTimer({ computerShowTime, inputStartTime, isActive }: Combo
 
     // 활성: 100ms 간격으로 경과 시간 업데이트
     intervalRef.current = setInterval(() => {
-      setElapsedMs(Date.now() - inputStartTime)
+      const next = Date.now() - inputStartTime
+      if (next >= computerShowTimeRef.current) {
+        // 상한 도달: interval 정지 + 값 clamp
+        clearInterval(intervalRef.current!)
+        intervalRef.current = null
+        setElapsedMs(computerShowTimeRef.current)
+      } else {
+        setElapsedMs(next)
+      }
     }, 100)
 
     return () => {
@@ -38,8 +52,10 @@ export function ComboTimer({ computerShowTime, inputStartTime, isActive }: Combo
   const targetSeconds = (computerShowTime / 1000).toFixed(2)
 
   // 색상: 기준 시간 이내 = 초록 계열, 초과 = 빨강 계열
-  const color = isOverTime ? '#F87171' : '#34D399'
-  const glowColor = isOverTime ? 'rgba(248,113,113,0.3)' : 'rgba(52,211,153,0.3)'
+  const colorVar = isOverTime ? 'var(--vb-combo-over)' : 'var(--vb-combo-ok)'
+  const glowVar = isOverTime
+    ? 'color-mix(in srgb, var(--vb-combo-over) 30%, transparent)'
+    : 'color-mix(in srgb, var(--vb-combo-ok) 30%, transparent)'
 
   return (
     <div style={{
@@ -54,8 +70,8 @@ export function ComboTimer({ computerShowTime, inputStartTime, isActive }: Combo
         fontFamily: 'var(--vb-font-score)',
         fontSize: 20,
         fontWeight: 900,
-        color,
-        textShadow: `0 0 12px ${glowColor}`,
+        color: colorVar,
+        textShadow: `0 0 12px ${glowVar}`,
         transition: 'color 200ms ease, text-shadow 200ms ease',
         letterSpacing: 1,
         minWidth: 52,

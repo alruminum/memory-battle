@@ -18,6 +18,17 @@
     "mcp__stitch__extract_design_context"
   ],
   "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 ~/.claude/hooks/harness-router.py mb 2>/dev/null || true",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
     "SessionStart": [
       {
         "hooks": [
@@ -43,6 +54,11 @@
       {
         "matcher": "Agent",
         "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"import sys,json,re; d=json.load(sys.stdin); t=d.get('tool_input',{}); a=t.get('subagent_type'); p=t.get('prompt',''); has_issue=bool(re.search(r'#\\d+',p)); print(json.dumps({'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':f'❌ {a} 호출 전 GitHub 이슈 등록 필요. 프롬프트에 이슈 번호(#NNN)가 없습니다.'}})) if a in ['architect','engineer','designer'] and not has_issue else None\" 2>/dev/null || true",
+            "timeout": 5
+          },
           {
             "type": "command",
             "command": "python3 -c \"import sys,json,re; d=json.load(sys.stdin); t=d.get('tool_input',{}); a=t.get('subagent_type'); p=t.get('prompt',''); r=re.search(r'Mode [A-E]',p,re.IGNORECASE); print(json.dumps({'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':'❌ architect 호출 시 Mode A/B/C/D/E를 프롬프트에 명시하세요.'}})) if a=='architect' and not r else None\" 2>/dev/null || true",
