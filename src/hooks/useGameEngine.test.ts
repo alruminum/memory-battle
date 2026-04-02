@@ -82,25 +82,26 @@ describe('C-1. IDLE → SHOWING → INPUT 전환', () => {
   })
 })
 
+/**
+ * 헬퍼: 카운트다운 + 첫 SHOWING 완료 후 INPUT 상태로 진입시킨다.
+ * 이후 store의 sequence를 확인해 첫 버튼을 반환한다.
+ */
+function setupToInput(result: { current: ReturnType<typeof useGameEngine> }) {
+  act(() => {
+    result.current.startGame()
+  })
+  act(() => {
+    vi.advanceTimersByTime(1500) // 카운트다운 완료
+  })
+  act(() => {
+    vi.advanceTimersByTime(1000) // SHOWING 완료 → INPUT
+  })
+  return useGameStore.getState().sequence[0]
+}
+
 // ── C-2. INPUT → ROUND-CLEAR → SHOWING ───────────────────────────────────
 
 describe('C-2. INPUT → ROUND-CLEAR → SHOWING', () => {
-  /**
-   * 헬퍼: 카운트다운 + 첫 SHOWING 완료 후 INPUT 상태로 진입시킨다.
-   * 이후 store의 sequence를 확인해 첫 버튼을 반환한다.
-   */
-  function setupToInput(result: { current: ReturnType<typeof useGameEngine> }) {
-    act(() => {
-      result.current.startGame()
-    })
-    act(() => {
-      vi.advanceTimersByTime(1500) // 카운트다운 완료
-    })
-    act(() => {
-      vi.advanceTimersByTime(1000) // SHOWING 완료 → INPUT
-    })
-    return useGameStore.getState().sequence[0]
-  }
 
   it('C-2-1: 정답 완료 → clearingStage !== null', () => {
     const { result } = renderHook(() => useGameEngine())
@@ -163,19 +164,6 @@ describe('C-2. INPUT → ROUND-CLEAR → SHOWING', () => {
 // ── C-3. INPUT → RESULT (오답) ────────────────────────────────────────────
 
 describe('C-3. INPUT → RESULT (오답)', () => {
-  function setupToInput(result: { current: ReturnType<typeof useGameEngine> }) {
-    act(() => {
-      result.current.startGame()
-    })
-    act(() => {
-      vi.advanceTimersByTime(1500)
-    })
-    act(() => {
-      vi.advanceTimersByTime(1000)
-    })
-    return useGameStore.getState().sequence[0]
-  }
-
   it('C-3-1: 오답 → status RESULT', () => {
     const { result } = renderHook(() => useGameEngine())
     const firstBtn = setupToInput(result)

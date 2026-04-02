@@ -8,43 +8,39 @@ beforeEach(() => {
 // ── B-1. startGame() ──────────────────────────────────────────────────────
 
 describe('B-1. startGame() — 초기화 검증', () => {
-  it('B-1-1: status === SHOWING', () => {
+  beforeEach(() => {
     useGameStore.getState().startGame()
+  })
+
+  it('B-1-1: status === SHOWING', () => {
     expect(useGameStore.getState().status).toBe('SHOWING')
   })
 
   it('B-1-2: score === 0', () => {
-    useGameStore.getState().startGame()
     expect(useGameStore.getState().score).toBe(0)
   })
 
   it('B-1-3: comboStreak === 0', () => {
-    useGameStore.getState().startGame()
     expect(useGameStore.getState().comboStreak).toBe(0)
   })
 
   it('B-1-4: stage === 0', () => {
-    useGameStore.getState().startGame()
     expect(useGameStore.getState().stage).toBe(0)
   })
 
   it('B-1-5: sequenceStartTime === 0', () => {
-    useGameStore.getState().startGame()
     expect(useGameStore.getState().sequenceStartTime).toBe(0)
   })
 
   it('B-1-6: fullComboCount === 0', () => {
-    useGameStore.getState().startGame()
     expect(useGameStore.getState().fullComboCount).toBe(0)
   })
 
-  it('B-1-6: maxComboStreak === 0', () => {
-    useGameStore.getState().startGame()
+  it('B-1-7: maxComboStreak === 0', () => {
     expect(useGameStore.getState().maxComboStreak).toBe(0)
   })
 
-  it('B-1-6: baseScore === 0', () => {
-    useGameStore.getState().startGame()
+  it('B-1-8: baseScore === 0', () => {
     expect(useGameStore.getState().baseScore).toBe(0)
   })
 })
@@ -92,7 +88,7 @@ describe('B-2. addInput(color) — 입력 반환값 및 상태 변화', () => {
 // ── B-3. stageClear() — 풀콤보 판정 ──────────────────────────────────────
 
 describe('B-3. stageClear() — 풀콤보 판정', () => {
-  // computerShowTime = flashDuration(500) * sequence.length(3) = 1500
+  // computerShowTime = flashDuration(500) * sequence.length(3) = 1500  // docs/game-logic.md 참조
   // B-3-1: userInputTime = 2400 - 1000 = 1400 < 1500 → true
   it('B-3-1: userInputTime < computerShowTime → isFullCombo true', () => {
     useGameStore.setState({
@@ -100,7 +96,7 @@ describe('B-3. stageClear() — 풀콤보 판정', () => {
       sequenceStartTime: 1000,
       comboStreak: 0,
     })
-    const { isFullCombo } = useGameStore.getState().stageClear(2400, 500)
+    const { isFullCombo } = useGameStore.getState().stageClear(2400, 500) // flashDuration=500 docs/game-logic.md 참조
     expect(isFullCombo).toBe(true)
   })
 
@@ -111,7 +107,7 @@ describe('B-3. stageClear() — 풀콤보 판정', () => {
       sequenceStartTime: 1000,
       comboStreak: 0,
     })
-    const { isFullCombo } = useGameStore.getState().stageClear(2600, 500)
+    const { isFullCombo } = useGameStore.getState().stageClear(2600, 500) // flashDuration=500 docs/game-logic.md 참조
     expect(isFullCombo).toBe(false)
   })
 
@@ -122,7 +118,7 @@ describe('B-3. stageClear() — 풀콤보 판정', () => {
       sequenceStartTime: 1000,
       comboStreak: 0,
     })
-    const { isFullCombo } = useGameStore.getState().stageClear(2500, 500)
+    const { isFullCombo } = useGameStore.getState().stageClear(2500, 500) // flashDuration=500 docs/game-logic.md 참조
     expect(isFullCombo).toBe(false)
   })
 })
@@ -330,7 +326,7 @@ describe('B-6. gameOver()', () => {
     expect(useGameStore.getState().score).toBe(7)
   })
 
-  it('B-6-3: gameOver 후 comboStreak 변화 없음', () => {
+  it('B-6-4: gameOver 후 comboStreak 변화 없음', () => {
     useGameStore.setState({ sequence: ['orange'], comboStreak: 3 })
     useGameStore.getState().gameOver()
     expect(useGameStore.getState().comboStreak).toBe(3)
