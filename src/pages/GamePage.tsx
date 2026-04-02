@@ -3,8 +3,10 @@ import { useGameStore } from '../store/gameStore'
 import { useGameEngine } from '../hooks/useGameEngine'
 import { useRanking } from '../hooks/useRanking'
 import { getUserId } from '../lib/ait'
+import { getFlashDuration } from '../lib/gameLogic'
 import { ButtonPad } from '../components/game/ButtonPad'
 import { ComboIndicator } from '../components/game/ComboIndicator'
+import { ComboTimer } from '../components/game/ComboTimer'
 import { BannerAd } from '../components/ads/BannerAd'
 
 function rankLabel(rank: number): string {
@@ -83,7 +85,7 @@ interface GamePageProps {
 }
 
 export function GamePage({ onGameOver, onRanking }: GamePageProps) {
-  const { status, score, stage, comboStreak, userId, setUserId } = useGameStore()
+  const { status, score, stage, comboStreak, userId, setUserId, sequenceStartTime } = useGameStore()
   const { flashingButton, clearingStage, countdown, handleInput, startGame, retryGame, isClearingFullCombo } = useGameEngine()
   const ranking = useRanking(userId || null)
 
@@ -110,6 +112,10 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
   }, [status])
 
   const isPlaying = status === 'SHOWING' || status === 'INPUT'
+
+  // ComboTimer 파생값: stage === 0 방어 (즉시 빨강 버그 방지)
+  const flashDuration = getFlashDuration(stage)
+  const computerShowTime = flashDuration * (stage > 0 ? stage : 1)
 
   function handleStart() {
     startGame()
@@ -209,6 +215,15 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
           onPress={handleInput}
           onStart={handleStart}
           onRetry={() => retryGame()}
+        />
+      </div>
+
+      {/* 타임워치 */}
+      <div style={{ flexShrink: 0, minHeight: 40 }}>
+        <ComboTimer
+          computerShowTime={computerShowTime}
+          inputStartTime={sequenceStartTime}
+          isActive={status === 'INPUT'}
         />
       </div>
 
