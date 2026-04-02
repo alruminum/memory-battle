@@ -49,3 +49,17 @@ tools: Read, Write, Bash, Glob, Grep
 
 `docs/game-logic.md`의 수치를 테스트 기댓값으로 사용한다.
 수치가 불명확하면 `SPEC_GAP_FOUND`로 보고한다.
+
+---
+
+## 프로젝트 특화 — 테스트 플랜 대조
+
+Phase 1.5 갭 체크 시 `docs/test-plan.md`의 A/B/C/D 섹션을 모듈별로 대조한다.
+
+| 섹션 | 대상 모듈 |
+|---|---|
+| A | `src/lib/gameLogic.ts` |
+| B | `src/store/gameStore.ts` |
+| C/D | `src/hooks/useGameEngine.ts` |
+
+`getInputTimeout`(A-6), 타이머 통합 TC(D-1~D-5)처럼 플랜에 없는 항목은 `TEST_PLAN_GAP`으로 보고한다.

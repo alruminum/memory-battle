@@ -2,6 +2,9 @@
 
 > 작성 기준: PRD v0.3.1 / Epic 09 구현 완료 시점  
 > 테스트 코드 작성 전 명세 문서. 실제 코드 작성/실행은 별도 진행.
+>
+> **업데이트 이력**
+> - 2026-04-02: A-6 (`getInputTimeout`) 섹션 추가, D 그룹 (타이머 통합 TC) 추가 (Epic 09 SPEC_GAP 복구)
 
 ---
 
@@ -79,6 +82,8 @@ src/
 
 > 파일 경로: `src/lib/gameLogic.test.ts`  
 > 외부 의존 없음. mock 불필요.
+>
+> **커버 대상 함수**: `getFlashDuration`, `getComboMultiplier`, `calcClearBonus`, `calcBaseStageScore`, `calcStageScore`, `getInputTimeout`
 
 ---
 
@@ -162,6 +167,24 @@ src/
 | A-5-2 | 정상 흐름 | 배율 x2 (streak=5): 12×2 = 24 | `calcStageScore(12, 5)` | `24` | 🔴 Critical |
 | A-5-3 | 정상 흐름 | 배율 x3 (streak=10): 18×3 = 54 | `calcStageScore(18, 10)` | `54` | 🟡 High |
 | A-5-4 | 엣지 케이스 | rawScore=0이면 결과도 0 | `calcStageScore(0, 5)` | `0` | 🟠 Medium |
+
+---
+
+#### A-6. `getInputTimeout(stage)` ⚠️ v0.3 (v0.3.1: 타이머 바 UI 제거, 로직 유지)
+
+버튼당 입력 제한 시간(ms). 경계: 1~9 → 2000ms / 10~19 → 1800ms / 20~29 → 1600ms / 30+ → 1400ms
+
+| # | 유형 | 케이스 설명 | 입력 | 기대값 | 우선순위 |
+|---|---|---|---|---|---|
+| A-6-1 | 정상 흐름 | stage 1 → 2000ms | `getInputTimeout(1)` | `2000` | 🔴 Critical |
+| A-6-2 | 정상 흐름 | stage 10 → 1800ms (경계 시작) | `getInputTimeout(10)` | `1800` | 🔴 Critical |
+| A-6-3 | 정상 흐름 | stage 20 → 1600ms (경계 시작) | `getInputTimeout(20)` | `1600` | 🟡 High |
+| A-6-4 | 정상 흐름 | stage 30 → 1400ms (하한 시작) | `getInputTimeout(30)` | `1400` | 🟡 High |
+| A-6-5 | 엣지 케이스 | stage 9 → 2000ms (10 직전) | `getInputTimeout(9)` | `2000` | 🟡 High |
+| A-6-6 | 엣지 케이스 | stage 19 → 1800ms (20 직전) | `getInputTimeout(19)` | `1800` | 🟡 High |
+| A-6-7 | 엣지 케이스 | stage 29 → 1600ms (30 직전) | `getInputTimeout(29)` | `1600` | 🟡 High |
+| A-6-8 | 엣지 케이스 | stage 0 → 2000ms (기본값) | `getInputTimeout(0)` | `2000` | 🟠 Medium |
+| A-6-9 | 엣지 케이스 | stage 100 → 1400ms (하한 고정) | `getInputTimeout(100)` | `1400` | 🟠 Medium |
 
 ---
 
@@ -343,6 +366,21 @@ INPUT 상태에서 `sequence.length`와 store의 `stage`는 항상 같아야 한
 
 ---
 
+#### D. `src/hooks/useGameEngine.ts` — 타이머 통합 TC ⚠️ v0.3 복구 (Epic 09 SPEC_GAP)
+
+> `useTimer`는 `vi.mock`으로 교체. `reset`/`stop`을 `vi.fn()` spy로 검증.  
+> 타이머 만료 콜백은 `globalThis.__testTimerExpire`로 테스트에서 직접 트리거.
+
+| # | 유형 | 케이스 설명 | 조작 | 기대 결과 | 우선순위 |
+|---|---|---|---|---|---|
+| D-1 | 정상 흐름 | INPUT 진입 시 timer.reset 1회 호출 | SHOWING → INPUT 전환 | `mockTimerReset.toHaveBeenCalledTimes(1)` | 🔴 Critical |
+| D-2 | 정상 흐름 | 타이머 만료 시 status RESULT | `__testTimerExpire()` 호출 | `status === 'RESULT'` | 🔴 Critical |
+| D-3 | 정상 흐름 | 오답 입력 시 timer.stop 호출 | 오답 handleInput | `mockTimerStop.toHaveBeenCalled()` | 🔴 Critical |
+| D-4 | 정상 흐름 | round-clear 시 timer.stop 호출 | 마지막 정답 handleInput | `mockTimerStop.toHaveBeenCalled()` | 🟡 High |
+| D-5 | 정상 흐름 | 정답(correct) 입력 시 timer.reset 호출 | 중간 정답 handleInput | `mockTimerReset.toHaveBeenCalled()` | 🔴 Critical |
+
+---
+
 ## 3. 테스트 제외 항목 및 이유
 
 | 모듈 | 제외 이유 |
@@ -362,9 +400,9 @@ INPUT 상태에서 `sequence.length`와 store의 `stage`는 항상 같아야 한
 
 | 우선순위 | 기준 | 해당 케이스 수 |
 |---|---|---|
-| 🔴 Critical | 게임 핵심 로직 정합성 (풀콤보 판정, 점수 계산, 상태 전환) | 23개 |
-| 🟡 High | 경계값 및 파생 상태 검증 (fullComboCount, maxComboStreak 등) | 19개 |
-| 🟠 Medium | 방어 코드 및 극단값 (stage=0, 매우 큰 streak 등) | 9개 |
+| 🔴 Critical | 게임 핵심 로직 정합성 (풀콤보 판정, 점수 계산, 상태 전환, 타이머) | 28개 |
+| 🟡 High | 경계값 및 파생 상태 검증 (fullComboCount, maxComboStreak 등) | 25개 |
+| 🟠 Medium | 방어 코드 및 극단값 (stage=0, 매우 큰 streak 등) | 11개 |
 
 ### Critical 케이스 목록 (우선 구현 필수)
 
