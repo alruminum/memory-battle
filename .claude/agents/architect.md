@@ -1,6 +1,6 @@
 ---
 name: architect
-description: 새 모듈 구현 계획 파일(docs/impl/NN-*.md)을 작성하는 설계 에이전트. 기존 설계 문서를 읽고 프로젝트 패턴에 맞는 impl 파일을 생성한다. 새 기능 구현 전에 계획 파일이 없을 때 사용한다.
+description: 새 모듈 구현 계획 파일(docs/milestones/vNN/epics/epic-NN-*/impl/NN-*.md)을 작성하는 설계 에이전트. 기존 설계 문서를 읽고 프로젝트 패턴에 맞는 impl 파일을 생성한다. 새 기능 구현 전에 계획 파일이 없을 때 사용한다.
 tools: Read, Glob, Grep, Write, Edit
 model: sonnet
 ---

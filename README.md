@@ -35,7 +35,7 @@
 - **플랫폼**: 앱인토스 WebView (`@apps-in-toss/web-framework` 2.x)
 - **상태관리**: Zustand
 - **DB**: Supabase (PostgreSQL)
-- **스타일**: Tailwind CSS
+- **스타일**: 인라인 style 객체 (Tailwind 미사용)
 
 ## 개발 환경 설정
 
@@ -113,4 +113,3 @@ product-planner (기획 + 스코프 결정)
 ```
 
 각 단계는 유저 명시적 승인 후 다음 단계로 진행합니다.
-전체 에이전트 흐름도: [`~/.claude/agents/README.md`](~/.claude/agents/README.md)

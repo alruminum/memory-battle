@@ -14,7 +14,7 @@ tools: Read, Write, Bash, Glob, Grep
 
 ## 프로젝트 특화 — 테스트 환경
 
-- **테스트 명령어**: `package.json`의 `test` 스크립트 확인 후 사용 (없으면 `npx vitest run --reporter=verbose`)
+- **테스트 명령어**: `package.json`의 `test` 스크립트 확인 후 사용 (`test` 스크립트가 없고 vitest도 미설치인 경우에만 `npm install vitest --save-dev` 후 `npx vitest run --reporter=verbose`)
 - **테스트 파일 위치**: 구현 파일과 같은 디렉토리 또는 `src/__tests__/`
 - **파일 확장자**: `*.test.ts` 또는 `*.spec.ts`
 
