@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useGameStore } from '../store/gameStore'
 import { playTone, playGameStart, playGameOver, playApplause } from '../lib/sound'
-import { getFlashDuration } from '../lib/gameLogic'
+import { getFlashDuration, getInputTimeout } from '../lib/gameLogic'
+import { useTimer } from './useTimer'
 import { dbg, dbgWarn } from '../lib/debug'
 import type { ButtonColor } from '../types'
 
@@ -13,8 +14,18 @@ const COUNTDOWN_INTERVAL = 500  // ms per tick
 const randomButton = () => BUTTONS[Math.floor(Math.random() * BUTTONS.length)]
 
 export function useGameEngine() {
-  const { status, sequence, setSequence, addInput, gameOver, resetGame } =
+  const { status, sequence, stage, setSequence, addInput, gameOver, resetGame } =
     useGameStore()
+
+  // 타이머 만료 시 게임오버
+  const handleExpire = useCallback(() => {
+    playGameOver()
+    gameOver()
+  }, [gameOver])
+
+  // stage 기반 동적 타임아웃
+  const inputTimeout = getInputTimeout(stage)
+  const timer = useTimer(handleExpire, inputTimeout)
   const [flashingButton, setFlashingButton] = useState<ButtonColor | null>(null)
   const [clearingStage, setClearingStage] = useState<number | null>(null)
   const [countdown, setCountdown] = useState<number | null>(null)
@@ -45,6 +56,7 @@ export function useGameEngine() {
           currentIndex: 0,
           sequenceStartTime: Date.now(),  // INPUT 페이즈 시작 시각 저장
         })
+        timer.reset()   // INPUT 진입 시 입력 타이머 시작
         showingRef.current = false
         return
       }
@@ -61,12 +73,13 @@ export function useGameEngine() {
     }
 
     next()
-  }, [status, sequence])
+  }, [status, sequence, timer])
 
   // 카운트다운 후 게임 실제 시작
   const launchAfterCountdown = useCallback(() => {
     if (startingRef.current) return
     startingRef.current = true
+    timer.stop()    // 이전 게임 잔여 타이머 정리
     setCountdown(3)
     setTimeout(() => setCountdown(2), COUNTDOWN_INTERVAL)
     setTimeout(() => setCountdown(1), COUNTDOWN_INTERVAL * 2)
@@ -81,7 +94,7 @@ export function useGameEngine() {
       setSequence(firstSeq)
       useGameStore.setState({ sequence: firstSeq, status: 'SHOWING', stage: 1 })
     }, COUNTDOWN_INTERVAL * 3)
-  }, [setSequence])
+  }, [setSequence, timer])
 
   const startGame = useCallback(() => {
     launchAfterCountdown()
@@ -115,6 +128,7 @@ export function useGameEngine() {
       const result = addInput(color)
 
       if (result === 'wrong') {
+        timer.stop()
         playGameOver()
         gameOver()
         return
@@ -123,6 +137,7 @@ export function useGameEngine() {
       if (result === 'round-clear') {
         const clearedStage = sequence.length
         clearingRef.current = true
+        timer.stop()
         setClearingStage(clearedStage)
 
         const now = Date.now()
@@ -151,8 +166,11 @@ export function useGameEngine() {
         }, pauseMs)
         return
       }
+
+      // correct: 매 정답 입력마다 타이머 재시작 (TRD: "버튼당 입력 제한 — 매 버튼마다 독립 적용")
+      timer.reset()
     },
-    [sequence, addInput, gameOver, setSequence]
+    [sequence, addInput, gameOver, setSequence, timer]
   )
 
   return {

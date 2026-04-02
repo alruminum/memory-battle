@@ -12,9 +12,27 @@ vi.mock('../lib/sound', () => ({
   resumeAudio: vi.fn(),
 }))
 
+// useTimer mock: reset/stop spy를 외부에서 접근 가능하게 노출
+const mockTimerReset = vi.fn()
+const mockTimerStop = vi.fn()
+
+vi.mock('./useTimer', () => ({
+  useTimer: (_onExpire: () => void, _duration?: number) => {
+    // onExpire를 ref에 저장해두고 테스트에서 직접 호출할 수 있도록 노출
+    ;(globalThis as Record<string, unknown>).__testTimerExpire = _onExpire
+    return {
+      timeLeft: 2000,
+      reset: mockTimerReset,
+      stop: mockTimerStop,
+    }
+  },
+}))
+
 beforeEach(() => {
   vi.useFakeTimers()
   useGameStore.getState().resetGame()
+  mockTimerReset.mockClear()
+  mockTimerStop.mockClear()
 })
 
 afterEach(() => {
@@ -98,6 +116,32 @@ function setupToInput(result: { current: ReturnType<typeof useGameEngine> }) {
     vi.advanceTimersByTime(1000) // SHOWING 완료 → INPUT (flashDuration × sequenceLength)
   })
   return useGameStore.getState().sequence[0]
+}
+
+/**
+ * 헬퍼: 2스테이지 INPUT 상태로 진입시킨다.
+ * 1스테이지 정답 입력 → CLEAR_PAUSE_MS(1100ms) → SHOWING → INPUT 전환
+ * 반환값: [sequence[0], sequence[1]] (2개짜리 시퀀스)
+ */
+function setupToInput2(result: { current: ReturnType<typeof useGameEngine> }) {
+  const firstBtn = setupToInput(result)
+
+  // 1스테이지 정답 → round-clear
+  act(() => {
+    result.current.handleInput(firstBtn)
+  })
+
+  // CLEAR_PAUSE_MS 후 SHOWING 진입
+  act(() => {
+    vi.advanceTimersByTime(1100)
+  })
+
+  // 2개짜리 시퀀스 SHOWING: flashDuration(500ms) × 2 + 여유 = 1500ms
+  act(() => {
+    vi.advanceTimersByTime(1500)
+  })
+
+  return useGameStore.getState().sequence
 }
 
 // ── C-2. INPUT → ROUND-CLEAR → SHOWING ───────────────────────────────────
@@ -293,5 +337,102 @@ describe('C-4. sequence.length === stage 불변식', () => {
 
     // score가 추가로 변하지 않아야 함
     expect(useGameStore.getState().score).toBe(scoreAfterClear)
+  })
+})
+
+// ── D-1. 타이머 복구 — INPUT 진입 시 timer.reset 호출 ───────────────────
+
+describe('D-1. INPUT 진입 시 timer.reset 호출', () => {
+  it('D-1-1: SHOWING 완료 후 INPUT 전환 시 timer.reset 1회 호출', () => {
+    const { result } = renderHook(() => useGameEngine())
+
+    act(() => {
+      result.current.startGame()
+    })
+
+    act(() => {
+      vi.advanceTimersByTime(1500) // 카운트다운 → SHOWING
+    })
+
+    // SHOWING → INPUT 전환
+    act(() => {
+      vi.advanceTimersByTime(1000)
+    })
+
+    expect(useGameStore.getState().status).toBe('INPUT')
+    expect(mockTimerReset).toHaveBeenCalledTimes(1)
+  })
+})
+
+// ── D-2. 타이머 만료 시 gameOver 호출 ────────────────────────────────────
+
+describe('D-2. 타이머 만료 시 gameOver', () => {
+  it('D-2-1: INPUT 상태에서 타이머 만료 → status RESULT', () => {
+    const { result } = renderHook(() => useGameEngine())
+    setupToInput(result)
+
+    // INPUT 상태에서 타이머 만료 콜백 직접 호출
+    act(() => {
+      const expire = (globalThis as Record<string, unknown>).__testTimerExpire as (() => void) | undefined
+      if (expire) expire()
+    })
+
+    expect(useGameStore.getState().status).toBe('RESULT')
+  })
+})
+
+// ── D-3. 오답 입력 시 timer.stop 호출 ────────────────────────────────────
+
+describe('D-3. 오답 입력 시 timer.stop 호출', () => {
+  it('D-3-1: 오답 handleInput → timer.stop 호출됨', () => {
+    const { result } = renderHook(() => useGameEngine())
+    const firstBtn = setupToInput(result)
+
+    mockTimerStop.mockClear() // INPUT 진입 전까지의 stop 호출 초기화
+
+    const wrongBtn = firstBtn === 'orange' ? 'blue' : 'orange'
+
+    act(() => {
+      result.current.handleInput(wrongBtn as Parameters<typeof result.current.handleInput>[0])
+    })
+
+    expect(mockTimerStop).toHaveBeenCalled()
+  })
+})
+
+// ── D-4. round-clear 시 timer.stop 호출 ──────────────────────────────────
+
+describe('D-4. round-clear 시 timer.stop 호출', () => {
+  it('D-4-1: 정답 완료(round-clear) → timer.stop 호출됨', () => {
+    const { result } = renderHook(() => useGameEngine())
+    const firstBtn = setupToInput(result)
+
+    mockTimerStop.mockClear() // INPUT 진입 전까지의 stop 호출 초기화
+
+    act(() => {
+      result.current.handleInput(firstBtn)
+    })
+
+    expect(mockTimerStop).toHaveBeenCalled()
+  })
+})
+
+// ── D-5. correct 입력 시 timer.reset 호출 ────────────────────────────────
+
+describe('D-5. correct 입력 시 timer.reset 호출', () => {
+  it('D-5-1: 2스테이지 INPUT에서 첫 버튼(correct) 입력 → timer.reset 호출됨', () => {
+    const { result } = renderHook(() => useGameEngine())
+    const seq = setupToInput2(result)
+
+    // INPUT 진입 시 호출된 reset 초기화 후 correct 입력만 검증
+    mockTimerReset.mockClear()
+
+    // 2개 시퀀스 중 첫 번째만 입력 → correct 반환 (round-clear 아님)
+    act(() => {
+      result.current.handleInput(seq[0])
+    })
+
+    expect(useGameStore.getState().status).toBe('INPUT')  // 아직 INPUT 유지
+    expect(mockTimerReset).toHaveBeenCalledTimes(1)
   })
 })

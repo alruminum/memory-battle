@@ -41,3 +41,17 @@ export const calcStageScore = (
   rawScore: number,
   comboStreak: number
 ): number => rawScore * getComboMultiplier(comboStreak)
+
+/**
+ * 스테이지에 따른 버튼 입력 제한 시간 (ms)
+ * Stage 1~9: 2000ms / 10~19: 1800ms / 20~29: 1600ms / 30+: 1400ms
+ *
+ * 시퀀스 전체 제한이 아닌 버튼 1개 입력 간격 제한이다.
+ * (시퀀스 길이와 무관하게 매 버튼마다 독립 적용)
+ */
+export const getInputTimeout = (stage: number): number => {
+  if (stage >= 30) return 1400
+  if (stage >= 20) return 1600
+  if (stage >= 10) return 1800
+  return 2000
+}

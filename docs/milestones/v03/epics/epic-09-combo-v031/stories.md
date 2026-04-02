@@ -45,3 +45,16 @@
 
 - [x] `MultiplierBurst` 컴포넌트 구현
 - [x] `GamePage` clearingStage 시퀀스에 통합
+
+---
+
+## Story 4: 입력 타이머 복구 (SPEC_GAP)
+
+> SPEC_GAP: Epic 09 Story 1 구현 시 "게임오버 타이머 바 제거"를 타이머 로직 전체 제거로 오해하여 삭제됨
+> impl: `impl/04-timer-restore.md`
+
+PRD v0.3.1 원래 의도대로 입력 타이머 로직을 복구한다.
+타이머 바 UI(게이지)는 이미 제거된 상태이므로 유지하고, 로직만 복원한다.
+
+- [x] `src/lib/gameLogic.ts`에 `getInputTimeout(stage)` 함수 추가
+- [x] `src/hooks/useGameEngine.ts`에 `useTimer` 재연결 (`handleExpire`, `timer.reset/stop`)

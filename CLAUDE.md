@@ -31,6 +31,12 @@ VITE_APP_NAME=memory-battle
 
 ---
 
+## 오케스트레이션 워크플로우
+
+- 전역 룰: `~/.claude/orchestration-rules.md` (디자인 루프·구현 루프·에이전트 역할 경계)
+
+---
+
 ## 작업 순서 (반드시 준수)
 
 1. **`backlog.md`** 에서 에픽 목록 확인
@@ -39,7 +45,6 @@ VITE_APP_NAME=memory-battle
    - 설계 결정 근거는 **`docs/impl/00-decisions.md`** 참조
 4. 구현 후 **`stories.md`** 해당 태스크 체크
 
-구현/디자인 루프 상세는 `.claude/agents/orchestrator.md` 참조.
 사람이 해야 할 운영/출시 항목은 **`RELEASE.md`** 참조.
 
 
@@ -88,7 +93,6 @@ VITE_APP_NAME=memory-battle
 | 16 combo-streak | [impl/16-combo-streak.md](docs/milestones/v03/epics/epic-05-mechanic-v03/impl/16-combo-streak.md) |
 | 17 combo-ui | [impl/17-combo-ui.md](docs/milestones/v03/epics/epic-05-mechanic-v03/impl/17-combo-ui.md) |
 | 18 result-update | [impl/18-result-update.md](docs/milestones/v03/epics/epic-05-mechanic-v03/impl/18-result-update.md) |
-
 **Epic 06 — 마일스톤 기반 문서 구조 개편** · [stories](docs/milestones/v03/epics/epic-06-milestone-docs/stories.md)
 _(impl 없음 — 문서 구조 작업만)_
 
@@ -97,6 +101,21 @@ _(impl 없음 — 문서 구조 작업만)_
 | impl | 계획 파일 |
 |---|---|
 | 23 supabase-gen-types | [impl/23-supabase-gen-types.md](docs/milestones/v03/epics/epic-07-db-type-safety/impl/23-supabase-gen-types.md) |
+
+**Epic 08 — GamePage 품질 개선 & UI 리팩토링** · [stories](docs/milestones/v03/epics/epic-08-gamepage-refactor/stories.md)
+
+| impl | 계획 파일 |
+|---|---|
+| 01 quality-fix | [impl/01-quality-fix.md](docs/milestones/v03/epics/epic-08-gamepage-refactor/impl/01-quality-fix.md) |
+
+**Epic 09 — 콤보 시스템 전면 개편 (PRD v0.3.1)** · [stories](docs/milestones/v03/epics/epic-09-combo-v031/stories.md)
+
+| impl | 계획 파일 |
+|---|---|
+| 01 combo-logic-v031 | [impl/01-combo-logic-v031.md](docs/milestones/v03/epics/epic-09-combo-v031/impl/01-combo-logic-v031.md) |
+| 02 combo-timer-ui | [impl/02-combo-timer-ui.md](docs/milestones/v03/epics/epic-09-combo-v031/impl/02-combo-timer-ui.md) |
+| 03 multiplier-burst-ui | [impl/03-multiplier-burst-ui.md](docs/milestones/v03/epics/epic-09-combo-v031/impl/03-multiplier-burst-ui.md) |
+| 04 timer-restore | [impl/04-timer-restore.md](docs/milestones/v03/epics/epic-09-combo-v031/impl/04-timer-restore.md) |
 
 ---
 
@@ -142,6 +161,22 @@ _(impl 없음 — 문서 구조 작업만)_
 Remote: https://github.com/alruminum/memory-battle.git
 Branch: main
 ```
+
+---
+
+## stories.md 작성 규칙
+
+- **스토리 번호**: 에픽 내 독립 순번 (Story 1, Story 2, Story 3 …). 전역 번호 사용 금지.
+- **impl 파일 번호**: 에픽 내 독립 순번 (01-*, 02-*, 03-* …). 전역 번호 사용 금지.
+- 새 에픽 stories.md 작성 전 직전 에픽 stories.md를 읽어 컨벤션 확인 필수.
+
+---
+
+## 에이전트 호출 규칙 (메인 Claude 준수)
+
+- **서브에이전트 base 우회 금지**: 에이전트 호출 시 해당 에이전트 base의 워크플로우를 우회하는 방식으로 작업 지시 금지.
+- **architect 호출 시 반드시 Mode 명시**: Mode A(시스템 설계) / Mode B(모듈 계획) / Mode C(SPEC_GAP) / Mode D(태스크 분해) / Mode E(기술 에픽) 중 하나로 호출. "특정 파일 직접 수정" 형태의 지시 금지.
+  - PRD/스펙 변경으로 설계 문서(game-logic.md 등) 업데이트가 필요하면 → 변경된 PRD 내용과 함께 Mode B로 호출. architect가 base 워크플로우(TRD 현행화 포함)대로 처리한다.
 
 ---
 

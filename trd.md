@@ -1,6 +1,8 @@
 # 기억력배틀 TRD v0.3
 
 > 변경 이력
+> - v0.3.1-fix (2026-04-02): SPEC_GAP 복구 — §3-4 입력 제한 타이머 섹션 추가 (`getInputTimeout` 스펙 명시). Epic 09 Story 1 구현 시 누락된 타이머 로직 복구 계획(04-timer-restore.md) 반영.
+> - v0.3.1 (2026-04-02): 콤보 시스템 개편 — 타이머 제거, 풀콤보 조건을 컴퓨터 시연 시간 기준으로 변경, 배율 공식 변경(5연속마다 +1, 무제한), multiplierIncreased 플래그 추가, ComboTimer/MultiplierBurst 컴포넌트 추가.
 > - v0.3 (2026-04-01): 게임 메카닉 개편 — 난이도 선택 제거, 스테이지 기반 속도/타이머 도입, 스택형 콤보 시스템으로 교체, 기회제 폐지, 게임오버 강제 리워드광고로 전환, DB 스키마 변경.
 > - v0.2 (2026-03-31): BM 변경 — 기회제 폐지, 게임오버 강제 리워드광고 방식으로 교체. daily_chances → daily_reward 테이블 교체.
 > - v0.1 (초안): 최초 작성
@@ -32,9 +34,10 @@ memory-battle/
 │   │   └── RankingPage.tsx     # 랭킹 화면 (일간/월간/시즌)
 │   ├── components/
 │   │   ├── game/
-│   │   │   ├── ButtonPad.tsx   # 4개 색깔 버튼
-│   │   │   ├── TimerGauge.tsx  # 스테이지별 타이머 게이지
-│   │   │   ├── ComboDisplay.tsx # 콤보 스택 표시
+│   │   │   ├── ButtonPad.tsx        # 4개 색깔 버튼
+│   │   │   ├── ComboIndicator.tsx   # 콤보 스택 표시 (ComboDisplay.tsx에서 변경)
+│   │   │   ├── ComboTimer.tsx       # 타임워치 UI (신규, v0.3.1)
+│   │   │   ├── MultiplierBurst.tsx  # 배율 상승 버스트 오버레이 (신규, v0.3.1)
 │   │   │   └── ScoreDisplay.tsx
 │   │   ├── ranking/
 │   │   │   ├── RankingTab.tsx
@@ -106,14 +109,16 @@ const getFlashDuration = (stage: number): number => {
 }
 ```
 
-### 3-4. 타이머 로직 (스테이지 기반) ⚠️ v0.3 변경
+### 3-4. 입력 제한 타이머 (스테이지 기반) ⚠️ v0.3
 
-| 스테이지 구간 | 버튼당 입력 제한 |
+> INPUT 상태에서 버튼 미입력 시 게임오버. 타이머 바 UI는 v0.3.1에서 제거됨 (로직은 유지).
+
+| 스테이지 구간 | 버튼 입력 제한 시간 |
 |---|---|
 | 1~9 | 2000ms |
 | 10~19 | 1800ms |
 | 20~29 | 1600ms |
-| 30+ | 1400ms (하한) |
+| 30+ | 1400ms |
 
 ```typescript
 const getInputTimeout = (stage: number): number => {
@@ -123,6 +128,9 @@ const getInputTimeout = (stage: number): number => {
   return 2000
 }
 ```
+
+> 버튼 1개 입력 간격 제한 (시퀀스 전체가 아닌 매 버튼마다 독립 적용).
+> `useTimer`가 INPUT 진입 시 `reset()`, wrong/clear 시 `stop()` 호출로 제어.
 
 ### 3-5. 점수 계산 ⚠️ v0.3 변경
 
@@ -139,44 +147,46 @@ const calcClearBonus = (stage: number): number => {
 }
 
 // 최종 스테이지 점수 = (버튼점수 + 클리어보너스) × 콤보 배율
-const calcStageScore = (rawScore: number, comboStreak: number, stage: number): number => {
-  if (stage < COMBO_ACTIVATION_STAGE) return rawScore
-  return rawScore * getComboMultiplier(comboStreak)
-}
+// ⚠️ v0.3.1: stage 파라미터 제거, COMBO_ACTIVATION_STAGE 조건 제거
+const calcStageScore = (rawScore: number, comboStreak: number): number =>
+  rawScore * getComboMultiplier(comboStreak)
 ```
 
-### 3-6. 스택형 콤보 감지 ⚠️ v0.3 변경
+### 3-6. 스택형 콤보 감지 ⚠️ v0.3.1 변경
 
-> 기존: 10스테이지 이상, 풀콤보 시 x2 고정
-> 변경: 5스테이지 이상, 연속 풀콤보 스트릭으로 x1~x5 누적
+> 기존(v0.3): 300ms 입력 간격 기준 풀콤보 판정, x1~x5 상한
+> 변경(v0.3.1): 유저 입력 총 소요 시간 < 컴퓨터 시연 시간 기준으로 판정, 배율 상한 제거
 
 ```typescript
-const COMBO_THRESHOLD = 300        // ms
-const COMBO_ACTIVATION_STAGE = 5
+// 풀콤보 조건: 유저의 전체 입력 완료 시간 < 컴퓨터 시연 시간
+// computerShowTime = flashDuration × sequenceLength
 
-// 연속 풀콤보 스트릭 → 배율
+// 배율 ⚠️ v0.3.1: 5연속마다 +1, 상한 없음
 const getComboMultiplier = (comboStreak: number): number =>
-  Math.min(comboStreak + 1, 5)
+  Math.floor(comboStreak / 5) + 1
 
-// 스트릭 배율표
-// 0 → x1 / 1 → x2 / 2 → x3 / 3 → x4 / 4이상 → x5
+// 배율표
+// 0~4  → x1 / 5~9 → x2 / 10~14 → x3 / N×5~(N+1)×5-1 → x(N+1) … 무제한
 
-let lastInputTime = 0
-let comboCount = 0
-let comboStreak = 0  // 스테이지 간 유지
+// 스테이지 클리어 시 (INPUT 페이즈 시작 시각 ~ 마지막 입력 완료 시각 비교)
+const onStageClear = (
+  sequenceStartTime: number,
+  inputCompleteTime: number,
+  flashDuration: number,
+  sequenceLength: number,
+  prevComboStreak: number
+): { comboStreak: number; isFullCombo: boolean; multiplierIncreased: boolean } => {
+  const computerShowTime = flashDuration * sequenceLength
+  const userInputTime = inputCompleteTime - sequenceStartTime
+  const isFullCombo = userInputTime < computerShowTime
 
-const onButtonInput = (timestamp: number) => {
-  const gap = timestamp - lastInputTime
-  if (gap <= COMBO_THRESHOLD) comboCount++
-  else comboCount = 0
-  lastInputTime = timestamp
-}
+  const newStreak = isFullCombo ? prevComboStreak + 1 : 0
 
-// 스테이지 클리어 시
-const onStageClear = (sequenceLength: number) => {
-  const isFullCombo = comboCount >= sequenceLength
-  comboStreak = isFullCombo ? Math.min(comboStreak + 1, 4) : 0
-  comboCount = 0
+  const prevMultiplier = getComboMultiplier(prevComboStreak)
+  const newMultiplier = getComboMultiplier(newStreak)
+  const multiplierIncreased = newMultiplier > prevMultiplier
+
+  return { comboStreak: newStreak, isFullCombo, multiplierIncreased }
 }
 ```
 
@@ -343,7 +353,8 @@ interface GameStore {
   currentIndex: number
   score: number             // 누적 점수 (콤보 배율 적용 후)
   stage: number
-  comboStreak: number       // 현재 연속 풀콤보 스트릭 (스테이지 간 유지)
+  comboStreak: number       // 현재 연속 풀콤보 스트릭 (상한 없음, v0.3.1)
+  sequenceStartTime: number // INPUT 페이즈 시작 시각 (ms) — 풀콤보 판정용 (v0.3.1)
   fullComboCount: number    // 이번 게임 풀콤보 달성 횟수
   maxComboStreak: number    // 이번 게임 최고 콤보 스택
 
@@ -355,6 +366,11 @@ interface GameStore {
   addInput: (color: string) => void
   gameOver: () => void               // Supabase + 토스 리더보드 점수 제출
   resetGame: () => void
+  // ⚠️ v0.3.1 추가
+  stageClear: (inputCompleteTime: number, flashDuration: number) => {
+    isFullCombo: boolean
+    multiplierIncreased: boolean
+  }
 }
 ```
 
@@ -368,12 +384,12 @@ interface GameStore {
 - ~~난이도 선택~~ (제거됨)
 - ~~남은 기회 표시~~ (제거됨)
 
-### GamePage ⚠️ v0.3 변경
+### GamePage ⚠️ v0.3.1 변경
 - 4개 버튼: 200x200px 원형, 탭 시 밝기 증가 애니메이션
-- 타이머 게이지: 스테이지별 제한 시간 기준 프로그레스바
-- 콤보 스택 숫자 상시 표시 (5스테이지 이상)
-- 300ms 이내 연속 입력 중: "COMBO!" 텍스트 + 글로우 이펙트
-- 풀콤보 확정 시: "FULL COMBO!" 메시지
+- ComboTimer: 컴퓨터 시연 시간 타임워치 형태로 표시 (INPUT 상태에서만 노출)
+- 스테이지 번호 옆 현재 배율 xN 상시 표시 (comboStreak 5 이상)
+- 풀콤보 달성 시: 디자인 중심 "컴퓨터를 이겼다" 피드백
+- MultiplierBurst: 배율 상승 시 xN scale-up + 파티클 버스트 (multiplierIncreased === true)
 - 배너광고: 하단 고정
 
 ### ResultPage ⚠️ v0.3 변경

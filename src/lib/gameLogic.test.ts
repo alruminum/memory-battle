@@ -5,6 +5,7 @@ import {
   calcClearBonus,
   calcBaseStageScore,
   calcStageScore,
+  getInputTimeout,
 } from './gameLogic'
 
 // ── A-1. getFlashDuration ──────────────────────────────────────────────────
@@ -156,5 +157,46 @@ describe('calcStageScore', () => {
 
   it('rawScore=0이면 결과도 0', () => {
     expect(calcStageScore(0, 5)).toBe(0)
+  })
+})
+
+// ── A-6. getInputTimeout ──────────────────────────────────────────────────
+// 근거: src/lib/gameLogic.ts 주석 — stage 1~9: 2000ms / 10~19: 1800ms / 20~29: 1600ms / 30+: 1400ms
+
+describe('getInputTimeout', () => {
+  it('stage 1 → 2000ms', () => {
+    expect(getInputTimeout(1)).toBe(2000)
+  })
+
+  it('stage 9 → 2000ms (10 경계 직전)', () => {
+    expect(getInputTimeout(9)).toBe(2000)
+  })
+
+  it('stage 10 → 1800ms (경계 시작)', () => {
+    expect(getInputTimeout(10)).toBe(1800)
+  })
+
+  it('stage 19 → 1800ms (20 경계 직전)', () => {
+    expect(getInputTimeout(19)).toBe(1800)
+  })
+
+  it('stage 20 → 1600ms (경계 시작)', () => {
+    expect(getInputTimeout(20)).toBe(1600)
+  })
+
+  it('stage 29 → 1600ms (30 경계 직전)', () => {
+    expect(getInputTimeout(29)).toBe(1600)
+  })
+
+  it('stage 30 → 1400ms (하한 시작)', () => {
+    expect(getInputTimeout(30)).toBe(1400)
+  })
+
+  it('stage 0 → 2000ms (기본값)', () => {
+    expect(getInputTimeout(0)).toBe(2000)
+  })
+
+  it('stage 100 → 1400ms (매우 큰 값, 하한 고정)', () => {
+    expect(getInputTimeout(100)).toBe(1400)
   })
 })
