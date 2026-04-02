@@ -35,7 +35,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 -c \"import sys,json,os,re; d=json.load(sys.stdin); cmd=d.get('tool_input',{}).get('command',''); is_commit=bool(re.search(r'git commit',cmd)); print(json.dumps({'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':'❌ git commit 전 pr-reviewer LGTM 필요. /tmp/mb_pr_reviewer_lgtm 없음.'}})) if is_commit and not os.path.exists('/tmp/mb_pr_reviewer_lgtm') else None\" 2>/dev/null || true",
+            "command": "python3 -c \"import sys,json,os,re,subprocess; d=json.load(sys.stdin); cmd=d.get('tool_input',{}).get('command',''); is_commit=bool(re.search(r'git commit',cmd)); staged=subprocess.run(['git','diff','--cached','--name-only'],capture_output=True,text=True).stdout if is_commit else ''; has_src=bool(re.search(r'^src/',staged,re.MULTILINE)); print(json.dumps({'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':'❌ git commit 전 pr-reviewer LGTM 필요. /tmp/mb_pr_reviewer_lgtm 없음.'}})) if is_commit and has_src and not os.path.exists('/tmp/mb_pr_reviewer_lgtm') else None\" 2>/dev/null || true",
             "timeout": 5
           }
         ]
