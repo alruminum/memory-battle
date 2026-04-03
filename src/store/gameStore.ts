@@ -69,22 +69,21 @@ export const useGameStore = create<GameStore>((set, get) => ({
     }),
 
   addInput: (color) => {
-    const { sequence, currentIndex, score } = get()
+    const { sequence, currentIndex, score, comboStreak } = get()
     const expected = sequence[currentIndex]
 
     if (color !== expected) {
       return 'wrong'
     }
 
+    const multiplier = getComboMultiplier(comboStreak)
     const isLast = currentIndex === sequence.length - 1
 
-    if (isLast) {
-      set({ score: score + 1, currentIndex: currentIndex + 1 })
-      return 'round-clear'
-    }
+    // 버튼마다 배율 포함 점수 즉시 누적
+    // baseScore는 stageClear에서만 일괄 갱신 — addInput에서 변경하지 않음
+    set({ score: score + multiplier, currentIndex: currentIndex + 1 })
 
-    set({ score: score + 1, currentIndex: currentIndex + 1 })
-    return 'correct'
+    return isLast ? 'round-clear' : 'correct'
   },
 
   stageClear: (inputCompleteTime, flashDuration) => {
@@ -94,7 +93,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const clearedStage = state.sequence.length
       const computerShowTime = flashDuration * clearedStage
       const userInputTime = inputCompleteTime - state.sequenceStartTime
-      const isFullCombo = userInputTime < computerShowTime
+      const isFullCombo = userInputTime < computerShowTime  // 스트릭 판정용 (점수 무관)
 
       const prevComboStreak = state.comboStreak
       const newComboStreak = isFullCombo ? prevComboStreak + 1 : 0  // 상한 없음
@@ -103,14 +102,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const newMultiplier = getComboMultiplier(newComboStreak)
       const multiplierIncreased = newMultiplier > prevMultiplier
 
-      // 점수 계산
-      // addInput이 clearedStage번 호출되었으므로 state.score에 이번 스테이지 rawScore가 포함됨
-      const prevAccumulated = state.score - clearedStage
+      // 클리어 보너스만 배율 적용해서 추가
+      // (버튼 점수는 addInput에서 이미 배율 포함 누적됨)
       const bonus = calcClearBonus(clearedStage)
-      const rawScore = clearedStage + bonus
-      const stageScore = isFullCombo
-        ? rawScore * getComboMultiplier(prevComboStreak)  // 풀콤보: 이전(클리어 직전) streak 기준 배율
-        : rawScore
+      const bonusScore = bonus * getComboMultiplier(prevComboStreak)  // 클리어 직전 배율 기준
+
       const baseStageScore = calcBaseStageScore(clearedStage)
 
       const newFullComboCount = isFullCombo ? state.fullComboCount + 1 : state.fullComboCount
@@ -119,7 +115,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       result = { isFullCombo, multiplierIncreased }
 
       return {
-        score: prevAccumulated + stageScore,
+        score: state.score + bonusScore,
         baseScore: state.baseScore + baseStageScore,
         comboStreak: newComboStreak,
         fullComboCount: newFullComboCount,

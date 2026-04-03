@@ -224,8 +224,9 @@ describe('B-5. stageClear() — 배율 적용 점수', () => {
   })
 
   // B-5-3: 풀콤보O, prevComboStreak=5 → x2, stage=3
-  //   rawScore=3, stageScore=3×2=6, prevAccumulated=0 → score=6
-  it('B-5-3: 풀콤보O, streak=5 → x2, stage=3, score=6', () => {
+  //   ⚠️ v0.3.2-hotfix (#59): stageClear는 clearBonus만 추가. clearBonus(3)=0 → score 변화 없음
+  //   (버튼 점수는 addInput에서 이미 x2 적용됨)
+  it('B-5-3: 풀콤보O, streak=5, stage=3 → clearBonus=0, score 변화 없음', () => {
     useGameStore.setState({
       sequence: ['orange', 'blue', 'green'],
       sequenceStartTime: 0,
@@ -233,13 +234,14 @@ describe('B-5. stageClear() — 배율 적용 점수', () => {
       score: 3,
     })
     useGameStore.getState().stageClear(1499, 500)
-    expect(useGameStore.getState().score).toBe(6)
+    // clearBonus(3) = 0 → bonusScore = 0 → score 유지
+    expect(useGameStore.getState().score).toBe(3)
   })
 
   // B-5-4: 풀콤보O, prevComboStreak=5 → x2, stage=10 (bonus=2)
-  //   prevAccumulated = score(10) - clearedStage(10) = 0
-  //   rawScore = 10+2 = 12, stageScore = 12×2 = 24 → score=24
-  it('B-5-4: 풀콤보O, streak=5, stage=10(보너스포함) → score=24', () => {
+  //   ⚠️ v0.3.2-hotfix (#59): stageClear는 clearBonus만 추가
+  //   clearBonus(10) = 2, multiplier(5) = x2 → bonusScore = 4 → score = 10+4 = 14
+  it('B-5-4: 풀콤보O, streak=5, stage=10(보너스포함) → clearBonus×x2, score=14', () => {
     // seq.length=10, computerShowTime=500*10=5000, inputCompleteTime=4999 → full combo
     const seq10: ('orange' | 'blue' | 'green' | 'yellow')[] = Array(10).fill('orange') as ('orange' | 'blue' | 'green' | 'yellow')[]
     useGameStore.setState({
@@ -249,7 +251,8 @@ describe('B-5. stageClear() — 배율 적용 점수', () => {
       score: 10,
     })
     useGameStore.getState().stageClear(4999, 500)
-    expect(useGameStore.getState().score).toBe(24)
+    // clearBonus(10) = 2, getComboMultiplier(5) = 2 → bonusScore = 4 → score = 14
+    expect(useGameStore.getState().score).toBe(14)
   })
 
   // B-5-5: 이전 누적 점수 보존 (2스테이지)
