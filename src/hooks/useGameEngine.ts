@@ -143,7 +143,7 @@ export function useGameEngine() {
         const flash = getFlashDuration(clearedStage)
 
         // stageClear에 inputCompleteTime과 flashDuration 전달
-        const { isFullCombo, multiplierIncreased: increased } =
+        const { multiplierIncreased: increased } =
           useGameStore.getState().stageClear(now, flash)
 
         setMultiplierIncreased(increased)
