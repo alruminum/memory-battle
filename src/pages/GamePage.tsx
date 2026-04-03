@@ -22,41 +22,82 @@ interface StageAreaProps {
   countdown: number | null
   clearingStage: number | null
   isPlaying: boolean
-  isClearingFullCombo: boolean
   stage: number
 }
 
-function StageArea({ countdown, clearingStage, isPlaying, isClearingFullCombo, stage }: StageAreaProps): JSX.Element {
+function StageArea({ countdown, clearingStage, isPlaying, stage }: StageAreaProps): JSX.Element {
   if (countdown !== null) {
     return (
       <div style={{
-        fontFamily: 'var(--vb-font-score)',
-        fontSize: 56,
-        fontWeight: 900,
-        color: 'var(--vb-accent)',
-        lineHeight: 1,
-        textShadow: '0 0 24px rgba(200,255,0,0.4)',
+        display: 'grid',
+        gridTemplateRows: 'auto auto auto',
+        gap: 6,
+        textAlign: 'center',
+        padding: '12px 10px',
       }}>
-        {countdown}
+        <div style={{
+          fontFamily: 'var(--vb-font-score)',
+          fontSize: 72,
+          fontWeight: 900,
+          color: 'var(--vb-accent)',
+          lineHeight: 1,
+          textShadow: '0 0 40px rgba(212,168,67,0.3)',
+        }}>
+          {countdown}
+        </div>
+        <div style={{
+          height: 1,
+          background: 'var(--vb-border)',
+          margin: '0 20px',
+        }} />
+        <div key={countdown} className="countdown-hint" style={{ padding: '2px 0' }}>
+          <div style={{
+            fontSize: 13,
+            fontWeight: 700,
+            color: 'var(--vb-text)',
+            lineHeight: 1.5,
+          }}>
+            깜빡이는 순서 그대로 눌러요
+          </div>
+          <div style={{
+            fontSize: 11,
+            color: 'var(--vb-text-dim)',
+            lineHeight: 1.5,
+          }}>
+            더 빠르면 콤보가 누적됩니다
+          </div>
+        </div>
       </div>
     )
   }
   if (clearingStage !== null) {
     return (
-      <div style={{ textAlign: 'center' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
+        <svg width="36" height="36" viewBox="0 0 36 36" fill="none" aria-hidden="true">
+          <path
+            d="M8 18 L15 25 L28 11"
+            stroke="var(--vb-combo-ok)"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeDasharray="40"
+            strokeDashoffset="40"
+            style={{ animation: 'checkDraw 0.4s 0.1s ease forwards' }}
+          />
+        </svg>
         <div style={{
           fontFamily: 'var(--vb-font-score)',
-          fontSize: 11,
-          color: 'var(--vb-accent)',
+          fontSize: 10,
           letterSpacing: 2,
+          color: 'var(--vb-text-dim)',
         }}>STAGE {clearingStage}</div>
         <div style={{
           fontFamily: 'var(--vb-font-score)',
           fontSize: 18,
           fontWeight: 800,
-          color: 'var(--vb-accent)',
-          letterSpacing: 1,
-        }}>{isClearingFullCombo ? 'FULL COMBO!' : 'CLEAR'}</div>
+          color: 'var(--vb-combo-ok)',
+          letterSpacing: 2,
+        }}>CLEAR</div>
       </div>
     )
   }
@@ -91,7 +132,7 @@ interface GamePageProps {
 
 export function GamePage({ onGameOver, onRanking }: GamePageProps) {
   const { status, score, stage, comboStreak, userId, setUserId, sequenceStartTime } = useGameStore()
-  const { flashingButton, clearingStage, countdown, handleInput, startGame, retryGame, isClearingFullCombo, multiplierIncreased, gameOverReason } = useGameEngine()
+  const { flashingButton, clearingStage, countdown, handleInput, startGame, retryGame, multiplierIncreased, gameOverReason } = useGameEngine()
   const ranking = useRanking(userId || null)
 
   useEffect(() => {
@@ -208,7 +249,7 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
         alignItems: 'center',
         justifyContent: 'center',
       }}>
-        <StageArea countdown={countdown} clearingStage={clearingStage} isPlaying={isPlaying} isClearingFullCombo={isClearingFullCombo} stage={stage} />
+        <StageArea countdown={countdown} clearingStage={clearingStage} isPlaying={isPlaying} stage={stage} />
       </div>
 
       {/* 콤보 인디케이터 */}

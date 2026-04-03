@@ -29,7 +29,6 @@ export function useGameEngine() {
   const [flashingButton, setFlashingButton] = useState<ButtonColor | null>(null)
   const [clearingStage, setClearingStage] = useState<number | null>(null)
   const [countdown, setCountdown] = useState<number | null>(null)
-  const [isClearingFullCombo, setIsClearingFullCombo] = useState(false)
   const [multiplierIncreased, setMultiplierIncreased] = useState(false)
   const showingRef = useRef(false)
   const clearingRef = useRef(false)
@@ -147,11 +146,10 @@ export function useGameEngine() {
         const { isFullCombo, multiplierIncreased: increased } =
           useGameStore.getState().stageClear(now, flash)
 
-        setIsClearingFullCombo(isFullCombo)
         setMultiplierIncreased(increased)
 
         const isMilestone = clearedStage % 5 === 0
-        if (isMilestone || isFullCombo) playApplause()
+        if (isMilestone) playApplause()
 
         const newSeq = [...sequence, randomButton()]
         const pauseMs = isMilestone ? MILESTONE_PAUSE_MS : CLEAR_PAUSE_MS
@@ -159,7 +157,6 @@ export function useGameEngine() {
         setTimeout(() => {
           clearingRef.current = false
           setClearingStage(null)
-          setIsClearingFullCombo(false)
           setMultiplierIncreased(false)
           setSequence(newSeq)
           useGameStore.setState({ status: 'SHOWING', currentIndex: 0, stage: newSeq.length })
@@ -180,7 +177,6 @@ export function useGameEngine() {
     handleInput,
     startGame,
     retryGame,
-    isClearingFullCombo,
     multiplierIncreased,
     gameOverReason,
   }

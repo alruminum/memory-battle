@@ -1,30 +1,57 @@
+const BLOCK_HEIGHTS = [8, 10, 12, 14, 16]  // px, 인덱스 0(좌)→4(우), 높이 차등
+
 interface ComboIndicatorProps {
-  comboStreak: number  // 현재 연속 풀콤보 스트릭 (0이면 비표시)
+  comboStreak: number
 }
 
 export function ComboIndicator({ comboStreak }: ComboIndicatorProps) {
   if (comboStreak === 0) return null
 
+  const multiplier = Math.floor(comboStreak / 5) + 1
+  const filledCount = comboStreak % 5   // 0: 막 배율 상승 직후(빈 상태), 1~4: 진행 중
+
   return (
     <div style={{
       display: 'flex',
-      flexDirection: 'column',
       alignItems: 'center',
-      gap: 4,
-      minHeight: 48,
+      gap: 10,
+      padding: '4px 14px',
     }}>
-      {/* 콤보 스택 숫자 (comboStreak > 0일 때 상시 표시) */}
-      {comboStreak > 0 && (
-        <div style={{
-          fontFamily: 'var(--vb-font-score)',
-          fontSize: 13,
-          fontWeight: 800,
-          color: 'var(--vb-accent)',
-          letterSpacing: 2,
-        }}>
-          {`x${Math.floor(comboStreak / 5) + 1} COMBO STREAK`}
-        </div>
-      )}
+      {/* 좌: 블록 5칸 */}
+      <div style={{
+        display: 'flex',
+        gap: 3,
+        alignItems: 'flex-end',
+        height: 20,
+      }}>
+        {BLOCK_HEIGHTS.map((h, i) => {
+          const isFilled = i < filledCount
+          return (
+            <div
+              key={i}
+              style={{
+                width: 10,
+                height: h,
+                borderRadius: '2px 2px 0 0',
+                background: isFilled ? 'var(--vb-accent)' : 'var(--vb-border)',
+                transformOrigin: 'bottom',
+                animation: (isFilled && i === filledCount - 1) ? 'blockPop 0.3s ease' : 'none',
+              }}
+            />
+          )
+        })}
+      </div>
+
+      {/* 우: x{배율} 숫자 */}
+      <div style={{
+        fontFamily: 'var(--vb-font-score)',
+        fontSize: 18,
+        fontWeight: 900,
+        color: 'var(--vb-accent)',
+        lineHeight: 1,
+      }}>
+        x{multiplier}
+      </div>
     </div>
   )
 }
