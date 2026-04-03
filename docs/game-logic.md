@@ -75,14 +75,19 @@ export const getInputTimeout = (stage: number): number => {
 ## 점수 계산
 
 ```typescript
-// 버튼 누를 때마다 무조건 +1
-const calcScore = (): number => 1
+// 버튼 누를 때마다 현재 배율 즉시 적용 ⚠️ v0.3.2-hotfix (#59)
+const calcButtonScore = (comboStreak: number): number =>
+  getComboMultiplier(comboStreak)  // streak 0~4: +1, 5~9: +2, ...
 
 // 10스테이지 이상 클리어 시 지급
 const calcClearBonus = (stage: number): number => {
   if (stage < 10) return 0
   return Math.floor(stage / 5)
 }
+
+// 클리어 보너스에도 배율 적용 (버튼 점수는 addInput에서 이미 누적)
+const calcBonusScore = (stage: number, comboStreak: number): number =>
+  calcClearBonus(stage) * getComboMultiplier(comboStreak)
 ```
 
 ---
@@ -113,7 +118,9 @@ computerShowTime = flashDuration × sequenceLength
 ### 규칙
 
 - **풀콤보 조건**: 시퀀스 시작부터 전체 입력 완료까지 총 소요 시간 < `computerShowTime`
-- **배율 적용**: 풀콤보 달성 시 해당 스테이지 즉시 적용 (버튼점수 + 클리어보너스) × 배율
+- **배율 적용**: `addInput` 시 현재 `comboStreak` 배율을 즉시 적용 (버튼마다 실시간 반영) ⚠️ v0.3.2-hotfix (#59)
+- **클리어 보너스**: `stageClear` 시 `clearBonus × 클리어 직전 배율` 추가 (버튼 점수는 이미 addInput에서 배율 포함)
+- **isFullCombo**: 콤보 스트릭 증가/리셋 판정에만 사용, 점수 계산에는 미사용 ⚠️ v0.3.2-hotfix (#59)
 - **스택 증가**: 풀콤보 달성 후 스택 +1 (상한 없음)
 - **스택 리셋**: 풀콤보 실패 시 스택 0으로 리셋
 - **multiplierIncreased 플래그**: stageClear 처리 시 이전 배율과 새 배율 비교, 상승했으면 `true`
@@ -123,11 +130,9 @@ computerShowTime = flashDuration × sequenceLength
 const getComboMultiplier = (comboStreak: number): number =>
   Math.floor(comboStreak / 5) + 1
 
-// 스테이지 최종 점수 (풀콤보 달성 시 해당 스테이지에 즉시 적용)
-const calcStageScore = (
-  rawScore: number,
-  comboStreak: number
-): number => rawScore * getComboMultiplier(comboStreak)
+// ⚠️ v0.3.2-hotfix (#59): calcStageScore 사용 중단
+// 버튼 점수는 addInput에서 배율 포함 즉시 누적, stageClear는 clearBonus만 추가
+// const calcStageScore = (rawScore, comboStreak) => ... (더 이상 stageClear에서 미사용)
 ```
 
 ### 스테이지 클리어 처리
@@ -211,6 +216,8 @@ interface GameStore {
 ---
 
 ## 누적 점수 시뮬
+
+> ⚠️ 아래 수치는 구 로직(v0.3.1) 기준이며 v0.3.2-hotfix(#59) 반영 전입니다. 새 로직 기준 시뮬은 후속 태스크에서 갱신 예정.
 
 | 도달 스테이지 | 콤보 없음 | 중간급 (2연속 반복) | 완벽 풀콤보 (배율 계속 상승) |
 |---|---|---|---|

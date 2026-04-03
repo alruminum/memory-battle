@@ -1,9 +1,13 @@
 # 기억력배틀 테스트 계획 (Test Plan)
 
-> 작성 기준: PRD v0.3.1 / Epic 10 버그픽스 시점  
+> 작성 기준: PRD v0.3.1 / Epic 11 UI 개선 시점  
 > 테스트 코드 작성 전 명세 문서. 실제 코드 작성/실행은 별도 진행.
 >
 > **업데이트 이력**
+> - 2026-04-03: B-2, B-5 TC 갱신 — 점수 배율 즉시 적용 버그픽스 (#59): addInput 배율 즉시 반영, stageClear clearBonus 전용 로직 반영
+> - 2026-04-03: §5 수동 검증 항목에 Epic 11 (#52/#53/#54) TC 추가, §3 제외 항목에 ComboIndicator 명시
+> - 2026-04-03: §5 수동 검증 항목에 Page Visibility API 버그픽스 TC 추가 (Epic 10 이슈 #51)
+> - 2026-04-03: §5 수동 검증 항목에 탭-쓰루 버그픽스 TC 추가 (Epic 10 이슈 #50)
 > - 2026-04-03: §5 수동 검증 항목에 타이틀·HUD 블러 제외 TC 추가 (Epic 10 이슈 #49)
 > - 2026-04-03: §5 수동 검증 항목에 GameOverOverlay 레이아웃·프리뷰 버그픽스 TC 추가 (Epic 10 #48)
 > - 2026-04-03: B-6 `gameOver(reason)` TC 갱신 (`gameOverReason` 필드 추가 — Epic 10)
@@ -226,16 +230,19 @@ beforeEach(() => {
 
 #### B-2. `addInput(color)`
 
-버튼 입력에 따른 반환값과 상태 변화.
+버튼 입력에 따른 반환값과 상태 변화.  
+⚠️ v0.3.2-hotfix (#59): 배율 즉시 적용 — `score += getComboMultiplier(comboStreak)`
 
 | # | 유형 | 케이스 설명 | 선행 조건 | 기대 결과 | 우선순위 |
 |---|---|---|---|---|---|
 | B-2-1 | 정상 흐름 | 정답 버튼 입력 (비마지막) → 'correct' 반환 | sequence=['orange','blue'], currentIndex=0 | 반환값 `'correct'` | 🔴 Critical |
-| B-2-2 | 정상 흐름 | 정답 입력 후 score +1 | sequence=['orange'], score=0, currentIndex=0, 'orange' 입력 | `state.score === 1` | 🔴 Critical |
+| B-2-2 | 정상 흐름 | streak=0 (x1) 정답 입력 후 score +1 | sequence=['orange'], score=0, comboStreak=0, 'orange' 입력 | `state.score === 1` | 🔴 Critical |
 | B-2-3 | 정상 흐름 | 정답 입력 후 currentIndex +1 | currentIndex=0 | `state.currentIndex === 1` | 🟡 High |
 | B-2-4 | 정상 흐름 | 마지막 버튼 정답 → 'round-clear' 반환 | sequence=['orange'], currentIndex=0, 'orange' 입력 | 반환값 `'round-clear'` | 🔴 Critical |
 | B-2-5 | 에러 처리 | 오답 버튼 입력 → 'wrong' 반환 | sequence=['orange'], 'blue' 입력 | 반환값 `'wrong'` | 🔴 Critical |
 | B-2-6 | 에러 처리 | 오답 입력 시 score 변화 없음 | score=5, 오답 입력 | `state.score === 5` (변화 없음) | 🟡 High |
+| B-2-7 | 정상 흐름 | streak=5 (x2) 정답 입력 후 score +2 | score=0, comboStreak=5, 'orange' 입력 정답 | `state.score === 2` | 🔴 Critical |
+| B-2-8 | 정상 흐름 | streak=10 (x3) 정답 입력 후 score +3 | score=0, comboStreak=10, 'orange' 입력 정답 | `state.score === 3` | 🔴 Critical |
 
 ---
 
@@ -269,18 +276,22 @@ beforeEach(() => {
 
 #### B-5. `stageClear(inputCompleteTime, flashDuration)` — 배율 적용 점수
 
-**핵심 로직**: 풀콤보 시 `prevComboStreak`(클리어 직전 streak) 기준 배율로 이번 스테이지 정산.  
-- `prevAccumulated = state.score - clearedStage` (이전 누적 분리)  
-- `stageScore = rawScore × getComboMultiplier(prevComboStreak)` (풀콤보 시)  
-- `rawScore = clearedStage + calcClearBonus(clearedStage)`
+⚠️ v0.3.2-hotfix (#59): 핵심 로직 변경 — 버튼 점수는 addInput에서 배율 포함 누적됨.  
+`stageClear`는 `clearBonus × getComboMultiplier(prevComboStreak)`만 추가.  
+`isFullCombo`는 스트릭 판정에만 사용, 점수와 무관.
+
+**핵심 로직** (변경 후):
+- `bonusScore = calcClearBonus(clearedStage) × getComboMultiplier(prevComboStreak)` (클리어 보너스)
+- 버튼 점수는 이미 `score`에 배율 포함 누적됨 (addInput에서 처리)
+- 풀콤보/미달성 여부와 관계없이 `score += bonusScore`
 
 | # | 유형 | 케이스 설명 | 선행 조건 | 기대 결과 | 우선순위 |
 |---|---|---|---|---|---|
-| B-5-1 | 정상 흐름 | 풀콤보 미달성 → 배율 미적용 (stage=3) | score=3(addInput 3회), sequence.length=3, prevComboStreak=2, 풀콤보X | `state.score === 3` (rawScore×1) | 🔴 Critical |
-| B-5-2 | 정상 흐름 | 풀콤보 달성 streak=0 → x1 배율 (stage=3) | score=3, sequence.length=3, prevComboStreak=0, 풀콤보O | `state.score === 3` (3×x1) | 🔴 Critical |
-| B-5-3 | 정상 흐름 | 풀콤보 달성 streak=5 → x2 배율 (stage=3) | score=3, sequence.length=3, prevComboStreak=5, 풀콤보O | `state.score === 6` (3×x2) | 🔴 Critical |
-| B-5-4 | 정상 흐름 | 풀콤보 달성 streak=5 → x2 배율 (stage=10, 보너스 포함) | score=10, sequence.length=10, prevComboStreak=5, 풀콤보O | `state.score === (10+2)×2 = 24` | 🔴 Critical |
-| B-5-5 | 정상 흐름 | 이전 누적 점수 보존 (2스테이지 연속 클리어) | 1스테이지 클리어 score=1, 2스테이지에서 score=1+2=3, 풀콤보X | `state.score === 3` (누적 1 + 이번 2) | 🟡 High |
+| B-5-1 | 정상 흐름 | stage=3 (보너스 없음) — 풀콤보X, 점수 변화 없음 | score=3 (addInput x1 배율 3회), sequence.length=3 (stage<10), 풀콤보X | `state.score === 3` (clearBonus=0) | 🔴 Critical |
+| B-5-2 | 정상 흐름 | stage=3 (보너스 없음) — 풀콤보O, 점수 변화 없음 | score=3, sequence.length=3 (stage<10), prevComboStreak=0, 풀콤보O | `state.score === 3` (clearBonus=0) | 🔴 Critical |
+| B-5-3 | 정상 흐름 | stage=10 보너스 streak=0 (x1) — 풀콤보O | score=10 (addInput x1×10), sequence.length=10, prevComboStreak=0, 풀콤보O | `state.score === 10 + 2×1 = 12` (clearBonus=2, x1) | 🔴 Critical |
+| B-5-4 | 정상 흐름 | stage=10 보너스 streak=5 (x2) — 풀콤보O | score=20 (addInput x2×10), sequence.length=10, prevComboStreak=5, 풀콤보O | `state.score === 20 + 2×2 = 24` (clearBonus=2, x2) | 🔴 Critical |
+| B-5-5 | 정상 흐름 | stage=10 보너스 streak=5 (x2) — 풀콤보X, 보너스 여전히 적용 | score=20, sequence.length=10, prevComboStreak=5, 풀콤보X | `state.score === 20 + 2×2 = 24` (isFullCombo가 점수에 무관) | 🔴 Critical |
 | B-5-6 | 정상 흐름 | multiplierIncreased true — streak 4→5 전환 시 | prevComboStreak=4, 풀콤보O → newComboStreak=5 | `multiplierIncreased === true` | 🔴 Critical |
 | B-5-7 | 정상 흐름 | multiplierIncreased false — streak 배율 상승 없을 때 | prevComboStreak=1, 풀콤보O → newComboStreak=2 (x1 유지) | `multiplierIncreased === false` | 🟡 High |
 | B-5-8 | 엣지 케이스 | multiplierIncreased false — 풀콤보 미달성 시 | prevComboStreak=4, 풀콤보X → newComboStreak=0 | `multiplierIncreased === false` | 🟡 High |
@@ -451,3 +462,19 @@ INPUT 상태에서 `sequence.length`와 store의 `stage`는 항상 같아야 한
 | GameOverOverlay: 패널 상단에 핸들바·경고 아이콘(⚠)·"GAME OVER" 라벨 표시 | 오버레이 등장 시 세 요소가 순서대로 상단에 표시되는지 시각 확인 (Epic 10 버그 #48) |
 | GameOverOverlay: 타이틀·HUD 영역에 블러 미적용 | 오버레이 등장 시 "MEMORY BATTLE" 타이틀과 SCORE/STG/DAILY HUD가 블러 없이 선명하게 표시되는지 확인 (Epic 10 이슈 #49) |
 | GameOverOverlay: DAILY 버튼 z-index 상승 후 탭 이벤트 정상 처리 | 오버레이 표시 중 DAILY 버튼 탭 시 랭킹 페이지로 정상 전환되는지 확인 (Epic 10 이슈 #49) |
+| GameOverOverlay: 오답 입력 직후 탭-쓰루 없음 | 색깔 버튼 오답 탭 → 오버레이 등장 후 즉시 ResultPage 이동하지 않고 오버레이 유지 확인 (Epic 10 이슈 #50) |
+| GameOverOverlay: 오버레이 탭 → ResultPage 정상 전환 | 오버레이 등장 후 의도적 탭 시 ResultPage로 정상 전환 확인 (Epic 10 이슈 #50) |
+| GameOverOverlay: 타임아웃 후 탭 → ResultPage 정상 전환 (회귀 없음) | 타임아웃 오버레이 탭 → ResultPage 전환 플로우 이상 없음 확인 (Epic 10 이슈 #50) |
+| Page Visibility: 화면 OFF 후 복귀 시 소리 중단 (이슈 #51) | 게임 진행 중 화면 OFF → 소리 즉시 중단, 복귀 후 다음 버튼 입력 시 정상 재생 확인 |
+| 카운트다운 힌트 문구: 3→2→1 중 구분선 + 힌트 2줄 표시 (이슈 #52) | 게임 시작 → 카운트다운 중 "깜빡이는 순서 그대로 눌러요" + "더 빠르면 콤보가 누적됩니다" 문구 확인 |
+| 카운트다운 힌트 문구: 매 tick 전환 시 flipIn 재실행 (이슈 #52) | 3→2, 2→1 전환 시 힌트 블록 등장 애니메이션 재실행 확인 |
+| 카운트다운 힌트 문구: SHOWING 진입 시 사라짐 (이슈 #52) | 카운트다운 종료 → SHOWING 페이즈에서 힌트 문구 미표시 확인 |
+| FULL COMBO! 제거: clearingStage 시 체크마크 표시 (이슈 #53) | 스테이지 클리어 시 "FULL COMBO!" 텍스트 없음, 체크마크 SVG 드로우 애니메이션 + "CLEAR" 텍스트 확인 |
+| FULL COMBO! 제거: milestone 클리어 시 환호성 사운드 유지 (이슈 #53) | 5스테이지 클리어 시 환호성 재생, 비-milestone 클리어 시 무음 확인 |
+| ComboIndicator 블록 UI: 5칸 높이 차등 블록 표시 (이슈 #54) | comboStreak=1~4 시 1~4칸 filled 블록, 나머지 empty, `x1` 배율 표시 확인 |
+| ComboIndicator 블록 UI: 배율 상승 직후 빈 블록 상태 (이슈 #54) | comboStreak=5 시 블록 0칸 filled, `x2` 배율 표시 확인 |
+| ComboIndicator 블록 UI: 마지막 채워진 블록에 blockPop 애니메이션 (이슈 #54) | 블록이 새로 채워질 때 해당 블록 scaleY 팝 애니메이션 확인 |
+| ComboIndicator 블록 UI: comboStreak=0 시 미표시 (이슈 #54) | 게임 시작 직후 또는 콤보 리셋 직후 ComboIndicator 미렌더링 확인 |
+| Page Visibility: 화면 OFF 중 타이머 만료로 인한 강제 게임오버 없음 (이슈 #51) | 화면 OFF 5초 이상 유지 → 복귀 시 게임 유지, 게임오버 미발생 확인 |
+| Page Visibility: ComboTimer 복귀 시 elapsed 정상 표시 (이슈 #51) | 화면 OFF → ComboTimer 정지, 복귀 시 Date.now() 기준 경과 시간 재계산 표시 확인 |
+| Page Visibility: ComboTimer 목표 초과 후 복귀 시 clamped 표시 (이슈 #51) | 화면 OFF 동안 computerShowTime 초과 → 복귀 시 목표값으로 고정 표시, interval 재시작 없음 확인 |
