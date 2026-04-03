@@ -25,9 +25,12 @@ export function useTimer(onExpire: () => void, duration = 2000) {
     intervalRef.current = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 100) {
-          dbg('[Timer] EXPIRED')
+          dbg('[Timer] EXPIRED (hidden=%s)', document.hidden)
           stop()
-          onExpireRef.current()
+          if (!document.hidden) {
+            // hidden 상태에서는 onExpire 호출 억제
+            onExpireRef.current()
+          }
           return 0
         }
         return prev - 100

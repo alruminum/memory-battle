@@ -27,21 +27,52 @@ export function ComboTimer({ computerShowTime, inputStartTime, isActive }: Combo
       return
     }
 
-    // 활성: 100ms 간격으로 경과 시간 업데이트
-    intervalRef.current = setInterval(() => {
-      const next = Date.now() - inputStartTime
-      if (next >= computerShowTimeRef.current) {
-        // 상한 도달: interval 정지 + 값 clamp
-        clearInterval(intervalRef.current!)
+    const startInterval = () => {
+      if (intervalRef.current) return  // 이미 실행 중이면 중복 시작 방지
+      intervalRef.current = setInterval(() => {
+        const next = Date.now() - inputStartTime
+        if (next >= computerShowTimeRef.current) {
+          // 상한 도달: interval 정지 + 값 clamp
+          clearInterval(intervalRef.current!)
+          intervalRef.current = null
+          setElapsedMs(computerShowTimeRef.current)
+        } else {
+          setElapsedMs(next)
+        }
+      }, 100)
+    }
+
+    const stopInterval = () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
         intervalRef.current = null
-        setElapsedMs(computerShowTimeRef.current)
-      } else {
-        setElapsedMs(next)
       }
-    }, 100)
+    }
+
+    // 초기 시작: hidden이 아닐 때만 interval 시작
+    if (!document.hidden) {
+      startInterval()
+    }
+
+    const handleVisibility = () => {
+      if (document.hidden) {
+        stopInterval()
+      } else {
+        // 복귀 시: elapsed 즉시 반영 후 interval 재개
+        const next = Date.now() - inputStartTime
+        setElapsedMs(Math.min(next, computerShowTimeRef.current))
+        if (next < computerShowTimeRef.current) {
+          startInterval()
+        }
+        // next >= computerShowTimeRef.current이면 clamped 상한값으로 고정된 채 interval 재시작 불필요
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibility)
 
     return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current)
+      document.removeEventListener('visibilitychange', handleVisibility)
+      stopInterval()
     }
   }, [isActive, inputStartTime])
 

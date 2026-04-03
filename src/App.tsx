@@ -4,6 +4,7 @@ import { useGameStore } from './store/gameStore'
 import { GamePage } from './pages/GamePage'
 import { ResultPage } from './pages/ResultPage'
 import { RankingPage } from './pages/RankingPage'
+import { suspendAudio, resumeAudio } from './lib/sound'
 
 type Page = 'game' | 'result' | 'ranking'
 
@@ -28,6 +29,18 @@ function App() {
     window.addEventListener('popstate', handlePopState)
     return () => window.removeEventListener('popstate', handlePopState)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.hidden) {
+        suspendAudio()
+      } else {
+        resumeAudio()
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibility)
+    return () => document.removeEventListener('visibilitychange', handleVisibility)
+  }, [])
 
   return (
     <div style={{ height: '100dvh', overflow: 'hidden' }}>
