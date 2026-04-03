@@ -23,7 +23,7 @@ export function GameOverOverlay({ reason, onConfirm }: GameOverOverlayProps): JS
     // backgroundColor는 .gameover-backdrop CSS 클래스에서만 관리 (C-2 권고: 인라인 제거)
     // @supports backdrop-filter 분기를 인라인 style로 처리 불가 → CSS 클래스 전용
     <div
-      onClick={onConfirm}
+      onPointerDown={onConfirm}
       className="gameover-backdrop"
       style={{
         position: 'absolute',
