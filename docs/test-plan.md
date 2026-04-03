@@ -1,9 +1,12 @@
 # 기억력배틀 테스트 계획 (Test Plan)
 
-> 작성 기준: PRD v0.3.1 / Epic 09 구현 완료 시점  
+> 작성 기준: PRD v0.3.1 / Epic 10 버그픽스 시점  
 > 테스트 코드 작성 전 명세 문서. 실제 코드 작성/실행은 별도 진행.
 >
 > **업데이트 이력**
+> - 2026-04-03: §5 수동 검증 항목에 타이틀·HUD 블러 제외 TC 추가 (Epic 10 이슈 #49)
+> - 2026-04-03: §5 수동 검증 항목에 GameOverOverlay 레이아웃·프리뷰 버그픽스 TC 추가 (Epic 10 #48)
+> - 2026-04-03: B-6 `gameOver(reason)` TC 갱신 (`gameOverReason` 필드 추가 — Epic 10)
 > - 2026-04-02: A-6 (`getInputTimeout`) 섹션 추가, D 그룹 (타이머 통합 TC) 추가 (Epic 09 SPEC_GAP 복구)
 
 ---
@@ -284,13 +287,19 @@ beforeEach(() => {
 
 ---
 
-#### B-6. `gameOver()`
+#### B-6. `gameOver(reason)` ⚠️ Epic 10 변경 — reason 파라미터 추가
+
+> 커버 대상 함수: `gameOver(reason: 'timeout' | 'wrong')` — `gameOverReason` 필드 저장 포함
 
 | # | 유형 | 케이스 설명 | 검증 포인트 | 우선순위 |
 |---|---|---|---|---|
 | B-6-1 | 정상 흐름 | gameOver 후 status는 'RESULT' | `state.status === 'RESULT'` | 🔴 Critical |
 | B-6-2 | 정상 흐름 | gameOver 후 stage는 sequence.length와 같음 | sequence.length=5일 때 `state.stage === 5` | 🟡 High |
 | B-6-3 | 정상 흐름 | gameOver 후 score, comboStreak 변화 없음 | score/comboStreak는 gameOver 전 값 유지 | 🟠 Medium |
+| B-6-4 | 정상 흐름 | `gameOver('timeout')` 후 gameOverReason === 'timeout' | `state.gameOverReason === 'timeout'` | 🔴 Critical |
+| B-6-5 | 정상 흐름 | `gameOver('wrong')` 후 gameOverReason === 'wrong' | `state.gameOverReason === 'wrong'` | 🔴 Critical |
+| B-6-6 | 정상 흐름 | `resetGame()` 후 gameOverReason === null | `state.gameOverReason === null` | 🔴 Critical |
+| B-6-7 | 정상 흐름 | `startGame()` 후 gameOverReason === null | 게임 재시작 시 잔류 reason 없음 | 🔴 Critical |
 
 ---
 
@@ -432,8 +441,13 @@ INPUT 상태에서 `sequence.length`와 store의 `stage`는 항상 같아야 한
 |---|---|
 | ComboTimer: INPUT 진입 시 0.00부터 시작 | 게임 플레이 → INPUT 전환 시 타이머 시작 확인 |
 | ComboTimer: computerShowTime 이내 → 초록, 초과 → 빨강 | 느린 입력으로 빨강 전환 확인 |
+| ComboTimer: computerShowTime 초과 후 숫자 고정 (버그 #44) | 느린 입력으로 목표값 초과 후 타이머가 목표값에서 멈추는지 확인 |
 | MultiplierBurst: 5번째 풀콤보 시 x2(노랑) 표시 | 5연속 풀콤보 달성 시 오버레이 확인 |
 | MultiplierBurst: pointerEvents:none (버튼 입력 차단 안 됨) | 애니메이션 중 버튼 클릭 가능 여부 |
 | MultiplierBurst: 600ms 후 자동 소멸 | 애니메이션 완료 후 사라짐 확인 |
 | 마일스톤(5, 10, 15...) + 풀콤보 + 배율 상승 동시 발생 | 세 효과 동시 트리거 시 레이아웃 이상 없음 |
 | 게임오버 후 retry → 점수/comboStreak 완전 초기화 | retry 후 HUD 값이 0으로 리셋됨 확인 |
+| GameOverOverlay: 오버레이가 게임 컨테이너 내에만 표시됨 (레이아웃 이탈 없음) | 타이머 만료·오답 입력 시 오버레이가 게임 영역 내 표시, 상단 타이틀/HUD 바 미차단 확인 (Epic 10 버그 #48) |
+| GameOverOverlay: 패널 상단에 핸들바·경고 아이콘(⚠)·"GAME OVER" 라벨 표시 | 오버레이 등장 시 세 요소가 순서대로 상단에 표시되는지 시각 확인 (Epic 10 버그 #48) |
+| GameOverOverlay: 타이틀·HUD 영역에 블러 미적용 | 오버레이 등장 시 "MEMORY BATTLE" 타이틀과 SCORE/STG/DAILY HUD가 블러 없이 선명하게 표시되는지 확인 (Epic 10 이슈 #49) |
+| GameOverOverlay: DAILY 버튼 z-index 상승 후 탭 이벤트 정상 처리 | 오버레이 표시 중 DAILY 버튼 탭 시 랭킹 페이지로 정상 전환되는지 확인 (Epic 10 이슈 #49) |

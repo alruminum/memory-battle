@@ -42,6 +42,22 @@ VITE_APP_NAME=memory-battle
 
 > 버전이 올라가면 "현재 버전 레이블" 항목만 업데이트하면 된다. 에이전트는 이 표를 참조한다.
 
+### 이슈 등록 필수 항목
+
+버그 이슈 등록 시 아래 항목을 반드시 포함해야 한다:
+
+| 항목 | 값 |
+|---|---|
+| 레이블 | `bug` + 현재 버전 레이블 (`v03` 등) |
+| 마일스톤 | `Bugs` |
+
+스토리 이슈 등록 시:
+
+| 항목 | 값 |
+|---|---|
+| 레이블 | 해당 에픽 레이블 + 현재 버전 레이블 |
+| 마일스톤 | `Story` |
+
 ---
 
 ## 오케스트레이션 워크플로우
@@ -132,6 +148,14 @@ _(impl 없음 — 문서 구조 작업만)_ · Issues: [#19](https://github.com/
 | 04 timer-restore | [impl/04-timer-restore.md](docs/milestones/v03/epics/epic-09-combo-v031/impl/04-timer-restore.md) | [#28](https://github.com/alruminum/memory-battle/issues/28) |
 | 05 combo-timer-interval-fix | [impl/05-combo-timer-interval-fix.md](docs/milestones/v03/epics/epic-09-combo-v031/impl/05-combo-timer-interval-fix.md) | [#44](https://github.com/alruminum/memory-battle/issues/44) |
 
+**Epic 10 — 게임오버 오버레이** · [stories](docs/milestones/v03/epics/epic-10-gameover-overlay/stories.md) · Epic: [#46](https://github.com/alruminum/memory-battle/issues/46)
+
+| impl | 계획 파일 | Issue |
+|---|---|---|
+| 01 gameover-overlay | [impl/01-gameover-overlay.md](docs/milestones/v03/epics/epic-10-gameover-overlay/impl/01-gameover-overlay.md) | [#47](https://github.com/alruminum/memory-battle/issues/47) |
+| 02 overlay-bugfix | [impl/02-overlay-bugfix.md](docs/milestones/v03/epics/epic-10-gameover-overlay/impl/02-overlay-bugfix.md) | [#48](https://github.com/alruminum/memory-battle/issues/48) |
+| 03 hud-blur-exclusion | [impl/03-hud-blur-exclusion.md](docs/milestones/v03/epics/epic-10-gameover-overlay/impl/03-hud-blur-exclusion.md) | [#49](https://github.com/alruminum/memory-battle/issues/49) |
+
 ---
 
 ## 문서 (필요한 것만 열어서 참고)
@@ -189,6 +213,12 @@ Branch: main
   Closes #43
   ```
 
+### 이슈 close 규칙 (절대 원칙)
+
+- **GitHub API로 이슈를 직접 close 금지** (engineer, architect 등 모든 에이전트 포함)
+- 이슈는 반드시 **`git push` 이후** `Closes #NNN` 커밋 메시지로만 자동 close됨
+- push 전에 이슈가 닫히면 레포지토리에 fix가 없는 상태로 이슈가 닫히는 문제 발생
+
 ---
 
 ## stories.md 작성 규칙
@@ -203,7 +233,33 @@ Branch: main
 
 - **서브에이전트 base 우회 금지**: 에이전트 호출 시 해당 에이전트 base의 워크플로우를 우회하는 방식으로 작업 지시 금지.
 - **architect 호출 시 반드시 Mode 명시**: Mode A(시스템 설계) / Mode B(모듈 계획) / Mode C(SPEC_GAP) / Mode D(태스크 분해) / Mode E(기술 에픽) 중 하나로 호출. "특정 파일 직접 수정" 형태의 지시 금지.
+  - **프롬프트 첫 줄 형식 필수**: `Mode X — [용도 한 줄 설명]` 형태로 작성. 예: `Mode B — 모듈별 구현 계획 파일 작성`. Mode 문자만 단독 표기 금지.
   - PRD/스펙 변경으로 설계 문서(game-logic.md 등) 업데이트가 필요하면 → 변경된 PRD 내용과 함께 Mode B로 호출. architect가 base 워크플로우(TRD 현행화 포함)대로 처리한다.
+
+### architect Mode 상세
+
+| Mode | 용도 | 산출물 |
+|---|---|---|
+| **Mode A** | 시스템 전체 구조 설계 | `docs/architecture.md` 등 설계 문서 |
+| **Mode B** | 모듈별 구현 계획 파일 작성 | `docs/impl/NN-*.md` ← **기본값** |
+| **Mode C** | SPEC_GAP 피드백 처리 | impl 파일 수정 |
+| **Mode D** | 큰 에픽 → stories/태스크 분해 | `stories.md` 업데이트 |
+| **Mode E** | 기술 에픽 설계 (성능·보안·리팩) | `docs/` 설계 문서 |
+
+> Mode를 명시하지 않으면 architect가 거부함 (PreToolUse 훅). **구현 전 계획이면 Mode B가 기본.**
+
+### designer 루프 트리거 기준
+
+"스크린샷이 달라지는가?"가 핵심 질문.
+
+| 요청 유형 | designer 루프 필요? |
+|---|---|
+| 새 화면 추가 | ✅ 필요 |
+| 기존 화면 레이아웃·색상·컴포넌트 변경 | ✅ 필요 |
+| 애니메이션·트랜지션 추가 | ✅ 필요 (시각적 차이 발생) |
+| 버그 픽스 (동작 수정, 화면 변화 없음) | ❌ 불필요 |
+| 로직 리팩토링 (UI 변화 없음) | ❌ 불필요 |
+| 텍스트/문구 변경 | ❌ 불필요 → architect Mode B 직행 |
 
 ---
 

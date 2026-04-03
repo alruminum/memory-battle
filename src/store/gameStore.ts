@@ -2,6 +2,8 @@ import { create } from 'zustand'
 import type { GameStatus, ButtonColor } from '../types'
 import { getComboMultiplier, calcClearBonus, calcBaseStageScore } from '../lib/gameLogic'
 
+export type GameOverReason = 'timeout' | 'wrong' | null
+
 interface GameStore {
   status: GameStatus
   sequence: ButtonColor[]
@@ -13,6 +15,7 @@ interface GameStore {
   fullComboCount: number
   maxComboStreak: number
   sequenceStartTime: number  // INPUT 페이즈 시작 시각 (ms). 0 = 미설정
+  gameOverReason: GameOverReason
 
   userId: string
   hasTodayReward: boolean
@@ -26,7 +29,7 @@ interface GameStore {
     isFullCombo: boolean
     multiplierIncreased: boolean
   }
-  gameOver: () => void
+  gameOver: (reason: GameOverReason) => void
   resetGame: () => void
 }
 
@@ -41,6 +44,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   fullComboCount: 0,
   maxComboStreak: 0,
   sequenceStartTime: 0,
+  gameOverReason: null,
 
   userId: '',
   hasTodayReward: false,
@@ -61,6 +65,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       fullComboCount: 0,
       maxComboStreak: 0,
       sequenceStartTime: 0,
+      gameOverReason: null,
     }),
 
   addInput: (color) => {
@@ -125,10 +130,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
     return result
   },
 
-  gameOver: () =>
+  gameOver: (reason) =>
     set((state) => ({
       status: 'RESULT',
       stage: state.sequence.length,
+      gameOverReason: reason,
     })),
 
   resetGame: () =>
@@ -143,5 +149,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
       fullComboCount: 0,
       maxComboStreak: 0,
       sequenceStartTime: 0,
+      gameOverReason: null,
     }),
 }))

@@ -15,3 +15,4 @@
 | [x] | Epic 07: DB 타입 안전성 | [docs/milestones/v03/epics/epic-07-db-type-safety/stories.md](docs/milestones/v03/epics/epic-07-db-type-safety/stories.md) |
 | [x] | Epic 08: GamePage 품질 개선 & UI 리팩토링 | [docs/milestones/v03/epics/epic-08-gamepage-refactor/stories.md](docs/milestones/v03/epics/epic-08-gamepage-refactor/stories.md) |
 | [x] | Epic 09: 콤보 시스템 전면 개편 (PRD v0.3.1) | [docs/milestones/v03/epics/epic-09-combo-v031/stories.md](docs/milestones/v03/epics/epic-09-combo-v031/stories.md) |
+| [ ] | Epic 10: 게임오버 오버레이 | [docs/milestones/v03/epics/epic-10-gameover-overlay/stories.md](docs/milestones/v03/epics/epic-10-gameover-overlay/stories.md) |

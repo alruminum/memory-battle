@@ -305,30 +305,51 @@ describe('B-5. stageClear() — 배율 적용 점수', () => {
   })
 })
 
-// ── B-6. gameOver() ───────────────────────────────────────────────────────
+// ── B-6. gameOver(reason) — Epic 10 ──────────────────────────────────────
 
-describe('B-6. gameOver()', () => {
-  it('B-6-1: status === RESULT', () => {
+describe('B-6. gameOver(reason) — reason 파라미터 + gameOverReason 필드', () => {
+  it('B-6-1: gameOver 후 status === RESULT', () => {
     useGameStore.setState({ sequence: ['orange', 'blue', 'green', 'yellow', 'orange'] })
-    useGameStore.getState().gameOver()
+    useGameStore.getState().gameOver('wrong')
     expect(useGameStore.getState().status).toBe('RESULT')
   })
 
-  it('B-6-2: stage === sequence.length', () => {
+  it('B-6-2: gameOver 후 stage === sequence.length', () => {
     useGameStore.setState({ sequence: ['orange', 'blue', 'green', 'yellow', 'orange'] })
-    useGameStore.getState().gameOver()
+    useGameStore.getState().gameOver('wrong')
     expect(useGameStore.getState().stage).toBe(5)
   })
 
-  it('B-6-3: gameOver 후 score 변화 없음', () => {
-    useGameStore.setState({ sequence: ['orange'], score: 7 })
-    useGameStore.getState().gameOver()
+  it('B-6-3: gameOver 후 score, comboStreak 변화 없음', () => {
+    useGameStore.setState({ sequence: ['orange'], score: 7, comboStreak: 3 })
+    useGameStore.getState().gameOver('wrong')
     expect(useGameStore.getState().score).toBe(7)
+    expect(useGameStore.getState().comboStreak).toBe(3)
   })
 
-  it('B-6-4: gameOver 후 comboStreak 변화 없음', () => {
-    useGameStore.setState({ sequence: ['orange'], comboStreak: 3 })
-    useGameStore.getState().gameOver()
-    expect(useGameStore.getState().comboStreak).toBe(3)
+  it('B-6-4: gameOver("timeout") → gameOverReason === "timeout"', () => {
+    useGameStore.setState({ sequence: ['orange'] })
+    useGameStore.getState().gameOver('timeout')
+    expect(useGameStore.getState().gameOverReason).toBe('timeout')
+  })
+
+  it('B-6-5: gameOver("wrong") → gameOverReason === "wrong"', () => {
+    useGameStore.setState({ sequence: ['orange'] })
+    useGameStore.getState().gameOver('wrong')
+    expect(useGameStore.getState().gameOverReason).toBe('wrong')
+  })
+
+  it('B-6-6: resetGame() 후 gameOverReason === null', () => {
+    useGameStore.setState({ sequence: ['orange'] })
+    useGameStore.getState().gameOver('timeout')
+    useGameStore.getState().resetGame()
+    expect(useGameStore.getState().gameOverReason).toBeNull()
+  })
+
+  it('B-6-7: startGame() 후 gameOverReason === null', () => {
+    useGameStore.setState({ sequence: ['orange'] })
+    useGameStore.getState().gameOver('wrong')
+    useGameStore.getState().startGame()
+    expect(useGameStore.getState().gameOverReason).toBeNull()
   })
 })

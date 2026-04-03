@@ -9,6 +9,10 @@ import { ComboIndicator } from '../components/game/ComboIndicator'
 import { ComboTimer } from '../components/game/ComboTimer'
 import { BannerAd } from '../components/ads/BannerAd'
 import { MultiplierBurst } from '../components/game/MultiplierBurst'
+import { GameOverOverlay } from '../components/game/GameOverOverlay'
+
+// 타이틀·HUD strip을 GameOverOverlay(z-index 200) 위에 렌더링하여 backdrop-filter blur 영향에서 제외
+const Z_ABOVE_OVERLAY = 201
 
 function rankLabel(rank: number): string {
   return rank > 0 ? '#' + rank : '#—'
@@ -87,7 +91,7 @@ interface GamePageProps {
 
 export function GamePage({ onGameOver, onRanking }: GamePageProps) {
   const { status, score, stage, comboStreak, userId, setUserId, sequenceStartTime } = useGameStore()
-  const { flashingButton, clearingStage, countdown, handleInput, startGame, retryGame, isClearingFullCombo, multiplierIncreased } = useGameEngine()
+  const { flashingButton, clearingStage, countdown, handleInput, startGame, retryGame, isClearingFullCombo, multiplierIncreased, gameOverReason } = useGameEngine()
   const ranking = useRanking(userId || null)
 
   useEffect(() => {
@@ -104,12 +108,16 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  const [isShaking, setIsShaking] = useState(false)
+
+  // RESULT 진입 시 shake 애니메이션 트리거 (자동 페이지 전환 제거 — 유저 탭으로 전환)
   useEffect(() => {
     if (status === 'RESULT') {
-      onGameOver()
+      setIsShaking(true)
+      // shake 애니메이션 완료 후 class 제거 (0.5s)
+      const tid = setTimeout(() => setIsShaking(false), 500) // index.css .shake animation-duration: 0.5s 와 동기화
+      return () => clearTimeout(tid)
     }
-  // status 변화만 감시하는 것이 의도. onGameOver를 deps에 추가하면 부모 리렌더 시 중복 호출 가능
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status])
 
   const [showBurst, setShowBurst] = useState(false)
@@ -130,14 +138,18 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
   }
 
   return (
-    <div style={{
-      display: 'flex',
-      flexDirection: 'column',
-      height: '100%',
-      backgroundColor: 'var(--vb-bg)',
-      color: 'var(--vb-text)',
-      fontFamily: 'var(--vb-font-body)',
-    }}>
+    <div
+      className={isShaking ? 'shake' : ''}
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+        backgroundColor: 'var(--vb-bg)',
+        color: 'var(--vb-text)',
+        fontFamily: 'var(--vb-font-body)',
+        position: 'relative',
+      }}
+    >
       {/* 타이틀 */}
       <div style={{
         padding: '14px 20px 12px',
@@ -146,6 +158,8 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
         justifyContent: 'center',
         borderBottom: '1px solid var(--vb-border)',
         flexShrink: 0,
+        position: 'relative',
+        zIndex: Z_ABOVE_OVERLAY,
       }}>
         <div style={{
           fontFamily: 'var(--vb-font-score)',
@@ -165,6 +179,8 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
         backgroundColor: 'var(--vb-surface)',
         borderBottom: '1px solid var(--vb-border)',
         flexShrink: 0,
+        position: 'relative',
+        zIndex: Z_ABOVE_OVERLAY,
       }}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '10px 8px', gap: 3 }}>
           <span style={{ fontSize: 9, fontWeight: 600, color: 'var(--vb-text-dim)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>SCORE</span>
@@ -246,6 +262,14 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
         isVisible={showBurst}
         onComplete={() => setShowBurst(false)}
       />
+
+      {/* 게임오버 오버레이: RESULT 상태이고 reason이 있을 때만 표시 */}
+      {status === 'RESULT' && gameOverReason !== null && (
+        <GameOverOverlay
+          reason={gameOverReason}
+          onConfirm={onGameOver}
+        />
+      )}
     </div>
   )
 }

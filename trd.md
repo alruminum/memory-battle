@@ -1,6 +1,8 @@
 # 기억력배틀 TRD v0.3
 
 > 변경 이력
+> - v0.3.2-fix (2026-04-03): GameOverOverlay 버그픽스 (Epic 10 #48) — §7 GamePage: `position: fixed` → `position: absolute` 변경(컨테이너 기준 배치), 루트 div `position: relative` 추가, 패널 상단 핸들바·경고 아이콘·"GAME OVER" 타이틀 추가.
+> - v0.3.2 (2026-04-03): 게임오버 오버레이 추가 (Epic 10) — §2 `GameOverOverlay.tsx` 추가, §6 `gameOverReason` 필드 + `gameOver(reason)` 시그니처 변경, §7 GamePage 오버레이 스펙 추가.
 > - v0.3.1-fix (2026-04-02): SPEC_GAP 복구 — §3-4 입력 제한 타이머 섹션 추가 (`getInputTimeout` 스펙 명시). Epic 09 Story 1 구현 시 누락된 타이머 로직 복구 계획(04-timer-restore.md) 반영.
 > - v0.3.1 (2026-04-02): 콤보 시스템 개편 — 타이머 제거, 풀콤보 조건을 컴퓨터 시연 시간 기준으로 변경, 배율 공식 변경(5연속마다 +1, 무제한), multiplierIncreased 플래그 추가, ComboTimer/MultiplierBurst 컴포넌트 추가.
 > - v0.3 (2026-04-01): 게임 메카닉 개편 — 난이도 선택 제거, 스테이지 기반 속도/타이머 도입, 스택형 콤보 시스템으로 교체, 기회제 폐지, 게임오버 강제 리워드광고로 전환, DB 스키마 변경.
@@ -37,6 +39,7 @@ memory-battle/
 │   │   │   ├── ButtonPad.tsx        # 4개 색깔 버튼
 │   │   │   ├── ComboIndicator.tsx   # 콤보 스택 표시 (ComboDisplay.tsx에서 변경)
 │   │   │   ├── ComboTimer.tsx       # 타임워치 UI (신규, v0.3.1)
+│   │   │   ├── GameOverOverlay.tsx  # 게임오버 오버레이 (신규, v0.3.2)
 │   │   │   ├── MultiplierBurst.tsx  # 배율 상승 버스트 오버레이 (신규, v0.3.1)
 │   │   │   └── ScoreDisplay.tsx
 │   │   ├── ranking/
@@ -357,6 +360,7 @@ interface GameStore {
   sequenceStartTime: number // INPUT 페이즈 시작 시각 (ms) — 풀콤보 판정용 (v0.3.1)
   fullComboCount: number    // 이번 게임 풀콤보 달성 횟수
   maxComboStreak: number    // 이번 게임 최고 콤보 스택
+  gameOverReason: 'timeout' | 'wrong' | null  // ⚠️ v0.3.2: 게임오버 이유 (오버레이 표시용)
 
   // 유저
   userId: string
@@ -364,7 +368,7 @@ interface GameStore {
   // 액션
   startGame: () => void              // 기회 차감 없이 바로 시작
   addInput: (color: string) => void
-  gameOver: () => void               // Supabase + 토스 리더보드 점수 제출
+  gameOver: (reason: 'timeout' | 'wrong') => void  // ⚠️ v0.3.2: reason 파라미터 추가
   resetGame: () => void
   // ⚠️ v0.3.1 추가
   stageClear: (inputCompleteTime: number, flashDuration: number) => {
@@ -384,13 +388,15 @@ interface GameStore {
 - ~~난이도 선택~~ (제거됨)
 - ~~남은 기회 표시~~ (제거됨)
 
-### GamePage ⚠️ v0.3.1 변경
+### GamePage ⚠️ v0.3.2 변경
 - 4개 버튼: 200x200px 원형, 탭 시 밝기 증가 애니메이션
 - ComboTimer: 컴퓨터 시연 시간 타임워치 형태로 표시 (INPUT 상태에서만 노출)
 - 스테이지 번호 옆 현재 배율 xN 상시 표시 (comboStreak 5 이상)
 - 풀콤보 달성 시: 디자인 중심 "컴퓨터를 이겼다" 피드백
 - MultiplierBurst: 배율 상승 시 xN scale-up + 파티클 버스트 (multiplierIncreased === true)
 - 배너광고: 하단 고정
+- GameOverlay 루트 div: `position: relative` (v0.3.2-fix 추가 — absolute 자식 기준점)
+- GameOverOverlay (v0.3.2): 게임오버 시 backdrop blur + 바텀 패널 슬라이드업. shake 애니메이션. 탭으로 결과 화면 전환 (자동 전환 X). `position: absolute`(v0.3.2-fix: fixed→absolute). 패널 상단: 핸들바(32×4px) + 경고 아이콘(⚠ 48×48px 원형) + "GAME OVER" 타이틀(Barlow Condensed 13px, letter-spacing 3px)
 
 ### ResultPage ⚠️ v0.3 변경
 - 이번 점수 + 최고 기록 갱신 여부

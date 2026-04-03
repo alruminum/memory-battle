@@ -14,13 +14,13 @@ const COUNTDOWN_INTERVAL = 500  // ms per tick
 const randomButton = () => BUTTONS[Math.floor(Math.random() * BUTTONS.length)]
 
 export function useGameEngine() {
-  const { status, sequence, stage, setSequence, addInput, gameOver, resetGame } =
+  const { status, sequence, stage, setSequence, addInput, gameOver, resetGame, gameOverReason } =
     useGameStore()
 
   // 타이머 만료 시 게임오버
   const handleExpire = useCallback(() => {
     playGameOver()
-    gameOver()
+    gameOver('timeout')
   }, [gameOver])
 
   // stage 기반 동적 타임아웃
@@ -130,7 +130,7 @@ export function useGameEngine() {
       if (result === 'wrong') {
         timer.stop()
         playGameOver()
-        gameOver()
+        gameOver('wrong')
         return
       }
 
@@ -182,5 +182,6 @@ export function useGameEngine() {
     retryGame,
     isClearingFullCombo,
     multiplierIncreased,
+    gameOverReason,
   }
 }
