@@ -28,7 +28,8 @@ model: sonnet
 7. `docs/milestones/vNN/epics/epic-NN-*/impl/NN-모듈명.md` 파일을 작성한다.
 8. 설계 결정 근거는 impl 파일 내 "결정 근거" 섹션에 직접 작성한다.
 9. `stories.md`에 해당 태스크가 없으면 해당 스토리 아래 추가한다.
-10. impl 파일 작성 완료 후 **GitHub Issues를 생성**한다:
+10. impl 파일 작성 완료 후 **GitHub Issues를 생성**한다.
+    ⚠️ **버그픽스 Mode B 시 이 단계 전체 스킵** — base의 "버그픽스 분기" 규칙 참조:
 
     **a. Epic 부모 이슈** (`mcp__github__create_issue`):
     - 제목: `[Epic NN] {에픽 이름}`

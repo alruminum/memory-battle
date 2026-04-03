@@ -68,6 +68,17 @@ VITE_APP_NAME=memory-battle
 
 ## 작업 순서 (반드시 준수)
 
+### 버그픽스 작업 순서 (`bug` 레이블 이슈인 경우)
+
+> 신규 기능(feat)과 다른 경로. 아래 규칙 준수.
+
+1. **원래 이슈 번호 유지** — 새 이슈 등록 금지. 추가 수정은 원래 이슈 체크리스트에 항목 추가
+2. architect 호출 시 프롬프트 첫 줄에 반드시 `버그픽스 —` 명시
+3. 구현 중 추가 수정 발생 → 별개 이슈 등록 금지 → 원래 이슈에 통합
+4. 커밋 메시지: 원래 이슈 번호 참조 (`Related to #NNN` 또는 `Closes #NNN`)
+
+---
+
 1. **GitHub Issues** 에서 해당 에픽 레이블/마일스톤으로 미완료 이슈 확인
    `gh issue list --label "epic-0N: ..." --milestone vNN --repo alruminum/memory-battle`
 2. **이슈 본문**에서 스토리 컨텍스트 + 태스크 체크리스트 확인
@@ -247,6 +258,7 @@ Branch: main
 | **Mode E** | 기술 에픽 설계 (성능·보안·리팩) | `docs/` 설계 문서 |
 
 > Mode를 명시하지 않으면 architect가 거부함 (PreToolUse 훅). **구현 전 계획이면 Mode B가 기본.**
+> **버그픽스 시**: 프롬프트 첫 줄에 `버그픽스 —` 명시 필수 (architect가 Epic/Story 이슈 생성 스킵)
 
 ### designer 루프 트리거 기준
 
