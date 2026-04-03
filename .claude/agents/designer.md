@@ -63,6 +63,39 @@ Stitch에 보내는 prompt에 반드시 포함:
 - **스타일**: 인라인 style 객체 사용. Tailwind 클래스 금지
 - **플랫폼**: 앱인토스 WebView — 외부 Google Fonts `@import` 가능, 모바일 브라우저 기준
 - **게임 앱 특성**: 세로 스크롤 우선, 터치 친화적(최소 44px), 게임의 긴장감·성취감 강화
+- **룩앤필 원칙**: 기존 화면에 부분 추가·수정하는 작업은 현재 코드의 색상·폰트·간격·반경을 그대로 따른다. 새 컬러 팔레트 도입 금지. 반드시 `src/index.css`와 대상 TSX 파일을 먼저 읽고 기존 스타일을 파악한 뒤 시안을 만든다.
+
+---
+
+## 프로젝트 특화 — HTML 미리보기 파일 필수 (절대 원칙)
+
+**3개 variant 생성 완료 후 반드시 `design-preview-{issue번호}.html`을 Write 툴로 프로젝트 루트에 생성한다.**
+이슈 번호를 모를 경우 `design-preview-{화면명}.html`로 대체.
+
+### HTML 파일 포함 요소
+
+1. **실제 CSS 애니메이션** — `@keyframes` 포함, 브라우저에서 바로 실행되는 인터랙션
+2. **게임 화면 모형** — 실제 `--vb-*` CSS 변수 + Space Grotesk 폰트 적용한 phone-frame 안에 각 variant 렌더링
+3. **↺ 재생 버튼** — 각 variant 애니메이션 독립 재실행 가능
+4. **상태 전환 버튼** — 이유 텍스트·상태 변화가 있는 경우 버튼으로 전환 가능
+5. **design-critic 점수표** — 4개 기준 점수 + PICK 배지
+6. **3개 variant 나란히 배치** — grid layout으로 한 화면에서 비교
+
+### HTML 파일 구조 (필수)
+
+```html
+<!-- 상단: 이슈 정보 헤더 -->
+<!-- 3열 grid: variant A / B / C 카드 -->
+<!--   카드 내부: card-header(이름+점수) / phone-frame(실제 애니메이션) / replay버튼 / 설명 -->
+<!-- 하단: design-critic 판정 결과 -->
+```
+
+### CSS 변수 — 반드시 소스에서 직접 읽기 (하드코딩 금지)
+
+**HTML 생성 전 `src/index.css`를 Read로 읽어 현재 `--vb-*` 변수값을 확인한다.**
+문서나 이전 대화의 색상값을 그대로 쓰면 안 된다 — 코드가 정답이다.
+
+Google Fonts CDN은 `src/index.css` `@import` 구문에서 확인해 동일하게 사용.
 
 ---
 
