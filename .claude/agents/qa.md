@@ -15,8 +15,8 @@ model: sonnet
 ## GitHub Issues 버그 등록 오버라이드
 
 - **repo**: `alruminum/memory-battle`
-- **milestone**: `CLAUDE.md` → "버그/이슈 추적 (QA)" 항목 (`Bugs`)
-- **labels**: `["{CLAUDE.md 현재 버전 레이블}"]`
+- **milestone**: `CLAUDE.md` → "GitHub Issues 마일스톤 (현재)" 표에서 이름 확인 → "이슈 생성 시 마일스톤 처리 규칙"에 따라 번호 조회 후 전달
+- **labels**: `["bug", "{CLAUDE.md 현재 버전 레이블}"]` (버그 이슈 기준)
 
 ---
 

@@ -1,6 +1,7 @@
 # 기억력배틀 TRD v0.3
 
 > 변경 이력
+> - v0.3.2-hotfix (2026-04-03): 점수 배율 즉시 적용 버그픽스 (#59) — §3-5 `calcScore` → `calcButtonScore(comboStreak)` 변경, addInput 배율 즉시 적용, stageClear clearBonus만 추가, isFullCombo는 스트릭 판정에만 사용.
 > - v0.3.2-fix (2026-04-03): GameOverOverlay 버그픽스 (Epic 10 #48) — §7 GamePage: `position: fixed` → `position: absolute` 변경(컨테이너 기준 배치), 루트 div `position: relative` 추가, 패널 상단 핸들바·경고 아이콘·"GAME OVER" 타이틀 추가.
 > - v0.3.2 (2026-04-03): 게임오버 오버레이 추가 (Epic 10) — §2 `GameOverOverlay.tsx` 추가, §6 `gameOverReason` 필드 + `gameOver(reason)` 시그니처 변경, §7 GamePage 오버레이 스펙 추가.
 > - v0.3.1-fix (2026-04-02): SPEC_GAP 복구 — §3-4 입력 제한 타이머 섹션 추가 (`getInputTimeout` 스펙 명시). Epic 09 Story 1 구현 시 누락된 타이머 로직 복구 계획(04-timer-restore.md) 반영.
@@ -135,13 +136,15 @@ const getInputTimeout = (stage: number): number => {
 > 버튼 1개 입력 간격 제한 (시퀀스 전체가 아닌 매 버튼마다 독립 적용).
 > `useTimer`가 INPUT 진입 시 `reset()`, wrong/clear 시 `stop()` 호출로 제어.
 
-### 3-5. 점수 계산 ⚠️ v0.3 변경
+### 3-5. 점수 계산 ⚠️ v0.3.2-hotfix 변경 (#59)
 
 > 난이도 배율 제거 — 스택형 콤보 배율로 대체.
+> ⚠️ v0.3.2-hotfix: 배율을 stageClear에서 일괄 적용하던 방식에서 addInput 시 즉시 적용으로 변경.
 
 ```typescript
-// 버튼 누를 때마다 +1
-const calcScore = (): number => 1
+// 버튼 누를 때마다 현재 배율 즉시 적용 ⚠️ v0.3.2-hotfix
+const calcButtonScore = (comboStreak: number): number =>
+  getComboMultiplier(comboStreak)  // streak 0~4: +1, 5~9: +2, ...
 
 // 10스테이지 이상 클리어 시 지급
 const calcClearBonus = (stage: number): number => {
@@ -149,11 +152,13 @@ const calcClearBonus = (stage: number): number => {
   return Math.floor(stage / 5)
 }
 
-// 최종 스테이지 점수 = (버튼점수 + 클리어보너스) × 콤보 배율
-// ⚠️ v0.3.1: stage 파라미터 제거, COMBO_ACTIVATION_STAGE 조건 제거
-const calcStageScore = (rawScore: number, comboStreak: number): number =>
-  rawScore * getComboMultiplier(comboStreak)
+// stageClear: 클리어 보너스에만 배율 적용 (버튼 점수는 addInput에서 이미 누적)
+// ⚠️ v0.3.2-hotfix: calcStageScore(rawScore × multiplier) 패턴 제거
+const calcBonusScore = (stage: number, comboStreak: number): number =>
+  calcClearBonus(stage) * getComboMultiplier(comboStreak)
 ```
+
+> `isFullCombo`는 콤보 스트릭 증가/리셋 판정에만 사용, 점수 계산에는 미사용. (v0.3.2-hotfix #59)
 
 ### 3-6. 스택형 콤보 감지 ⚠️ v0.3.1 변경
 

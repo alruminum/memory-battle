@@ -24,12 +24,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 -c \"import sys,json,re; d=json.load(sys.stdin); fp=d.get('tool_input',{}).get('file_path',''); pattern=r'(docs/(architecture|game-logic|db-schema|sdk|ui-spec|domain-logic|reference)[^/]*\\.md|(^|/)prd\\.md|(^|/)trd\\.md)'; print(json.dumps({'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':f'❌ {fp} 는 에이전트 소유 파일. 직접 수정 금지 → architect/designer/product-planner 에이전트 호출.'}})) if re.search(pattern, fp) else None\" 2>/dev/null || true",
+            "command": "python3 -c \"import sys,json,re,os; d=json.load(sys.stdin); fp=d.get('tool_input',{}).get('file_path',''); pattern=r'(docs/(architecture|game-logic|db-schema|sdk|ui-spec|domain-logic|reference)[^/]*\\.md|(^|/)prd\\.md|(^|/)trd\\.md)'; print(json.dumps({'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':f'❌ {fp} 는 에이전트 소유 파일. 직접 수정 금지 → architect/designer/product-planner 에이전트 호출.'}})) if re.search(pattern, fp) and not os.path.exists('/tmp/mb_architect_active') else None\" 2>/dev/null || true",
             "timeout": 5
           },
           {
             "type": "command",
-            "command": "python3 -c \"import sys,json,re,os; d=json.load(sys.stdin); fp=d.get('tool_input',{}).get('file_path',''); is_src=bool(re.search(r'(^|/)src/',fp)); is_test=bool(re.search(r'(^|/)src/__tests__/',fp)); print(json.dumps({'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':f'❌ src/** 는 engineer 에이전트 소유. 직접 수정 금지 → architect Mode B → validator Mode A PASS → engineer 순서로 진행.'}})) if is_src and not is_test else None\" 2>/dev/null || true",
+            "command": "python3 -c \"import sys,json,re,os; d=json.load(sys.stdin); fp=d.get('tool_input',{}).get('file_path',''); is_src=bool(re.search(r'(^|/)src/',fp)); is_test=bool(re.search(r'(^|/)src/__tests__/',fp)); harness_active=os.path.exists('/tmp/mb_harness_active'); print(json.dumps({'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':f'❌ src/** 는 engineer 에이전트 소유. 직접 수정 금지 → architect Mode B → validator Mode A PASS → engineer 순서로 진행.'}})) if is_src and not is_test and not harness_active else None\" 2>/dev/null || true",
             "timeout": 5
           }
         ]
@@ -39,12 +39,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 -c \"import sys,json,re; d=json.load(sys.stdin); fp=d.get('tool_input',{}).get('file_path',''); pattern=r'(docs/(architecture|game-logic|db-schema|sdk|ui-spec|domain-logic|reference)[^/]*\\.md|(^|/)prd\\.md|(^|/)trd\\.md)'; print(json.dumps({'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':f'❌ {fp} 는 에이전트 소유 파일. 직접 수정 금지 → architect/designer/product-planner 에이전트 호출.'}})) if re.search(pattern, fp) else None\" 2>/dev/null || true",
+            "command": "python3 -c \"import sys,json,re,os; d=json.load(sys.stdin); fp=d.get('tool_input',{}).get('file_path',''); pattern=r'(docs/(architecture|game-logic|db-schema|sdk|ui-spec|domain-logic|reference)[^/]*\\.md|(^|/)prd\\.md|(^|/)trd\\.md)'; print(json.dumps({'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':f'❌ {fp} 는 에이전트 소유 파일. 직접 수정 금지 → architect/designer/product-planner 에이전트 호출.'}})) if re.search(pattern, fp) and not os.path.exists('/tmp/mb_architect_active') else None\" 2>/dev/null || true",
             "timeout": 5
           },
           {
             "type": "command",
-            "command": "python3 -c \"import sys,json,re,os; d=json.load(sys.stdin); fp=d.get('tool_input',{}).get('file_path',''); is_src=bool(re.search(r'(^|/)src/',fp)); is_test=bool(re.search(r'(^|/)src/__tests__/',fp)); print(json.dumps({'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':f'❌ src/** 는 engineer 에이전트 소유. 직접 수정 금지 → architect Mode B → validator Mode A PASS → engineer 순서로 진행.'}})) if is_src and not is_test else None\" 2>/dev/null || true",
+            "command": "python3 -c \"import sys,json,re,os; d=json.load(sys.stdin); fp=d.get('tool_input',{}).get('file_path',''); is_src=bool(re.search(r'(^|/)src/',fp)); is_test=bool(re.search(r'(^|/)src/__tests__/',fp)); harness_active=os.path.exists('/tmp/mb_harness_active'); print(json.dumps({'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':f'❌ src/** 는 engineer 에이전트 소유. 직접 수정 금지 → architect Mode B → validator Mode A PASS → engineer 순서로 진행.'}})) if is_src and not is_test and not harness_active else None\" 2>/dev/null || true",
             "timeout": 5
           }
         ]
@@ -79,6 +79,11 @@
           },
           {
             "type": "command",
+            "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); a=d.get('tool_input',{}).get('subagent_type'); ha=os.path.exists('/tmp/mb_harness_active'); print(json.dumps({'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':'❌ engineer는 harness-executor를 통해서만 호출 가능. /tmp/mb_harness_active 없음. 메인 Claude에서 직접 engineer 호출 금지 — harness-executor에 impl 파일 경로 + 이슈 번호를 전달하라.'}})) if a=='engineer' and not ha else None\" 2>/dev/null || true",
+            "timeout": 5
+          },
+          {
+            "type": "command",
             "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); a=d.get('tool_input',{}).get('subagent_type'); dr=os.path.exists('/tmp/mb_designer_ran'); cp=os.path.exists('/tmp/mb_design_critic_passed'); print(json.dumps({'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':'❌ designer 실행 후 engineer 바로 불가. 올바른 순서: design-critic PICK → 유저 승인 → architect impl 계획 → validator Mode A PASS → engineer'}})) if a=='engineer' and dr and not cp else None\" 2>/dev/null || true",
             "timeout": 5
           },
@@ -91,11 +96,31 @@
             "type": "command",
             "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); a=d.get('tool_input',{}).get('subagent_type'); print(json.dumps({'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':'❌ pr-reviewer 전 validator Mode B PASS 필요. /tmp/mb_validator_b_passed 없음.'}})) if a=='pr-reviewer' and not os.path.exists('/tmp/mb_validator_b_passed') else None\" 2>/dev/null || true",
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "python3 -c \"import sys,json; d=json.load(sys.stdin); t=d.get('tool_input',{}); bg=t.get('run_in_background',False); a=t.get('subagent_type','?'); print(json.dumps({'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':f'❌ 백그라운드 에이전트 금지. {a} 호출 시 run_in_background=false 필수. 포그라운드에서만 실행해야 중단 가능.'}})) if bg else None\" 2>/dev/null || true",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "python3 -c \"import sys,json,os; from datetime import datetime; d=json.load(sys.stdin); t=d.get('tool_input',{}); a=t.get('subagent_type','?'); p=t.get('prompt','')[:80].replace('\\n',' '); caller='harness-executor' if os.path.exists('/tmp/mb_harness_active') else 'main-claude'; ts=datetime.now().strftime('%H:%M:%S'); line=f'[{ts}] {caller} → {a} | {p}\\n'; open('/tmp/mb-agent-calls.log','a').write(line)\" 2>/dev/null || true",
+            "timeout": 5
           }
         ]
       }
     ],
     "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"import sys,json; d=json.load(sys.stdin); fp=d.get('tool_input',{}).get('file_path',''); print(json.dumps({'hookSpecificOutput':{'hookEventName':'PostToolUse','additionalContext':'⚠️ [HARNESS] CLAUDE.md 수정됨 — 추가 내용이 프로젝트 독립적(에이전트 워크플로우, Git 규칙 등)이면 ~/.claude/templates/CLAUDE-base.md에도 즉시 반영 필요. (베이스 동기화 규칙)'}})) if 'CLAUDE.md' in fp and '/memory/' not in fp and '/.claude/' not in fp else None\" 2>/dev/null || true",
+            "timeout": 5
+          }
+        ]
+      },
       {
         "matcher": "Bash",
         "hooks": [
@@ -132,6 +157,16 @@
           {
             "type": "command",
             "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); a=d.get('tool_input',{}).get('subagent_type'); [os.remove(f) for f in ['/tmp/mb_test_engineer_passed','/tmp/mb_pr_reviewer_lgtm','/tmp/mb_validator_b_passed'] if os.path.exists(f)] if a=='engineer' else None\" 2>/dev/null || true",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); a=d.get('tool_input',{}).get('subagent_type'); [os.remove('/tmp/mb_harness_active') for _ in [1] if os.path.exists('/tmp/mb_harness_active')] if a=='harness-executor' else None\" 2>/dev/null || true",
+            "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); a=d.get('tool_input',{}).get('subagent_type'); [os.remove('/tmp/mb_architect_active') for _ in [1] if os.path.exists('/tmp/mb_architect_active')] if a=='architect' else None\" 2>/dev/null || true",
             "timeout": 5
           },
           {

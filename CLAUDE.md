@@ -54,6 +54,17 @@ VITE_APP_NAME=memory-battle
 
 > 버전이 올라가면 "현재 버전 레이블" 항목만 업데이트하면 된다. 에이전트는 이 표를 참조한다.
 
+### 이슈 생성 시 마일스톤 처리 규칙
+
+`mcp__github__create_issue`의 `milestone` 파라미터는 **이름이 아닌 숫자(number)**를 요구한다.  
+이슈 생성 전 반드시 아래 명령으로 마일스톤 이름 → 번호를 조회한다:
+
+```bash
+gh api repos/alruminum/memory-battle/milestones --jq '.[] | {number: .number, title: .title}'
+```
+
+조회 결과에서 위 표의 마일스톤 이름에 해당하는 `number`를 `milestone` 파라미터에 전달한다.
+
 ### 이슈 등록 필수 항목
 
 버그 이슈 등록 시:
@@ -177,6 +188,7 @@ _(impl 없음 — 문서 구조 작업만)_ · Issues: [#19](https://github.com/
 | 03 multiplier-burst-ui | [impl/03-multiplier-burst-ui.md](docs/milestones/v03/epics/epic-09-combo-v031/impl/03-multiplier-burst-ui.md) | [#27](https://github.com/alruminum/memory-battle/issues/27) |
 | 04 timer-restore | [impl/04-timer-restore.md](docs/milestones/v03/epics/epic-09-combo-v031/impl/04-timer-restore.md) | [#28](https://github.com/alruminum/memory-battle/issues/28) |
 | 05 combo-timer-interval-fix | [impl/05-combo-timer-interval-fix.md](docs/milestones/v03/epics/epic-09-combo-v031/impl/05-combo-timer-interval-fix.md) | [#44](https://github.com/alruminum/memory-battle/issues/44) |
+| 06 score-immediate-multiplier | [impl/06-score-immediate-multiplier.md](docs/milestones/v03/epics/epic-09-combo-v031/impl/06-score-immediate-multiplier.md) | [#59](https://github.com/alruminum/memory-battle/issues/59) |
 
 **Epic 10 — 게임오버 오버레이** · [stories](docs/milestones/v03/epics/epic-10-gameover-overlay/stories.md) · Epic: [#46](https://github.com/alruminum/memory-battle/issues/46)
 
@@ -185,6 +197,16 @@ _(impl 없음 — 문서 구조 작업만)_ · Issues: [#19](https://github.com/
 | 01 gameover-overlay | [impl/01-gameover-overlay.md](docs/milestones/v03/epics/epic-10-gameover-overlay/impl/01-gameover-overlay.md) | [#47](https://github.com/alruminum/memory-battle/issues/47) |
 | 02 overlay-bugfix | [impl/02-overlay-bugfix.md](docs/milestones/v03/epics/epic-10-gameover-overlay/impl/02-overlay-bugfix.md) | [#48](https://github.com/alruminum/memory-battle/issues/48) |
 | 03 hud-blur-exclusion | [impl/03-hud-blur-exclusion.md](docs/milestones/v03/epics/epic-10-gameover-overlay/impl/03-hud-blur-exclusion.md) | [#49](https://github.com/alruminum/memory-battle/issues/49) |
+| 04 overlay-tap-through-fix | [impl/04-overlay-tap-through-fix.md](docs/milestones/v03/epics/epic-10-gameover-overlay/impl/04-overlay-tap-through-fix.md) | [#50](https://github.com/alruminum/memory-battle/issues/50) |
+
+**Epic 11 — GamePage UI 개선 3건** · [stories](docs/milestones/v03/epics/epic-11-ui-improvements/stories.md) · Epic: [#55](https://github.com/alruminum/memory-battle/issues/55)
+
+| impl | 계획 파일 | Issue |
+|---|---|---|
+| 01 countdown-hint | [impl/01-countdown-hint.md](docs/milestones/v03/epics/epic-11-ui-improvements/impl/01-countdown-hint.md) | [#52](https://github.com/alruminum/memory-battle/issues/52) |
+| 02 fullcombo-removal | [impl/02-fullcombo-removal.md](docs/milestones/v03/epics/epic-11-ui-improvements/impl/02-fullcombo-removal.md) | [#53](https://github.com/alruminum/memory-battle/issues/53) |
+| 03 combo-indicator-v2 | [impl/03-combo-indicator-v2.md](docs/milestones/v03/epics/epic-11-ui-improvements/impl/03-combo-indicator-v2.md) | [#54](https://github.com/alruminum/memory-battle/issues/54) |
+| 05 visibility-api-fix | [impl/05-visibility-api-fix.md](docs/milestones/v03/epics/epic-10-gameover-overlay/impl/05-visibility-api-fix.md) | [#51](https://github.com/alruminum/memory-battle/issues/51) |
 
 ---
 
@@ -233,15 +255,46 @@ Branch: main
 
 ### 커밋 메시지 규칙
 
-- 연관 GitHub Issue가 있으면 커밋 메시지 본문에 반드시 명시
-- 해당 작업으로 이슈가 완료되는 경우: `Closes #NNN`
-- 참조만 하는 경우: `Related to #NNN`
-- 예시:
-  ```
-  chore: GitHub Issues 구조 개편 (마일스톤 통합 + 버전 레이블)
+#### 템플릿
 
-  Closes #43
-  ```
+```
+<type>(<scope>): <한 줄 요약>
+
+[왜] <트리거 — 버그: 재현 조건 / 기능: 요구사항 출처 / 리팩: 문제 상황>
+[변경]
+- <파일/모듈>: <변경 내용>
+[주의] <사이드이팩트·후속 작업> (없으면 생략)
+
+Closes/Related to #NNN
+```
+
+> `.gitmessage` 파일이 프로젝트 루트에 있음. `git config commit.template .gitmessage` 로 등록하면 `git commit` 시 에디터에 자동 삽입.
+
+#### scope 목록
+
+`game-engine` `store` `overlay` `ranking` `ad` `timer` `combo` `harness` `agent` `docs` `test` `ci`
+
+#### type별 [왜] 작성 기준
+
+| type | [왜] 내용 |
+|---|---|
+| `fix` | 재현 조건 + 근본 원인 (한 문장) |
+| `feat` | PRD/이슈 번호 + 어떤 요구사항인지 |
+| `refactor` | 어떤 문제가 있었는지 (가독성/성능/결합도) |
+| `chore` | 왜 이 시점에 필요했는지 |
+| `docs` | 무엇이 불일치/누락됐었는지 |
+| `test` | 어떤 시나리오가 커버 안 됐었는지 |
+
+#### 커밋 분리 원칙
+
+- 문서 변경 + 코드 변경 → 반드시 별도 커밋
+- chore(harness/agent) + feat → 반드시 별도 커밋
+- 실패 커밋 재시도 → push 전 `git rebase -i`로 squash
+
+#### 이슈 연결
+
+- 완료: `Closes #NNN`
+- 참조: `Related to #NNN`
 
 ### 이슈 close 규칙 (절대 원칙)
 

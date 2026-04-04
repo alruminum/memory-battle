@@ -89,6 +89,24 @@ interface 파일명Props {
 - 의존하는 모듈 번호 명시
 ```
 
+## 설계 문서 수정 시 플래그 규칙
+
+`docs/game-logic.md`, `docs/architecture.md`, `trd.md` 등 보호된 설계 문서를 수정하기 **직전**에 반드시 플래그 파일을 생성하고, 수정 완료 후 삭제한다:
+
+```bash
+# 수정 전
+touch /tmp/mb_architect_active
+
+# ... Write/Edit 수행 ...
+
+# 수정 후
+rm -f /tmp/mb_architect_active
+```
+
+이 플래그 없이 수정 시 PreToolUse 훅에 의해 차단된다.
+
+---
+
 ## 규칙
 
 - 타입은 항상 TypeScript 코드 블록으로 제시한다.
