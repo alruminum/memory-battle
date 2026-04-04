@@ -1,0 +1,21 @@
+# Harness Memory
+
+## Known Failure Patterns
+
+- 2026-04-02 | Epic-09 combo-timer | SPEC_GAP | "타이머 바 UI 제거" 지시를 "타이머 로직 전체 제거"로 해석. getInputTimeout + useTimer 삭제됨.
+  → impl 파일에 "UI 제거 / 로직 유지" 명시 필수. "제거"라는 단어 단독 사용 금지. (cb13448)
+
+- 2026-04-03 | Epic-10 overlay | tap-through | onPointerDown으로 버튼 입력 → gameOver → 오버레이 렌더 후 pointerup 시 click 이벤트가 오버레이로 전달되어 즉시 닫힘.
+  → 오버레이 인터랙션은 항상 onPointerDown. onClick 사용 금지. (142ceac)
+
+- 2026-04-01 | Epic-02 ranking | race-condition | isNewBest 판정 전에 fetchAll 미완료 → 잘못된 순위 표시.
+  → useRanking 마운트 시 fetchAll 선행 보장 필수. (55242ec)
+
+- 2026-03-31 | game-engine | race-condition | setCountdown(3) 이후 React 리렌더링 전 두 번째 클릭 → countdown이 null이라 startGame 중복 실행.
+  → 즉시 잠금이 필요한 상태는 ref로 관리. state만으로 guard 불충분. (9035edb)
+
+## Success Patterns
+
+- 2026-04-03 | Epic-10 overlay | onPointerDown 통일로 탭-쓰루 완전 차단. 오버레이 계열 컴포넌트 전체 적용 권장.
+
+- 2026-04-03 | Epic-09 score-multiplier | addInput 배율 즉시 적용 + stageClear clearBonus 전용 분리. impl 의사코드가 정확해 1회차에 PASS. 점수 계산 로직 변경 시 prevAccumulated 재계산 패턴 제거 + 단계별 누적 방식이 더 단순하고 버그 적음.
