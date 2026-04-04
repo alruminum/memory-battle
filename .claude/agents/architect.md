@@ -28,30 +28,16 @@ model: sonnet
 7. `docs/milestones/vNN/epics/epic-NN-*/impl/NN-모듈명.md` 파일을 작성한다.
 8. 설계 결정 근거는 impl 파일 내 "결정 근거" 섹션에 직접 작성한다.
 9. `stories.md`에 해당 태스크가 없으면 해당 스토리 아래 추가한다.
-10. impl 파일 작성 완료 후 **GitHub Issues를 생성**한다.
-    ⚠️ **버그픽스 Mode B 시 이 단계 전체 스킵** — base의 "버그픽스 분기" 규칙 참조:
+10. impl 파일 작성 완료 후 **GitHub Issues 생성** — base의 "이슈 생성 분기" 규칙에 따라 분기한다.
 
-    **a. Epic 부모 이슈** (`mcp__github__create_issue`):
-    - 제목: `[Epic NN] {에픽 이름}`
-    - milestone: `CLAUDE.md`의 **GitHub Issues 마일스톤 표** → "현재 에픽" 항목 참조
-    - labels: `["{CLAUDE.md 현재 버전 레이블}"]`
-    - body: 에픽 목적 + 포함 스토리 목록
+    **프로젝트 구체 값:**
+    - repo: `alruminum/memory-battle`
+    - feat 이슈: milestone=`Feature`, labels=`["feat", "{현재버전레이블}"]`
+    - 현재버전레이블: `CLAUDE.md` "현재 버전 레이블" 항목 참조
+    - milestone 번호는 이슈 생성 전 반드시 `CLAUDE.md`의 "이슈 생성 시 마일스톤 처리 규칙"에 따라 조회
 
-    **b. Story 이슈** (`mcp__github__create_issue`, 스토리마다 반복):
-    - 제목: `[Epic NN] Story M: {스토리 제목}`
-    - milestone: `Story`
-    - labels: `["{CLAUDE.md 현재 버전 레이블}"]`
-    - body: `📋 impl: {impl 파일 경로}\n\n> {스토리 컨텍스트}\n\n## Tasks\n- [ ] ...`
-
-    **c. Story를 Epic sub-issue로 연결** (Bash, 스토리마다 반복):
-    ```bash
-    # story 이슈의 내부 id 조회
-    STORY_ID=$(gh api repos/alruminum/memory-battle/issues/{story_number} --jq '.id')
-    gh api repos/alruminum/memory-battle/issues/{epic_number}/sub_issues \
-      --method POST --field sub_issue_id=$STORY_ID
-    ```
-
-    **d. 생성 후 `CLAUDE.md` 에픽 테이블에 Issue 번호 기재**
+    **`[epic-level]` 경로일 때 (product-planner 경유 또는 명시적 에픽 요청):**
+    기존 Story 이슈 본문에 impl 파일 경로 업데이트 (`mcp__github__update_issue`).
 
 11. impl 파일 작성 완료 후 **`CLAUDE.md`의 모듈 계획 파일 표를 반드시 업데이트**한다:
     - 해당 milestone/epic 섹션 아래 새 impl 항목 추가
