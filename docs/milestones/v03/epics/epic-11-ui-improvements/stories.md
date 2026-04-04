@@ -1,0 +1,44 @@
+# Epic 11: GamePage UI 개선 3건
+
+> 카운트다운 힌트 문구 표시, FULL COMBO! 텍스트·사운드 제거, ComboIndicator 블록 UI 개편.
+> 번호 체계: 에픽 내 독립 순번 (1부터 시작).
+
+---
+
+## Story 1: 카운트다운 중 게임 방법 안내 문구 표시 (#56)
+
+> impl: `impl/01-countdown-hint.md`
+> 관련 이슈: [#52](https://github.com/alruminum/memory-battle/issues/52) · Story: [#56](https://github.com/alruminum/memory-battle/issues/56)
+
+카운트다운(3→2→1) 중 숫자 아래에 수평 구분선과 힌트 문구 2줄을 표시한다.
+문구는 카운트다운 내내 고정, SHOWING 페이즈 진입 시 함께 사라진다.
+
+- [x] `src/pages/GamePage.tsx` — `StageArea` 컴포넌트의 카운트다운 분기에 구분선 + 힌트 문구 블록 추가
+- [x] `src/index.css` — `@keyframes flipIn` 애니메이션 추가
+
+---
+
+## Story 2: FULL COMBO! 텍스트 및 사운드 제거 (#57)
+
+> impl: `impl/02-fullcombo-removal.md`
+> 관련 이슈: [#53](https://github.com/alruminum/memory-battle/issues/53) · Story: [#57](https://github.com/alruminum/memory-battle/issues/57)
+
+clearingStage 시 "FULL COMBO!" 텍스트를 제거하고 체크마크 SVG 드로우 애니메이션으로 교체한다.
+관련 fullCombo 사운드 함수가 있으면 제거한다.
+
+- [x] `src/pages/GamePage.tsx` — `StageArea`의 `isClearingFullCombo` 조건부 제거, 체크마크 SVG 추가
+- [x] `src/hooks/useGameEngine.ts` — `isClearingFullCombo` 상태 및 관련 로직 제거 (사용 안 함)
+- [x] `src/index.css` — `@keyframes checkDraw` 애니메이션 추가
+
+---
+
+## Story 3: 콤보 스택 블록 UI로 개편 (#58)
+
+> impl: `impl/03-combo-indicator-v2.md`
+> 관련 이슈: [#54](https://github.com/alruminum/memory-battle/issues/54) · Story: [#58](https://github.com/alruminum/memory-battle/issues/58)
+
+`ComboIndicator`를 5칸 높이 차등 블록 + `x{배율}` 숫자 표시 UI로 전면 개편한다.
+블록 채워질 때 blockPop 애니메이션 적용. comboStreak === 0 시 null 반환 유지.
+
+- [x] `src/components/game/ComboIndicator.tsx` — 5칸 블록 UI + blockPop 애니메이션으로 전면 재작성
+- [x] `src/index.css` — `@keyframes blockPop` 추가
