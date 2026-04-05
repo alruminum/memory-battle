@@ -26,22 +26,7 @@ interface StageAreaProps {
 }
 
 function StageArea({ countdown, clearingStage, isPlaying, stage }: StageAreaProps): JSX.Element {
-  const [hintPhase, setHintPhase] = useState(0)
-
-  useEffect(() => {
-    if (countdown === null) return
-    setHintPhase(0)
-    const timer = setTimeout(() => setHintPhase(1), 750)
-    return () => clearTimeout(timer)
-  // countdown이 null→숫자로 전환될 때만 발동. 3→2→1 tick에는 반응하지 않음.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [countdown === null ? null : 'active'])
-
   if (countdown !== null) {
-    const hintText = hintPhase === 0
-      ? '깜빡이는 순서 그대로 눌러요'
-      : '더 빠르면 콤보가 누적됩니다'
-
     return (
       <div style={{
         display: 'grid',
@@ -50,7 +35,6 @@ function StageArea({ countdown, clearingStage, isPlaying, stage }: StageAreaProp
         textAlign: 'center',
         padding: '12px 10px',
       }}>
-        {/* 카운트 숫자 */}
         <div style={{
           fontFamily: 'var(--vb-font-score)',
           fontSize: 72,
@@ -61,15 +45,11 @@ function StageArea({ countdown, clearingStage, isPlaying, stage }: StageAreaProp
         }}>
           {countdown}
         </div>
-
-        {/* 수평 구분선 */}
         <div style={{
           height: 1,
           background: 'var(--vb-border)',
           margin: '0 20px',
         }} />
-
-        {/* 힌트 문구 블록 — key로 countdown 값 전달해 매 tick마다 재마운트 → flipIn 재실행 */}
         <div key={countdown} className="countdown-hint" style={{ padding: '2px 0' }}>
           <div style={{
             fontSize: 13,
@@ -77,7 +57,14 @@ function StageArea({ countdown, clearingStage, isPlaying, stage }: StageAreaProp
             color: 'var(--vb-text)',
             lineHeight: 1.5,
           }}>
-            {hintText}
+            깜빡이는 순서 그대로 눌러요
+          </div>
+          <div style={{
+            fontSize: 11,
+            color: 'var(--vb-text-dim)',
+            lineHeight: 1.5,
+          }}>
+            더 빠르면 콤보가 누적됩니다
           </div>
         </div>
       </div>
