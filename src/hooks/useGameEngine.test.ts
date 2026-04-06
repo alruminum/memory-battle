@@ -39,7 +39,7 @@ afterEach(() => {
   vi.useRealTimers()
 })
 
-// COUNTDOWN_INTERVAL = 500ms, 3 ticks = 1500ms total before game starts
+// COUNTDOWN_INTERVAL = 750ms, 3 ticks = 2250ms total before game starts
 // 타이머 수치 근거: docs/game-logic.md 참조
 
 // ── C-1. IDLE → SHOWING → INPUT 전환 ─────────────────────────────────────
@@ -52,9 +52,9 @@ describe('C-1. IDLE → SHOWING → INPUT 전환', () => {
       result.current.startGame()
     })
 
-    // 카운트다운 3 tick(각 500ms) 완료 → 게임 시작
+    // 카운트다운 3 tick(각 750ms) 완료 → 게임 시작
     act(() => {
-      vi.advanceTimersByTime(1500) // 500ms × 3 ticks
+      vi.advanceTimersByTime(2250) // 750ms × 3 ticks
     })
 
     expect(useGameStore.getState().status).toBe('SHOWING')
@@ -69,7 +69,7 @@ describe('C-1. IDLE → SHOWING → INPUT 전환', () => {
 
     // 카운트다운 완료 → SHOWING
     act(() => {
-      vi.advanceTimersByTime(1500)
+      vi.advanceTimersByTime(2250) // 750ms × 3 ticks
     })
 
     // sequence.length=1, flashDuration=500ms
@@ -90,7 +90,7 @@ describe('C-1. IDLE → SHOWING → INPUT 전환', () => {
     })
 
     act(() => {
-      vi.advanceTimersByTime(1500)
+      vi.advanceTimersByTime(2250) // 750ms × 3 ticks (카운트다운 완료)
     })
 
     act(() => {
@@ -110,7 +110,7 @@ function setupToInput(result: { current: ReturnType<typeof useGameEngine> }) {
     result.current.startGame()
   })
   act(() => {
-    vi.advanceTimersByTime(1500) // 카운트다운 완료 (500ms × 3)
+    vi.advanceTimersByTime(2250) // 카운트다운 완료 (750ms × 3)
   })
   act(() => {
     vi.advanceTimersByTime(1000) // SHOWING 완료 → INPUT (flashDuration × sequenceLength)
@@ -248,7 +248,7 @@ describe('C-4. sequence.length === stage 불변식', () => {
     })
 
     act(() => {
-      vi.advanceTimersByTime(1500) // 카운트다운 완료 → SHOWING, stage=1 세팅
+      vi.advanceTimersByTime(2250) // 카운트다운 완료 → SHOWING, stage=1 세팅
     })
 
     const state = useGameStore.getState()
@@ -264,7 +264,7 @@ describe('C-4. sequence.length === stage 불변식', () => {
     })
 
     act(() => {
-      vi.advanceTimersByTime(1500) // 카운트다운 완료 (500ms × 3)
+      vi.advanceTimersByTime(2250) // 카운트다운 완료 (750ms × 3)
     })
 
     act(() => {
@@ -294,7 +294,7 @@ describe('C-4. sequence.length === stage 불변식', () => {
     })
 
     act(() => {
-      vi.advanceTimersByTime(1500) // 카운트다운 완료 → SHOWING (500ms × 3)
+      vi.advanceTimersByTime(2250) // 카운트다운 완료 → SHOWING (750ms × 3)
     })
 
     // SHOWING 중에 입력 시도
@@ -314,7 +314,7 @@ describe('C-4. sequence.length === stage 불변식', () => {
     })
 
     act(() => {
-      vi.advanceTimersByTime(1500) // 카운트다운 완료 (500ms × 3)
+      vi.advanceTimersByTime(2250) // 카운트다운 완료 (750ms × 3)
     })
 
     act(() => {
@@ -351,7 +351,7 @@ describe('D-1. INPUT 진입 시 timer.reset 호출', () => {
     })
 
     act(() => {
-      vi.advanceTimersByTime(1500) // 카운트다운 → SHOWING
+      vi.advanceTimersByTime(2250) // 카운트다운 → SHOWING
     })
 
     // SHOWING → INPUT 전환

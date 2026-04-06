@@ -9,7 +9,7 @@ import type { ButtonColor } from '../types'
 const BUTTONS: ButtonColor[] = ['orange', 'blue', 'green', 'yellow']
 const CLEAR_PAUSE_MS = 1100
 const MILESTONE_PAUSE_MS = 1900
-const COUNTDOWN_INTERVAL = 500  // ms per tick
+const COUNTDOWN_INTERVAL = 750  // ms per tick (사양: 750ms per tick → 총 2250ms)
 
 const randomButton = () => BUTTONS[Math.floor(Math.random() * BUTTONS.length)]
 

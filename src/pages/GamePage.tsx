@@ -26,7 +26,22 @@ interface StageAreaProps {
 }
 
 function StageArea({ countdown, clearingStage, isPlaying, stage }: StageAreaProps): JSX.Element {
+  // hintPhase: 0 = 첫 번째 힌트, 1 = 두 번째 힌트 (750ms 후 전환)
+  const [hintPhase, setHintPhase] = useState(0)
+  const isActive = countdown !== null  // null↔숫자 전환에만 반응, 3→2→1 tick에는 변화 없음
+
+  useEffect(() => {
+    if (!isActive) return
+    setHintPhase(0)
+    const timer = setTimeout(() => setHintPhase(1), 750)
+    return () => clearTimeout(timer)
+  }, [isActive])
+
   if (countdown !== null) {
+    const hintText = hintPhase === 0
+      ? '깜빡이는 순서 그대로 눌러요'
+      : '더 빠르면 콤보가 누적됩니다'
+
     return (
       <div style={{
         display: 'grid',
@@ -35,7 +50,8 @@ function StageArea({ countdown, clearingStage, isPlaying, stage }: StageAreaProp
         textAlign: 'center',
         padding: '12px 10px',
       }}>
-        <div style={{
+        {/* 카운트 숫자 — key={countdown}: tick마다 교체 애니메이션 (Bug #64) */}
+        <div key={countdown} style={{
           fontFamily: 'var(--vb-font-score)',
           fontSize: 72,
           fontWeight: 900,
@@ -50,21 +66,15 @@ function StageArea({ countdown, clearingStage, isPlaying, stage }: StageAreaProp
           background: 'var(--vb-border)',
           margin: '0 20px',
         }} />
-        <div key={countdown} className="countdown-hint" style={{ padding: '2px 0' }}>
+        {/* 힌트 문구 블록 — key={hintPhase}: 750ms 전환 시점에만 flipIn 재실행 (Bug #61) */}
+        <div key={hintPhase} className="countdown-hint" style={{ padding: '2px 0' }}>
           <div style={{
             fontSize: 13,
             fontWeight: 700,
             color: 'var(--vb-text)',
             lineHeight: 1.5,
           }}>
-            깜빡이는 순서 그대로 눌러요
-          </div>
-          <div style={{
-            fontSize: 11,
-            color: 'var(--vb-text-dim)',
-            lineHeight: 1.5,
-          }}>
-            더 빠르면 콤보가 누적됩니다
+            {hintText}
           </div>
         </div>
       </div>
