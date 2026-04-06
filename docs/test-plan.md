@@ -478,3 +478,6 @@ INPUT 상태에서 `sequence.length`와 store의 `stage`는 항상 같아야 한
 | Page Visibility: 화면 OFF 중 타이머 만료로 인한 강제 게임오버 없음 (이슈 #51) | 화면 OFF 5초 이상 유지 → 복귀 시 게임 유지, 게임오버 미발생 확인 |
 | Page Visibility: ComboTimer 복귀 시 elapsed 정상 표시 (이슈 #51) | 화면 OFF → ComboTimer 정지, 복귀 시 Date.now() 기준 경과 시간 재계산 표시 확인 |
 | Page Visibility: ComboTimer 목표 초과 후 복귀 시 clamped 표시 (이슈 #51) | 화면 OFF 동안 computerShowTime 초과 → 복귀 시 목표값으로 고정 표시, interval 재시작 없음 확인 |
+| HUD STG 셀: 첫 게임 카운트다운(3-2-1) 중 -- 표시 (이슈 66) | 게임 시작 탭 후 카운트다운 3, 2, 1 동안 STG 셀에 00 대신 -- 표시됨 확인 |
+| HUD STG 셀: 리트라이 카운트다운 중 이전 stage 값 미표시 (이슈 66) | 3스테이지 후 게임오버 -> 리트라이 탭 -> 카운트다운 중 STG 셀에 이전 값 없이 -- 표시됨 확인 |
+| HUD STG 셀: 카운트다운 종료 후 실제 stage 표시 (이슈 66) | 카운트다운 완료 후 SHOWING 진입 시 STG 셀에 01 표시됨 확인 |
