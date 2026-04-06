@@ -4,6 +4,10 @@
 > 테스트 코드 작성 전 명세 문서. 실제 코드 작성/실행은 별도 진행.
 >
 > **업데이트 이력**
+> - 2026-04-06: §2 E그룹 구현 완료 — StageArea.countdown.test.tsx TC1~TC5 PASS (153/153), COUNTDOWN_INTERVAL 750ms 적용, hintPhase isActive 패턴 커밋 8827414 (#61/#64)
+> - 2026-04-06: §2 E그룹 추가 — StageArea.countdown.test.tsx TC 명세 (#61/#64); §5 MANUAL TC 2건 추가 (#64)
+> - 2026-04-05: §5 L472 TC 수정 — #61 버그픽스: "매 tick flipIn 재실행" → "750ms 전환 시에만 flipIn, tick 변경 시 깜빡임 없음"
+> - 2026-04-05: §5 수동 검증 항목 카운트다운 힌트 TC 수정 — #62 버그픽스: countdown값 기준 분기 → 750ms 타이머 기준으로 교체; E그룹(fake timers) TC 추가
 > - 2026-04-03: B-2, B-5 TC 갱신 — 점수 배율 즉시 적용 버그픽스 (#59): addInput 배율 즉시 반영, stageClear clearBonus 전용 로직 반영
 > - 2026-04-03: §5 수동 검증 항목에 Epic 11 (#52/#53/#54) TC 추가, §3 제외 항목에 ComboIndicator 명시
 > - 2026-04-03: §5 수동 검증 항목에 Page Visibility API 버그픽스 TC 추가 (Epic 10 이슈 #51)
@@ -401,6 +405,26 @@ INPUT 상태에서 `sequence.length`와 store의 `stage`는 항상 같아야 한
 
 ---
 
+
+### E. `src/__tests__/StageArea.countdown.test.tsx` — 카운트다운 힌트 fake timer 테스트
+
+> 파일 경로: `src/__tests__/StageArea.countdown.test.tsx` (신규)
+> vitest fake timers + @testing-library/react
+>
+> **커버 대상**: `StageArea` 컴포넌트 — hintPhase 타이머 로직 (#61), countdown key 교체 (#64)
+
+---
+
+| # | 유형 | 케이스 설명 | 조작 | 기대 결과 | 우선순위 |
+|---|---|---|---|---|---|
+| E-1 | 정상 흐름 | countdown=3 시작 직후 첫 번째 힌트만 단독 표시 | `render(<StageArea countdown={3} .../>)` | `"깜빡이는 순서 그대로 눌러요"` 존재, `"더 빠르면 콤보가 누적됩니다"` null | 🔴 Critical |
+| E-2 | 경계 | 749ms 시점에서도 첫 번째 힌트 유지 | `vi.advanceTimersByTime(749)` | `"깜빡이는 순서 그대로 눌러요"` 존재, 두 번째 힌트 null | 🟡 High |
+| E-3 | 정상 흐름 | 750ms 경과 후 두 번째 힌트로 전환, 첫 번째 없음 | `vi.advanceTimersByTime(750)` | `"더 빠르면 콤보가 누적됩니다"` 존재, `"깜빡이는 순서 그대로 눌러요"` null | 🔴 Critical |
+| E-4 | isActive 패턴 | countdown 3→2 rerender 시 hintPhase 리셋 없음 | 750ms 후 `rerender(<StageArea countdown={2} .../>)` | `"더 빠르면 콤보가 누적됩니다"` 유지 (effect 재실행 없음) | 🔴 Critical |
+| E-5 | 엣지 케이스 | countdown=null 시 힌트 블록 미표시 | `render(<StageArea countdown={null} .../>)` | 두 힌트 텍스트 모두 null | 🔴 Critical |
+
+---
+
 ## 3. 테스트 제외 항목 및 이유
 
 | 모듈 | 제외 이유 |
@@ -466,9 +490,12 @@ INPUT 상태에서 `sequence.length`와 store의 `stage`는 항상 같아야 한
 | GameOverOverlay: 오버레이 탭 → ResultPage 정상 전환 | 오버레이 등장 후 의도적 탭 시 ResultPage로 정상 전환 확인 (Epic 10 이슈 #50) |
 | GameOverOverlay: 타임아웃 후 탭 → ResultPage 정상 전환 (회귀 없음) | 타임아웃 오버레이 탭 → ResultPage 전환 플로우 이상 없음 확인 (Epic 10 이슈 #50) |
 | Page Visibility: 화면 OFF 후 복귀 시 소리 중단 (이슈 #51) | 게임 진행 중 화면 OFF → 소리 즉시 중단, 복귀 후 다음 버튼 입력 시 정상 재생 확인 |
-| 카운트다운 힌트 문구: 3→2→1 중 구분선 + 힌트 2줄 표시 (이슈 #52) | 게임 시작 → 카운트다운 중 "깜빡이는 순서 그대로 눌러요" + "더 빠르면 콤보가 누적됩니다" 문구 확인 |
-| 카운트다운 힌트 문구: 매 tick 전환 시 flipIn 재실행 (이슈 #52) | 3→2, 2→1 전환 시 힌트 블록 등장 애니메이션 재실행 확인 |
+| 카운트다운 힌트: countdown 시작 직후(0~749ms) "깜빡이는 순서 그대로 눌러요" 단독 표시 (#62) | 게임 시작 → 카운트다운 진입 직후 첫 번째 문구만 표시, 두 번째 줄 없음 확인 |
+| 카운트다운 힌트: 750ms 경과 후 "더 빠르면 콤보가 누적됩니다"로 전환 (#62) | 카운트다운 진입 750ms 이후 두 번째 문구로 전환되는지 확인 (countdown 값 무관) |
+| 카운트다운 힌트 문구: 750ms 전환 시에만 flipIn 재실행, tick(3→2→1) 변경 시 깜빡임 없음 (이슈 #61) | 카운트다운 중 힌트 블록이 3→2, 2→1 tick에 반응해 깜빡이지 않는지 확인 |
 | 카운트다운 힌트 문구: SHOWING 진입 시 사라짐 (이슈 #52) | 카운트다운 종료 → SHOWING 페이즈에서 힌트 문구 미표시 확인 |
+| 카운트다운 총 시간: 2250ms (750ms × 3) (#64) | 게임 시작 버튼 탭 후 카운트다운 총 소요 시간이 약 2250ms인지 측정 (이전: 1500ms) |
+| 카운트 숫자 교체 애니메이션: 3→2, 2→1 전환 시 재실행 (#64) | 숫자 변경 시 flipIn/countdownPop 등 교체 애니메이션이 매 tick 재실행되는지 시각 확인 |
 | FULL COMBO! 제거: clearingStage 시 체크마크 표시 (이슈 #53) | 스테이지 클리어 시 "FULL COMBO!" 텍스트 없음, 체크마크 SVG 드로우 애니메이션 + "CLEAR" 텍스트 확인 |
 | FULL COMBO! 제거: milestone 클리어 시 환호성 사운드 유지 (이슈 #53) | 5스테이지 클리어 시 환호성 재생, 비-milestone 클리어 시 무음 확인 |
 | ComboIndicator 블록 UI: 5칸 높이 차등 블록 표시 (이슈 #54) | comboStreak=1~4 시 1~4칸 filled 블록, 나머지 empty, `x1` 배율 표시 확인 |
