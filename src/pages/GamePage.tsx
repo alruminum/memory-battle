@@ -239,7 +239,7 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '10px 8px', gap: 3, borderLeft: '1px solid var(--vb-border)', borderRight: '1px solid var(--vb-border)' }}>
           <span style={{ fontSize: 9, fontWeight: 600, color: 'var(--vb-text-dim)', letterSpacing: '0.15em', textTransform: 'uppercase' }}>STG</span>
-          <span style={{ fontFamily: 'var(--vb-font-score)', fontSize: 22, fontWeight: 900, color: 'var(--vb-text)', lineHeight: 1 }}>{String(stage).padStart(2, '0')}</span>
+          <span style={{ fontFamily: 'var(--vb-font-score)', fontSize: 22, fontWeight: 900, color: 'var(--vb-text)', lineHeight: 1 }}>{countdown !== null ? '--' : String(stage).padStart(2, '0')}</span>
         </div>
         <button
           onClick={onRanking}
