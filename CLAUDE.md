@@ -206,6 +206,7 @@ _(impl 없음 — 문서 구조 작업만)_ · Issues: [#19](https://github.com/
 | 01 countdown-hint | [impl/01-countdown-hint.md](docs/milestones/v03/epics/epic-11-ui-improvements/impl/01-countdown-hint.md) | [#52](https://github.com/alruminum/memory-battle/issues/52) |
 | 02 fullcombo-removal | [impl/02-fullcombo-removal.md](docs/milestones/v03/epics/epic-11-ui-improvements/impl/02-fullcombo-removal.md) | [#53](https://github.com/alruminum/memory-battle/issues/53) |
 | 03 combo-indicator-v2 | [impl/03-combo-indicator-v2.md](docs/milestones/v03/epics/epic-11-ui-improvements/impl/03-combo-indicator-v2.md) | [#54](https://github.com/alruminum/memory-battle/issues/54) |
+| 04 hud-stg-countdown-fix | [impl/04-hud-stg-countdown-fix.md](docs/milestones/v03/epics/epic-11-ui-improvements/impl/04-hud-stg-countdown-fix.md) | [#66](https://github.com/alruminum/memory-battle/issues/66) |
 | 05 visibility-api-fix | [impl/05-visibility-api-fix.md](docs/milestones/v03/epics/epic-10-gameover-overlay/impl/05-visibility-api-fix.md) | [#51](https://github.com/alruminum/memory-battle/issues/51) |
 
 ---
