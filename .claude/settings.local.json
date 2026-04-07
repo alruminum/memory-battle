@@ -28,7 +28,11 @@
       "Bash(*)",
       "WebSearch",
       "WebFetch(domain:www.anthropic.com)",
-      "WebFetch(domain:addyosmani.com)"
+      "WebFetch(domain:addyosmani.com)",
+      "mcp__apps-in-toss__get_tds_rn_doc",
+      "mcp__apps-in-toss__get_tds_web_doc",
+      "mcp__apps-in-toss__search_tds_rn_docs",
+      "mcp__apps-in-toss__search_tds_web_docs"
     ]
   }
 }

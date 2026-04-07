@@ -19,3 +19,5 @@
 - 2026-04-03 | Epic-10 overlay | onPointerDown 통일로 탭-쓰루 완전 차단. 오버레이 계열 컴포넌트 전체 적용 권장.
 
 - 2026-04-03 | Epic-09 score-multiplier | addInput 배율 즉시 적용 + stageClear clearBonus 전용 분리. impl 의사코드가 정확해 1회차에 PASS. 점수 계산 로직 변경 시 prevAccumulated 재계산 패턴 제거 + 단계별 누적 방식이 더 단순하고 버그 적음.
+
+- 2026-04-05 | 01-countdown-hint | success | attempt 1. 로컬 useState+useEffect 750ms 타이머 패턴. countdown null→숫자 전환만 감지하는 의존성 패턴([countdown===null?null:'active'])이 깔끔. key={countdown} 재마운트 flipIn도 정상. (390a583)

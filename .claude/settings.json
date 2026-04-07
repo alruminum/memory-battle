@@ -15,7 +15,8 @@
     "mcp__stitch__fetch_screen_image",
     "mcp__stitch__build_site",
     "mcp__stitch__scaffold_project_files",
-    "mcp__stitch__extract_design_context"
+    "mcp__stitch__extract_design_context",
+    "mcp__stitch__generate_and_fetch_code"
   ],
   "hooks": {
     "PreToolUse": [
@@ -74,12 +75,12 @@
           },
           {
             "type": "command",
-            "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); a=d.get('tool_input',{}).get('subagent_type'); print(json.dumps({'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':'❌ engineer 전 validator Mode A PASS 필요. /tmp/mb_validator_a_passed 없음.'}})) if a=='engineer' and not os.path.exists('/tmp/mb_validator_a_passed') else None\" 2>/dev/null || true",
+            "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); a=d.get('tool_input',{}).get('subagent_type'); print(json.dumps({'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':'❌ engineer 전 Plan Validation PASS 필요. /tmp/mb_plan_validation_passed 없음.'}})) if a=='engineer' and not os.path.exists('/tmp/mb_plan_validation_passed') else None\" 2>/dev/null || true",
             "timeout": 5
           },
           {
             "type": "command",
-            "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); a=d.get('tool_input',{}).get('subagent_type'); ha=os.path.exists('/tmp/mb_harness_active'); print(json.dumps({'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':'❌ engineer는 harness-executor를 통해서만 호출 가능. /tmp/mb_harness_active 없음. 메인 Claude에서 직접 engineer 호출 금지 — harness-executor에 impl 파일 경로 + 이슈 번호를 전달하라.'}})) if a=='engineer' and not ha else None\" 2>/dev/null || true",
+            "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); a=d.get('tool_input',{}).get('subagent_type'); ha=os.path.exists('/tmp/mb_harness_active'); print(json.dumps({'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':'❌ engineer는 harness-executor.sh를 통해서만 호출 가능. /tmp/mb_harness_active 없음. 메인 Claude에서 직접 engineer 호출 금지 — bash .claude/harness-executor.sh impl2로 호출하라.'}})) if a=='engineer' and not ha else None\" 2>/dev/null || true",
             "timeout": 5
           },
           {
@@ -136,7 +137,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 -c \"import sys,json,re,os; d=json.load(sys.stdin); inp=d.get('tool_input',{}); resp=str(d.get('tool_response','')); p=inp.get('prompt',''); [open('/tmp/mb_validator_a_passed','w').close() if re.search(r'Mode A',p,re.IGNORECASE) else None, open('/tmp/mb_validator_b_passed','w').close() if re.search(r'Mode B',p,re.IGNORECASE) else None] if inp.get('subagent_type')=='validator' and 'PASS' in resp else None\" 2>/dev/null || true",
+            "command": "python3 -c \"import sys,json,re,os; d=json.load(sys.stdin); inp=d.get('tool_input',{}); resp=str(d.get('tool_response','')); p=inp.get('prompt',''); [open('/tmp/mb_plan_validation_passed','w').close() if re.search(r'Mode C|Plan Validation',p,re.IGNORECASE) else None, open('/tmp/mb_validator_b_passed','w').close() if re.search(r'Mode B',p,re.IGNORECASE) else None] if inp.get('subagent_type')=='validator' and 'PASS' in resp else None\" 2>/dev/null || true",
             "timeout": 5
           },
           {
@@ -151,7 +152,7 @@
           },
           {
             "type": "command",
-            "command": "python3 -c \"import sys,json,re,os; d=json.load(sys.stdin); inp=d.get('tool_input',{}); a=inp.get('subagent_type'); p=inp.get('prompt',''); mode_b=bool(re.search(r'Mode B',p,re.IGNORECASE)); [os.remove(f) for f in ['/tmp/mb_validator_a_passed','/tmp/mb_validator_b_passed','/tmp/mb_test_engineer_passed','/tmp/mb_pr_reviewer_lgtm','/tmp/mb_designer_ran','/tmp/mb_design_critic_passed'] if os.path.exists(f)] if a=='architect' and mode_b else None\" 2>/dev/null || true",
+            "command": "python3 -c \"import sys,json,re,os; d=json.load(sys.stdin); inp=d.get('tool_input',{}); a=inp.get('subagent_type'); p=inp.get('prompt',''); mode_b=bool(re.search(r'Mode B',p,re.IGNORECASE)); [os.remove(f) for f in ['/tmp/mb_plan_validation_passed','/tmp/mb_validator_b_passed','/tmp/mb_test_engineer_passed','/tmp/mb_pr_reviewer_lgtm','/tmp/mb_designer_ran','/tmp/mb_design_critic_passed'] if os.path.exists(f)] if a=='architect' and mode_b else None\" 2>/dev/null || true",
             "timeout": 5
           },
           {
@@ -176,7 +177,7 @@
           },
           {
             "type": "command",
-            "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); a=d.get('tool_input',{}).get('subagent_type'); [open('/tmp/mb_designer_ran','w').close(), [os.remove('/tmp/mb_design_critic_passed') for _ in [1] if os.path.exists('/tmp/mb_design_critic_passed')], [os.remove('/tmp/mb_validator_a_passed') for _ in [1] if os.path.exists('/tmp/mb_validator_a_passed')]] if a=='designer' else None\" 2>/dev/null || true",
+            "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); a=d.get('tool_input',{}).get('subagent_type'); [open('/tmp/mb_designer_ran','w').close(), [os.remove('/tmp/mb_design_critic_passed') for _ in [1] if os.path.exists('/tmp/mb_design_critic_passed')], [os.remove('/tmp/mb_plan_validation_passed') for _ in [1] if os.path.exists('/tmp/mb_plan_validation_passed')]] if a=='designer' else None\" 2>/dev/null || true",
             "timeout": 5
           },
           {
