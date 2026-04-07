@@ -1,10 +1,9 @@
-import { render, screen, act } from '@testing-library/react'
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { render, screen } from '@testing-library/react'
+import { describe, it, expect } from 'vitest'
 import React from 'react'
 
 // StageArea is not exported — inline minimal replica for unit testing
-// Uses the same hintPhase pattern as the actual implementation
-import { useState, useEffect } from 'react'
+// hintPhase state/useEffect 제거 — 2줄 고정 표시 (#82)
 
 interface StageAreaProps {
   countdown: number | null
@@ -14,24 +13,12 @@ interface StageAreaProps {
 }
 
 function StageArea({ countdown, clearingStage, isPlaying, stage }: StageAreaProps): React.JSX.Element {
-  const [hintPhase, setHintPhase] = useState(0)
-  const isActive = countdown !== null
-
-  useEffect(() => {
-    if (!isActive) return
-    setHintPhase(0)
-    const timer = setTimeout(() => setHintPhase(1), 750)
-    return () => clearTimeout(timer)
-  }, [isActive])
-
   if (countdown !== null) {
-    const hintText = hintPhase === 0
-      ? '깜빡이는 순서 그대로 눌러요'
-      : '더 빠르면 콤보가 누적됩니다'
     return (
       <div>
         <div data-testid="countdown-number">{countdown}</div>
-        <div data-testid="hint-text">{hintText}</div>
+        <div data-testid="hint-line1">깜빡이는 순서 그대로 누르세요</div>
+        <div data-testid="hint-line2">상대방보다 더 빨리 눌러 콤보를 쌓고 고득점을 노리세요</div>
       </div>
     )
   }
@@ -44,44 +31,36 @@ function StageArea({ countdown, clearingStage, isPlaying, stage }: StageAreaProp
   return <div data-testid="idle" />
 }
 
-describe('[#61/#64] StageArea 카운트다운 힌트 버그픽스', () => {
-  beforeEach(() => { vi.useFakeTimers() })
-  afterEach(() => { vi.useRealTimers() })
-
-  it('TC1: countdown=3 시작 직후 첫 번째 힌트만 단독 표시', () => {
+describe('[#82] StageArea 카운트다운 힌트 2줄 고정 표시', () => {
+  it('TC1: countdown=3 시 1번째 힌트 문구가 렌더링된다', () => {
     render(<StageArea countdown={3} clearingStage={null} isPlaying={false} stage={1} />)
-    expect(screen.getByText('깜빡이는 순서 그대로 눌러요')).toBeInTheDocument()
-    expect(screen.queryByText('더 빠르면 콤보가 누적됩니다')).toBeNull()
+    expect(screen.getByTestId('hint-line1')).toHaveTextContent('깜빡이는 순서 그대로 누르세요')
   })
 
-  it('TC2: 749ms 시점에서도 첫 번째 힌트 유지', () => {
+  it('TC2: countdown=3 시 2번째 힌트 문구가 렌더링된다', () => {
     render(<StageArea countdown={3} clearingStage={null} isPlaying={false} stage={1} />)
-    act(() => { vi.advanceTimersByTime(749) })
-    expect(screen.getByText('깜빡이는 순서 그대로 눌러요')).toBeInTheDocument()
-    expect(screen.queryByText('더 빠르면 콤보가 누적됩니다')).toBeNull()
+    expect(screen.getByTestId('hint-line2')).toHaveTextContent('상대방보다 더 빨리 눌러 콤보를 쌓고 고득점을 노리세요')
   })
 
-  it('TC3: 750ms 경과 후 두 번째 힌트로 전환, 첫 번째 없음', () => {
-    render(<StageArea countdown={3} clearingStage={null} isPlaying={false} stage={1} />)
-    act(() => { vi.advanceTimersByTime(750) })
-    expect(screen.getByText('더 빠르면 콤보가 누적됩니다')).toBeInTheDocument()
-    expect(screen.queryByText('깜빡이는 순서 그대로 눌러요')).toBeNull()
+  it('TC3: countdown=1 시 양쪽 힌트 문구 모두 표시된다', () => {
+    render(<StageArea countdown={1} clearingStage={null} isPlaying={false} stage={1} />)
+    expect(screen.getByTestId('hint-line1')).toBeInTheDocument()
+    expect(screen.getByTestId('hint-line2')).toBeInTheDocument()
   })
 
-  it('TC4: countdown 3→2 rerender 시 hintPhase 리셋 없음 (isActive 패턴 검증)', () => {
+  it('TC4: countdown=null 시 hint-line1, hint-line2 미존재', () => {
+    render(<StageArea countdown={null} clearingStage={null} isPlaying={false} stage={1} />)
+    expect(screen.queryByTestId('hint-line1')).toBeNull()
+    expect(screen.queryByTestId('hint-line2')).toBeNull()
+  })
+
+  it('TC5: countdown 3→2 rerender 시 양쪽 힌트 문구 모두 유지된다', () => {
     const { rerender } = render(
       <StageArea countdown={3} clearingStage={null} isPlaying={false} stage={1} />
     )
-    act(() => { vi.advanceTimersByTime(750) })  // hintPhase → 1
     rerender(<StageArea countdown={2} clearingStage={null} isPlaying={false} stage={1} />)
-    // isActive는 여전히 true → effect 재실행 없음 → hintPhase=1 유지
-    expect(screen.getByText('더 빠르면 콤보가 누적됩니다')).toBeInTheDocument()
-  })
-
-  it('TC5: countdown=null 시 힌트 블록 미표시', () => {
-    render(<StageArea countdown={null} clearingStage={null} isPlaying={false} stage={1} />)
-    expect(screen.queryByText('깜빡이는 순서 그대로 눌러요')).toBeNull()
-    expect(screen.queryByText('더 빠르면 콤보가 누적됩니다')).toBeNull()
+    expect(screen.getByTestId('hint-line1')).toHaveTextContent('깜빡이는 순서 그대로 누르세요')
+    expect(screen.getByTestId('hint-line2')).toBeInTheDocument()
   })
 })
 
