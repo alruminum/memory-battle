@@ -13,11 +13,16 @@ interface FloatingScoreProps {
   items: FloatingItem[]
 }
 
+// IMPORTANT: hex 값은 src/index.css :root의 CSS 변수와 일치해야 한다.
+// 색상 변경 시 두 곳 모두 수정 필요:
+//   --vb-orange-base, --vb-blue-base, --vb-green-base, --vb-yellow-base
+// CSS 변수 문자열 연결(예: 'var(--vb-orange-base)88')은 유효하지 않은 CSS가 되어
+// text-shadow 전체가 파싱 실패함 → hex 직접 사용이 유일한 안전한 방법.
 const BUTTON_COLORS: Record<ButtonColor, string> = {
-  orange: 'var(--vb-orange-base)',
-  blue:   'var(--vb-blue-base)',
-  green:  'var(--vb-green-base)',
-  yellow: 'var(--vb-yellow-base)',
+  orange: '#FF6200',
+  blue:   '#0A7AFF',
+  green:  '#18B84A',
+  yellow: '#F5C000',
 }
 
 export function getLabelColor(color: ButtonColor, multiplier: number): string {
@@ -37,10 +42,12 @@ export function getLabelGlow(color: ButtonColor, multiplier: number): string {
   return `0 0 ${strength}px ${base}, 0 0 ${spread}px ${base}88`
 }
 
+// duration: 1200ms (UX 조정 — 기존 800ms 대비 1.5배 연장)
+// see impl/14-floating-score-fix.md
 function getAnimation(multiplier: number): string {
-  const base = 'vb-float 800ms cubic-bezier(0.22, 1, 0.36, 1) forwards'
+  const base = 'vb-float 1200ms cubic-bezier(0.22, 1, 0.36, 1) forwards'
   if (multiplier >= 3) {
-    return `${base}, vb-glow-pulse 400ms ease-in-out 2`
+    return `${base}, vb-glow-pulse 600ms ease-in-out 2`
   }
   return base
 }

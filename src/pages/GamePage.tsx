@@ -200,7 +200,7 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
     setFloatingItems(prev => [...prev, { id, color, multiplier, x, y }])
     setTimeout(() => {
       setFloatingItems(prev => prev.filter(item => item.id !== id))
-    }, 850)
+    }, 1300) // animation 1200ms + 100ms safety margin
   }
 
   function handleInputWithFloat(color: ButtonColor) {
