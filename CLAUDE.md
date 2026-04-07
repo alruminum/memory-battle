@@ -211,6 +211,7 @@ _(impl 없음 — 문서 구조 작업만)_ · Issues: [#19](https://github.com/
 | 04 countdown-blink-fix | [impl/04-countdown-blink-fix.md](docs/milestones/v03/epics/epic-11-ui-improvements/impl/04-countdown-blink-fix.md) | [#61](https://github.com/alruminum/memory-battle/issues/61) |
 | 06 hud-stg-countdown-fix | [impl/06-hud-stg-countdown-fix.md](docs/milestones/v03/epics/epic-11-ui-improvements/impl/06-hud-stg-countdown-fix.md) | [#66](https://github.com/alruminum/memory-battle/issues/66) |
 | 07 countdown-persist-fix | [impl/07-countdown-persist-fix.md](docs/milestones/v03/epics/epic-11-ui-improvements/impl/07-countdown-persist-fix.md) | [#75](https://github.com/alruminum/memory-battle/issues/75) |
+| 08 hud-stg-countdown-display-fix | [impl/08-hud-stg-countdown-display-fix.md](docs/milestones/v03/epics/epic-11-ui-improvements/impl/08-hud-stg-countdown-display-fix.md) | [#76](https://github.com/alruminum/memory-battle/issues/76) |
 
 ---
 
