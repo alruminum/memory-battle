@@ -107,16 +107,16 @@ export function useGameEngine() {
   }, [resetGame, launchAfterCountdown])
 
   const handleInput = useCallback(
-    (color: ButtonColor) => {
+    (color: ButtonColor): 'correct' | 'wrong' | 'round-clear' => {
       const currentStatus = useGameStore.getState().status
       dbg('[Engine] handleInput color=', color, 'storeStatus=', currentStatus)
       if (currentStatus !== 'INPUT') {
         dbgWarn('[Engine] INPUT BLOCKED — storeStatus=', currentStatus)
-        return
+        return 'wrong'
       }
       if (clearingRef.current) {
         dbgWarn('[Engine] INPUT BLOCKED — clearing')
-        return
+        return 'wrong'
       }
 
       playTone(color)
@@ -131,7 +131,7 @@ export function useGameEngine() {
         timer.stop()
         playGameOver()
         gameOver('wrong')
-        return
+        return 'wrong'
       }
 
       if (result === 'round-clear') {
@@ -162,11 +162,12 @@ export function useGameEngine() {
           setSequence(newSeq)
           useGameStore.setState({ status: 'SHOWING', currentIndex: 0, stage: newSeq.length })
         }, pauseMs)
-        return
+        return 'round-clear'
       }
 
       // correct: 매 정답 입력마다 타이머 재시작 (TRD: "버튼당 입력 제한 — 매 버튼마다 독립 적용")
       timer.reset()
+      return result
     },
     [sequence, addInput, gameOver, setSequence, timer]
   )

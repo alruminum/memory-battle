@@ -213,3 +213,17 @@ body {
   0%   { opacity: 0; }
   100% { opacity: 1; }
 }
+
+/* Floating score: 곡선 상승 궤적 + 스케일 팝 (Variant B, Issue #78) */
+@keyframes vb-float {
+  0%   { transform: translateY(0) scale(1);        opacity: 1; }
+  15%  { transform: translateY(-10px) scale(1.12); opacity: 1; }
+  100% { transform: translateY(-60px) scale(0.85); opacity: 0; }
+}
+
+/* 고배율(x3+) 글로우 펄스 */
+@keyframes vb-glow-pulse {
+  0%   { filter: brightness(1.2); }
+  50%  { filter: brightness(1.8); }
+  100% { filter: brightness(1); }
+}

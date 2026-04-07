@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useGameStore } from '../store/gameStore'
 import { useGameEngine } from '../hooks/useGameEngine'
 import { useRanking } from '../hooks/useRanking'
@@ -10,6 +10,7 @@ import { ComboTimer } from '../components/game/ComboTimer'
 import { BannerAd } from '../components/ads/BannerAd'
 import { MultiplierBurst } from '../components/game/MultiplierBurst'
 import { GameOverOverlay } from '../components/game/GameOverOverlay'
+import { FloatingScore, FloatingItem } from '../components/game/FloatingScore'
 
 // 타이틀·HUD strip을 GameOverOverlay(z-index 200) 위에 렌더링하여 backdrop-filter blur 영향에서 제외
 const Z_ABOVE_OVERLAY = 201
@@ -160,6 +161,8 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
   }, [])
 
   const [isShaking, setIsShaking] = useState(false)
+  const [floatingItems, setFloatingItems] = useState<FloatingItem[]>([])
+  const padWrapperRef = useRef<HTMLDivElement>(null)
 
   // RESULT 진입 시 shake 애니메이션 트리거 (자동 페이지 전환 제거 — 유저 탭으로 전환)
   useEffect(() => {
@@ -183,6 +186,37 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
   // ComboTimer 파생값: stage === 0 방어 (즉시 빨강 버그 방지)
   const flashDuration = getFlashDuration(stage)
   const computerShowTime = flashDuration * (stage > 0 ? stage : 1)
+
+  const PAD_BTN_CENTERS: Record<ButtonColor, { relX: number; relY: number }> = {
+    orange: { relX: 55,  relY: 55  },
+    blue:   { relX: 237, relY: 55  },
+    green:  { relX: 55,  relY: 237 },
+    yellow: { relX: 237, relY: 237 },
+  }
+
+  function spawnFloatingScore(color: ButtonColor, multiplier: number) {
+    if (!padWrapperRef.current) return
+    const rect = padWrapperRef.current.getBoundingClientRect()
+    const padLeft = rect.left + (rect.width - 292) / 2
+    const padTop = rect.top
+    const center = PAD_BTN_CENTERS[color]
+    const x = padLeft + center.relX
+    const y = padTop + center.relY
+    const id = Date.now() + Math.random()
+    setFloatingItems(prev => [...prev, { id, color, multiplier, x, y }])
+    setTimeout(() => {
+      setFloatingItems(prev => prev.filter(item => item.id !== id))
+    }, 850)
+  }
+
+  function handleInputWithFloat(color: ButtonColor) {
+    const { comboStreak } = useGameStore.getState()
+    const multiplier = getComboMultiplier(comboStreak)
+    const result = handleInput(color)
+    if (result === 'correct' || result === 'round-clear') {
+      spawnFloatingScore(color, multiplier)
+    }
+  }
 
   function handleStart() {
     startGame()
@@ -274,12 +308,15 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
       </div>
 
       {/* 버튼 패드 */}
-      <div style={{
-        flex: 3,
-        display: 'flex',
-        alignItems: 'flex-start',
-        justifyContent: 'center',
-      }}>
+      <div
+        ref={padWrapperRef}
+        style={{
+          flex: 3,
+          display: 'flex',
+          alignItems: 'flex-start',
+          justifyContent: 'center',
+        }}
+      >
         <ButtonPad
           flashingButton={flashingButton}
           clearingStage={clearingStage}
@@ -287,7 +324,7 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
           disabled={status === 'SHOWING' || countdown !== null}
           status={status}
           score={score}
-          onPress={handleInput}
+          onPress={handleInputWithFloat}
           onStart={handleStart}
           onRetry={() => retryGame()}
         />
@@ -313,6 +350,9 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
         isVisible={showBurst}
         onComplete={() => setShowBurst(false)}
       />
+
+      {/* Floating score 레이블 (정답 탭 시 버튼 위에서 상승) */}
+      <FloatingScore items={floatingItems} />
 
       {/* 게임오버 오버레이: RESULT 상태이고 reason이 있을 때만 표시 */}
       {status === 'RESULT' && gameOverReason !== null && (
