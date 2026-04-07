@@ -4,6 +4,7 @@
 > 테스트 코드 작성 전 명세 문서. 실제 코드 작성/실행은 별도 진행.
 >
 > **업데이트 이력**
+> - 2026-04-07: §5 수동 검증 5건 추가 — 카운트다운 "1" 잔존 버그픽스 TC (#75)
 > - 2026-04-06: §5 수동 검증 3건 추가 — HUD STG 셀 카운트다운 중 `--` 표시 TC (#66)
 > - 2026-04-06: §2 E그룹 구현 완료 — StageArea.countdown.test.tsx TC1~TC5 PASS (153/153), COUNTDOWN_INTERVAL 750ms 적용, hintPhase isActive 패턴 커밋 8827414 (#61/#64)
 > - 2026-04-06: §2 E그룹 추가 — StageArea.countdown.test.tsx TC 명세 (#61/#64); §5 MANUAL TC 2건 추가 (#64)
@@ -509,3 +510,8 @@ INPUT 상태에서 `sequence.length`와 store의 `stage`는 항상 같아야 한
 | HUD STG 셀: 카운트다운 진행 중 `--` 표시 (이슈 #66) | 게임 시작 버튼 탭 → 카운트다운 3→2→1 전체 구간 동안 STG 셀이 `--`로 표시되는지 확인 |
 | HUD STG 셀: 리트라이 시 직전 stage 값 미노출 (이슈 #66) | 스테이지 5 이상 진행 후 리트라이 → 카운트다운 중 STG 셀이 `--` 표시 (직전 stage 값 잔존 없음) 확인 |
 | HUD STG 셀: 카운트다운 종료 후 올바른 stage 값 표시 (이슈 #66) | 카운트다운 종료 → SHOWING/INPUT 페이즈에서 STG 셀이 `01`, `02`, ... 값 표시 확인 |
+| countdown 잔존: 카운트다운 "1" 종료 후 StageArea UI 즉시 전환 (이슈 #75) | 게임 시작 버튼 탭 → 카운트다운 "1" 표시 후 SHOWING 진입 시 StageArea에 "1"이 미노출되는지 확인 |
+| countdown 잔존: 리트라이 시 카운트다운 종료 후 StageArea STAGE 01 표시 (이슈 #75) | 스테이지 N 진행 후 리트라이 → 카운트다운 종료 직후 StageArea에 STAGE 01 표시 (이전 countdown 값 미노출) 확인 |
+| countdown 잔존: 카운트다운(3→2→1) 힌트 문구 정상 표시 회귀 없음 (이슈 #75) | 카운트다운 진행 중 숫자+힌트 문구 정상 표시 확인 (#52 회귀 없음) |
+| countdown 잔존: 카운트다운 종료 후 HUD STG `--` → `01` 전환 정상 (이슈 #75) | 카운트다운 종료 → HUD STG 셀이 `--`에서 `01`로 전환되는지 확인 (#66 회귀 없음) |
+| countdown 잔존: SHOWING/INPUT/RESULT 기존 동작 회귀 없음 (이슈 #75) | 게임 진행 전 구간 정상 동작 확인 |
