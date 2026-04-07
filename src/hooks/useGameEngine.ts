@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { flushSync } from 'react-dom'
 import { useGameStore } from '../store/gameStore'
 import { playTone, playGameStart, playGameOver, playApplause } from '../lib/sound'
 import { getFlashDuration, getInputTimeout } from '../lib/gameLogic'
@@ -84,7 +85,7 @@ export function useGameEngine() {
     setTimeout(() => setCountdown(1), COUNTDOWN_INTERVAL * 2)
     setTimeout(() => {
       startingRef.current = false
-      setCountdown(null)
+      flushSync(() => setCountdown(null))
       clearingRef.current = false
       setClearingStage(null)
       playGameStart()
