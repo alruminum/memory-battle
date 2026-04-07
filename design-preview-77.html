@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Issue #77 — MultiplierBurst 디자인 시안 3종</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --vb-bg: #0e0e10;
+    --vb-surface: #18181b;
+    --vb-surface-2: #1f1f23;
+    --vb-border: #2a2a2e;
+    --vb-accent: #D4A843;
+    --vb-text: #e8e8ea;
+    --vb-text-mid: #8b8b90;
+    --vb-font-score: 'Barlow Condensed', sans-serif;
+    --vb-font-body: 'Space Grotesk', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #111115;
+    font-family: var(--vb-font-body);
+    color: var(--vb-text);
+    padding: 24px 16px 48px;
+    min-height: 100vh;
+  }
+
+  .page-header {
+    text-align: center;
+    margin-bottom: 32px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #2a2a2e;
+  }
+  .page-header h1 {
+    font-family: var(--vb-font-score);
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--vb-accent);
+    letter-spacing: 1px;
+  }
+  .page-header p {
+    font-size: 13px;
+    color: var(--vb-text-mid);
+    margin-top: 6px;
+  }
+
+  .variants-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  @media (max-width: 900px) {
+    .variants-grid { grid-template-columns: 1fr; max-width: 400px; }
+  }
+
+  .variant-card {
+    background: var(--vb-surface);
+    border: 1px solid var(--vb-border);
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card-header {
+    padding: 16px;
+    border-bottom: 1px solid var(--vb-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .card-header-left h2 {
+    font-family: var(--vb-font-score);
+    font-size: 18px;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+  }
+  .card-header-left p {
+    font-size: 11px;
+    color: var(--vb-text-mid);
+    margin-top: 2px;
+  }
+
+  .score-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+  }
+  .score-row {
+    display: flex;
+    gap: 8px;
+    font-size: 10px;
+    color: var(--vb-text-mid);
+  }
+  .score-val {
+    font-family: var(--vb-font-score);
+    font-weight: 800;
+    color: var(--vb-accent);
+  }
+
+  /* Phone frame */
+  .phone-frame {
+    position: relative;
+    width: 100%;
+    padding-top: calc(100% * 812 / 375);
+    background: var(--vb-bg);
+    overflow: hidden;
+  }
+
+  .phone-inner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  /* ---- 게임 배경 장식 (phone 내부) ---- */
+  .game-bg {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+  }
+  .fake-hud {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    right: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .fake-score {
+    font-family: var(--vb-font-score);
+    font-size: 28px;
+    font-weight: 900;
+    color: var(--vb-accent);
+    opacity: 0.4;
+  }
+  .fake-stage {
+    font-family: var(--vb-font-body);
+    font-size: 11px;
+    color: var(--vb-text-mid);
+    opacity: 0.4;
+  }
+  .fake-buttons {
+    position: absolute;
+    bottom: 60px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    width: 160px;
+    opacity: 0.15;
+  }
+  .fake-btn {
+    height: 52px;
+    border-radius: 12px;
+  }
+
+  /* ---- overlay 공통 ---- */
+  .burst-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+  }
+
+  /* ======== VARIANT A ======== */
+  /* 중앙 집중형: 대형 텍스트(96px) + 글로우 링 펄스 */
+  @keyframes va-scale-in {
+    0% { transform: scale(0.2); opacity: 0; }
+    60% { transform: scale(1.1); opacity: 1; }
+    80% { transform: scale(0.95); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  @keyframes va-text-pulse {
+    0%, 100% { text-shadow: 0 0 40px var(--burst-color), 0 0 80px var(--burst-color-dim); }
+    50% { text-shadow: 0 0 80px var(--burst-color), 0 0 160px var(--burst-color-dim), 0 0 200px var(--burst-color-dim2); }
+  }
+  @keyframes va-ring-expand {
+    0% { transform: translate(-50%, -50%) scale(0.1); opacity: 0.9; }
+    100% { transform: translate(-50%, -50%) scale(3); opacity: 0; }
+  }
+  @keyframes va-ring-expand2 {
+    0% { transform: translate(-50%, -50%) scale(0.1); opacity: 0.7; }
+    100% { transform: translate(-50%, -50%) scale(2.5); opacity: 0; }
+  }
+  @keyframes va-ring-expand3 {
+    0% { transform: translate(-50%, -50%) scale(0.1); opacity: 0.5; }
+    100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
+  }
+  @keyframes va-fadeout {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  @keyframes va-subtitle-in {
+    0% { opacity: 0; transform: translateY(8px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+
+  #va-container {
+    --burst-color: #FACC15;
+    --burst-color-dim: #FACC1566;
+    --burst-color-dim2: #FACC1522;
+  }
+
+  .va-ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border-width: 3px;
+    border-style: solid;
+    border-color: var(--burst-color);
+    transform: translate(-50%, -50%) scale(0.1);
+    opacity: 0;
+  }
+  .va-ring.r1 { animation: va-ring-expand 900ms ease-out 0ms both; }
+  .va-ring.r2 { animation: va-ring-expand2 900ms ease-out 150ms both; border-width: 2px; }
+  .va-ring.r3 { animation: va-ring-expand3 900ms ease-out 300ms both; border-width: 1px; }
+
+  .va-text {
+    position: relative;
+    z-index: 2;
+    font-family: var(--vb-font-score);
+    font-size: 96px;
+    font-weight: 900;
+    color: var(--burst-color);
+    letter-spacing: 2px;
+    animation: va-scale-in 500ms cubic-bezier(0.17, 0.89, 0.32, 1.3) both,
+               va-text-pulse 600ms ease-in-out 600ms 2 alternate;
+  }
+
+  .va-subtitle {
+    position: absolute;
+    top: calc(50% + 60px);
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: var(--vb-font-body);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--burst-color);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    opacity: 0;
+    white-space: nowrap;
+    animation: va-subtitle-in 300ms ease-out 400ms both;
+  }
+
+  .va-wrapper {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: va-fadeout 400ms ease-out 1300ms both;
+  }
+
+  /* ======== VARIANT B ======== */
+  /* 배경 dim + 16개 파티클 폭발 + 배지형 라벨 */
+  @keyframes vb-bg-in {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+  @keyframes vb-bg-out {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  @keyframes vb-text-bounce {
+    0% { transform: scale(0) rotate(-10deg); opacity: 0; }
+    50% { transform: scale(1.2) rotate(3deg); opacity: 1; }
+    70% { transform: scale(0.95) rotate(-1deg); }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+  @keyframes vb-particle-fly {
+    0% { transform: translate(-50%, -50%) translate(0, 0) scale(1); opacity: 1; }
+    100% { transform: translate(-50%, -50%) translate(var(--px), var(--py)) scale(0); opacity: 0; }
+  }
+  @keyframes vb-badge-in {
+    0% { opacity: 0; transform: translateX(-50%) translateY(10px) scale(0.8); }
+    100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+  }
+  @keyframes vb-fadeout {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  #vb-container {
+    --burst-color: #FB923C;
+    --burst-color-bg: #FB923C18;
+    --burst-color-dim: #FB923C66;
+  }
+
+  .vb-dim {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, var(--burst-color-bg) 0%, rgba(14,14,16,0.85) 70%);
+    animation: vb-bg-in 200ms ease-out both;
+  }
+
+  .vb-text {
+    position: relative;
+    z-index: 2;
+    font-family: var(--vb-font-score);
+    font-size: 88px;
+    font-weight: 900;
+    color: var(--burst-color);
+    letter-spacing: 2px;
+    text-shadow: 0 0 60px var(--burst-color), 0 0 120px var(--burst-color-dim);
+    animation: vb-text-bounce 500ms cubic-bezier(0.34, 1.56, 0.64, 1) 100ms both;
+  }
+
+  .vb-badge {
+    position: absolute;
+    top: calc(50% + 52px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--burst-color);
+    color: #000;
+    font-family: var(--vb-font-body);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 4px 12px;
+    border-radius: 20px;
+    white-space: nowrap;
+    z-index: 2;
+    animation: vb-badge-in 300ms ease-out 500ms both;
+  }
+
+  .vb-particle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--burst-color);
+    box-shadow: 0 0 12px var(--burst-color);
+    animation: vb-particle-fly 800ms cubic-bezier(0.1, 0.8, 0.2, 1) var(--delay) both;
+  }
+
+  .vb-wrapper {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: vb-fadeout 400ms ease-out 1400ms both;
+  }
+
+  /* ======== VARIANT C ======== */
+  /* 풀스크린 플래시 + 동심원 파동 + 3단계 텍스트 진입 */
+  @keyframes vc-flash {
+    0% { opacity: 0; }
+    15% { opacity: 0.35; }
+    40% { opacity: 0; }
+    100% { opacity: 0; }
+  }
+  @keyframes vc-wave1 {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 0.8; }
+    100% { transform: translate(-50%, -50%) scale(6); opacity: 0; }
+  }
+  @keyframes vc-wave2 {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 0.6; }
+    100% { transform: translate(-50%, -50%) scale(5); opacity: 0; }
+  }
+  @keyframes vc-wave3 {
+    0% { transform: translate(-50%, -50%) scale(0); opacity: 0.4; }
+    100% { transform: translate(-50%, -50%) scale(4); opacity: 0; }
+  }
+  @keyframes vc-text-slam {
+    0% { transform: scale(3); opacity: 0; filter: blur(16px); }
+    30% { transform: scale(0.9); opacity: 1; filter: blur(0); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  @keyframes vc-text-shake {
+    0%, 100% { transform: scale(1) rotate(0deg); }
+    20% { transform: scale(1.05) rotate(-2deg); }
+    40% { transform: scale(1.05) rotate(2deg); }
+    60% { transform: scale(1.02) rotate(-1deg); }
+    80% { transform: scale(1.02) rotate(1deg); }
+  }
+  @keyframes vc-lines-in {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+    100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  }
+  @keyframes vc-lines-rotate {
+    from { transform: translate(-50%, -50%) rotate(0deg); }
+    to { transform: translate(-50%, -50%) rotate(360deg); }
+  }
+  @keyframes vc-fadeout {
+    0% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  @keyframes vc-bg-glow {
+    0% { opacity: 0; }
+    30% { opacity: 1; }
+    100% { opacity: 0.6; }
+  }
+  @keyframes vc-streak {
+    0% { transform: translate(-50%, -50%) rotate(var(--sangle)) translateX(0) scaleX(0); opacity: 0.8; }
+    60% { transform: translate(-50%, -50%) rotate(var(--sangle)) translateX(120px) scaleX(1); opacity: 0.6; }
+    100% { transform: translate(-50%, -50%) rotate(var(--sangle)) translateX(200px) scaleX(0); opacity: 0; }
+  }
+
+  #vc-container {
+    --burst-color: #E879F9;
+    --burst-color-dim: #E879F966;
+    --burst-color-bg: #E879F912;
+  }
+
+  .vc-flash {
+    position: absolute;
+    inset: 0;
+    background: var(--burst-color);
+    animation: vc-flash 600ms ease-out both;
+    z-index: 10;
+  }
+
+  .vc-bg-glow {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, var(--burst-color-bg) 0%, transparent 70%);
+    animation: vc-bg-glow 600ms ease-out both;
+  }
+
+  .vc-wave {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    border-radius: 50%;
+    border-width: 2px;
+    border-style: solid;
+  }
+  .vc-wave.w1 {
+    width: 80px; height: 80px;
+    border-color: var(--burst-color);
+    animation: vc-wave1 1000ms ease-out 50ms both;
+  }
+  .vc-wave.w2 {
+    width: 80px; height: 80px;
+    border-color: var(--burst-color-dim);
+    animation: vc-wave2 1000ms ease-out 200ms both;
+  }
+  .vc-wave.w3 {
+    width: 80px; height: 80px;
+    border-color: var(--burst-color);
+    opacity: 0.5;
+    animation: vc-wave3 1000ms ease-out 350ms both;
+  }
+
+  .vc-streak {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    height: 3px;
+    width: 60px;
+    background: linear-gradient(90deg, transparent, var(--burst-color), transparent);
+    transform-origin: left center;
+    animation: vc-streak 700ms ease-out var(--sdelay) both;
+  }
+
+  .vc-text {
+    position: relative;
+    z-index: 5;
+    font-family: var(--vb-font-score);
+    font-size: 100px;
+    font-weight: 900;
+    color: var(--burst-color);
+    letter-spacing: 4px;
+    text-shadow:
+      0 0 30px var(--burst-color),
+      0 0 80px var(--burst-color-dim),
+      0 0 160px var(--burst-color-dim);
+    animation:
+      vc-text-slam 600ms cubic-bezier(0.23, 1, 0.32, 1) 100ms both,
+      vc-text-shake 300ms ease-in-out 800ms 2 both;
+  }
+
+  .vc-wrapper {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: vc-fadeout 500ms ease-out 1500ms both;
+  }
+
+  /* ---- controls ---- */
+  .card-controls {
+    padding: 12px 16px;
+    border-top: 1px solid var(--vb-border);
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .replay-btn {
+    background: var(--vb-surface-2);
+    border: 1px solid var(--vb-border);
+    color: var(--vb-text);
+    font-family: var(--vb-font-body);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 150ms;
+  }
+  .replay-btn:hover { background: #2a2a2e; }
+
+  .multiplier-select {
+    background: var(--vb-surface-2);
+    border: 1px solid var(--vb-border);
+    color: var(--vb-text);
+    font-family: var(--vb-font-body);
+    font-size: 12px;
+    padding: 6px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  .card-desc {
+    padding: 12px 16px;
+    border-top: 1px solid var(--vb-border);
+    font-size: 12px;
+    color: var(--vb-text-mid);
+    line-height: 1.6;
+  }
+  .card-desc strong {
+    color: var(--vb-text);
+    display: block;
+    margin-bottom: 4px;
+    font-size: 13px;
+  }
+  .card-desc ul {
+    padding-left: 16px;
+    margin-top: 4px;
+  }
+  .card-desc li { margin-bottom: 2px; }
+
+  /* ---- critic panel ---- */
+  .critic-panel {
+    max-width: 1280px;
+    margin: 32px auto 0;
+    background: var(--vb-surface);
+    border: 1px solid var(--vb-border);
+    border-radius: 16px;
+    padding: 20px 24px;
+  }
+  .critic-panel h3 {
+    font-family: var(--vb-font-score);
+    font-size: 20px;
+    font-weight: 900;
+    color: var(--vb-accent);
+    margin-bottom: 16px;
+    letter-spacing: 0.5px;
+  }
+  .critic-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .critic-table th {
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--vb-border);
+    color: var(--vb-text-mid);
+    font-weight: 600;
+  }
+  .critic-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #1e1e21;
+    vertical-align: top;
+  }
+  .score-chip {
+    display: inline-block;
+    background: var(--vb-surface-2);
+    border: 1px solid var(--vb-border);
+    color: var(--vb-accent);
+    font-family: var(--vb-font-score);
+    font-size: 16px;
+    font-weight: 900;
+    padding: 2px 10px;
+    border-radius: 6px;
+  }
+  .pick-badge {
+    display: inline-block;
+    background: var(--vb-accent);
+    color: #000;
+    font-family: var(--vb-font-body);
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 20px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-left: 6px;
+  }
+
+  /* vc-container 기본값 조정 */
+  #vc-container { --burst-color: #E879F9; --burst-color-dim: #E879F966; --burst-color-bg: #E879F912; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Issue #77 — MultiplierBurst 디자인 시안</h1>
+  <p>지속시간 1400~1800ms 연장 + 임팩트 강화 | 3개 variant 비교</p>
+</div>
+
+<div class="variants-grid">
+
+  <!-- ======== VARIANT A ======== -->
+  <div class="variant-card">
+    <div class="card-header">
+      <div class="card-header-left">
+        <h2 style="color: #FACC15;">Variant A — Glow Ring</h2>
+        <p>안정적 개선 | 지속시간 1700ms</p>
+      </div>
+      <div class="score-badge">
+        <div class="score-row">
+          <span>인지성</span><span class="score-val">8</span>
+        </div>
+        <div class="score-row">
+          <span>임팩트</span><span class="score-val">7</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="phone-frame">
+      <div class="phone-inner">
+        <!-- 게임 배경 -->
+        <div class="game-bg">
+          <div class="fake-hud">
+            <span class="fake-score">1,250</span>
+            <span class="fake-stage">STAGE 5</span>
+          </div>
+          <div class="fake-buttons">
+            <div class="fake-btn" style="background:#FF6200;"></div>
+            <div class="fake-btn" style="background:#0A7AFF;"></div>
+            <div class="fake-btn" style="background:#18B84A;"></div>
+            <div class="fake-btn" style="background:#F5C000;"></div>
+          </div>
+        </div>
+
+        <!-- Variant A overlay -->
+        <div id="va-container" class="burst-overlay">
+          <div class="va-wrapper" id="va-wrapper">
+            <div class="va-ring r1" id="va-r1"></div>
+            <div class="va-ring r2" id="va-r2"></div>
+            <div class="va-ring r3" id="va-r3"></div>
+            <div class="va-text" id="va-text">x2</div>
+            <div class="va-subtitle" id="va-subtitle">MULTIPLIER</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-controls">
+      <button class="replay-btn" onclick="replayVariantA()">↺ 재생</button>
+      <select class="multiplier-select" id="va-mult-select" onchange="setVAMultiplier(this.value)">
+        <option value="2">x2 노랑</option>
+        <option value="3">x3 주황</option>
+        <option value="4">x4 빨강</option>
+        <option value="5">x5 마젠타</option>
+      </select>
+    </div>
+
+    <div class="card-desc">
+      <strong>Glow Ring Pulse</strong>
+      <ul>
+        <li>96px 대형 텍스트 단독 집중</li>
+        <li>동심원 링 3개 방사 확산 (900ms)</li>
+        <li>텍스트 펄스 2회 반복 (600ms)</li>
+        <li>총 지속시간 <strong>1700ms</strong> (fadeout 400ms 포함)</li>
+        <li>배경 dim 없음 — 최소 침습적</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ======== VARIANT B ======== -->
+  <div class="variant-card">
+    <div class="card-header">
+      <div class="card-header-left">
+        <h2 style="color: #FB923C;">Variant B — Dim Burst</h2>
+        <p>중간 임팩트 | 지속시간 1800ms</p>
+      </div>
+      <div class="score-badge">
+        <div class="score-row">
+          <span>인지성</span><span class="score-val">9</span>
+        </div>
+        <div class="score-row">
+          <span>임팩트</span><span class="score-val">9</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="phone-frame">
+      <div class="phone-inner">
+        <div class="game-bg">
+          <div class="fake-hud">
+            <span class="fake-score">1,250</span>
+            <span class="fake-stage">STAGE 5</span>
+          </div>
+          <div class="fake-buttons">
+            <div class="fake-btn" style="background:#FF6200;"></div>
+            <div class="fake-btn" style="background:#0A7AFF;"></div>
+            <div class="fake-btn" style="background:#18B84A;"></div>
+            <div class="fake-btn" style="background:#F5C000;"></div>
+          </div>
+        </div>
+
+        <!-- Variant B overlay -->
+        <div id="vb-container" class="burst-overlay">
+          <div class="vb-wrapper" id="vb-wrapper">
+            <div class="vb-dim" id="vb-dim"></div>
+            <!-- 16개 파티클 — JS로 생성 -->
+            <div id="vb-particles"></div>
+            <div class="vb-text" id="vb-text">x3</div>
+            <div class="vb-badge" id="vb-badge">COMBO BOOST</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-controls">
+      <button class="replay-btn" onclick="replayVariantB()">↺ 재생</button>
+      <select class="multiplier-select" id="vb-mult-select" onchange="setVBMultiplier(this.value)">
+        <option value="2">x2 노랑</option>
+        <option value="3" selected>x3 주황</option>
+        <option value="4">x4 빨강</option>
+        <option value="5">x5 마젠타</option>
+      </select>
+    </div>
+
+    <div class="card-desc">
+      <strong>Dim + Particle Burst</strong>
+      <ul>
+        <li>배경 방사형 dim 오버레이 (80% 불투명)</li>
+        <li>파티클 16개 전방향 폭발 (800ms)</li>
+        <li>88px 텍스트 + COMBO BOOST 배지</li>
+        <li>총 지속시간 <strong>1800ms</strong> (fadeout 400ms 포함)</li>
+        <li>게임 화면과 명확한 시각적 분리</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ======== VARIANT C ======== -->
+  <div class="variant-card">
+    <div class="card-header">
+      <div class="card-header-left">
+        <h2 style="color: #E879F9;">Variant C — Full Impact</h2>
+        <p>최대 임팩트 | 지속시간 2000ms</p>
+      </div>
+      <div class="score-badge">
+        <div class="score-row">
+          <span>인지성</span><span class="score-val">10</span>
+        </div>
+        <div class="score-row">
+          <span>임팩트</span><span class="score-val">10</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="phone-frame">
+      <div class="phone-inner">
+        <div class="game-bg">
+          <div class="fake-hud">
+            <span class="fake-score">1,250</span>
+            <span class="fake-stage">STAGE 5</span>
+          </div>
+          <div class="fake-buttons">
+            <div class="fake-btn" style="background:#FF6200;"></div>
+            <div class="fake-btn" style="background:#0A7AFF;"></div>
+            <div class="fake-btn" style="background:#18B84A;"></div>
+            <div class="fake-btn" style="background:#F5C000;"></div>
+          </div>
+        </div>
+
+        <!-- Variant C overlay -->
+        <div id="vc-container" class="burst-overlay">
+          <div class="vc-wrapper" id="vc-wrapper">
+            <div class="vc-bg-glow" id="vc-bg-glow"></div>
+            <div class="vc-flash" id="vc-flash"></div>
+            <div class="vc-wave w1" id="vc-w1"></div>
+            <div class="vc-wave w2" id="vc-w2"></div>
+            <div class="vc-wave w3" id="vc-w3"></div>
+            <!-- 광선 streaks — JS로 생성 -->
+            <div id="vc-streaks"></div>
+            <div class="vc-text" id="vc-text">x5</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card-controls">
+      <button class="replay-btn" onclick="replayVariantC()">↺ 재생</button>
+      <select class="multiplier-select" id="vc-mult-select" onchange="setVCMultiplier(this.value)">
+        <option value="2">x2 노랑</option>
+        <option value="3">x3 주황</option>
+        <option value="4">x4 빨강</option>
+        <option value="5" selected>x5 마젠타</option>
+      </select>
+    </div>
+
+    <div class="card-desc">
+      <strong>Full Screen Impact</strong>
+      <ul>
+        <li>화면 플래시 (0.35 불투명도, 150ms)</li>
+        <li>동심원 파동 3개 연속 확산 (1000ms)</li>
+        <li>12방향 광선 streaks 방사</li>
+        <li>100px 텍스트 — 블러→선명 슬램 진입</li>
+        <li>총 지속시간 <strong>2000ms</strong> (fadeout 500ms 포함)</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<!-- critic panel -->
+<div class="critic-panel">
+  <h3>Design Critic 평가</h3>
+  <table class="critic-table">
+    <thead>
+      <tr>
+        <th>기준</th>
+        <th>Variant A</th>
+        <th>Variant B</th>
+        <th>Variant C</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>인지성</strong><br><span style="color:var(--vb-text-mid);font-size:11px">유저가 배율 상승을 인지하는가</span></td>
+        <td><span class="score-chip">8</span> 글로우 링으로 시선 유도 명확</td>
+        <td><span class="score-chip">9</span> dim으로 게임과 분리, 배지 문구 추가</td>
+        <td><span class="score-chip">10</span> 플래시+파동으로 즉각 인지 <span class="pick-badge">PICK</span></td>
+      </tr>
+      <tr>
+        <td><strong>임팩트</strong><br><span style="color:var(--vb-text-mid);font-size:11px">축하 이벤트로서의 감각</span></td>
+        <td><span class="score-chip">7</span> 깔끔하지만 소박한 느낌</td>
+        <td><span class="score-chip">9</span> 파티클 폭발로 만족감 높음</td>
+        <td><span class="score-chip">10</span> 멀티레이어로 최대 흥분감</td>
+      </tr>
+      <tr>
+        <td><strong>비침습성</strong><br><span style="color:var(--vb-text-mid);font-size:11px">게임 흐름 방해 최소화</span></td>
+        <td><span class="score-chip">10</span> 배경 dim 없음, 최소 침습</td>
+        <td><span class="score-chip">8</span> dim이 있지만 빠르게 사라짐</td>
+        <td><span class="score-chip">7</span> 플래시 있으나 pointerEvents:none 유지</td>
+      </tr>
+      <tr>
+        <td><strong>지속시간</strong><br><span style="color:var(--vb-text-mid);font-size:11px">충분한 인지 시간 확보</span></td>
+        <td><span class="score-chip">1700ms</span></td>
+        <td><span class="score-chip">1800ms</span></td>
+        <td><span class="score-chip">2000ms</span></td>
+      </tr>
+    </tbody>
+  </table>
+  <p style="margin-top:14px;font-size:12px;color:var(--vb-text-mid);">
+    추천: <strong style="color:var(--vb-text)">Variant C</strong> — 유저 리포트 "잘 모르겠어"에 가장 직접적으로 대응. 화면 플래시로 즉각 인지, 동심원 파동으로 여운 유지.
+    게임 중단 없음(pointerEvents:none). 부담스러우면 Variant B가 균형점.
+  </p>
+</div>
+
+<script>
+  // ---- 배율별 색상 ----
+  const COLORS = {
+    2: { main: '#FACC15', dim: '#FACC1566', bg: '#FACC1510' },
+    3: { main: '#FB923C', dim: '#FB923C66', bg: '#FB923C10' },
+    4: { main: '#F87171', dim: '#F8717166', bg: '#F8717110' },
+    5: { main: '#E879F9', dim: '#E879F966', bg: '#E879F910' },
+  }
+
+  // ---- CSS 변수 주입 ----
+  function applyColors(containerId, mult) {
+    const c = COLORS[mult] || COLORS[5]
+    const el = document.getElementById(containerId)
+    if (!el) return
+    el.style.setProperty('--burst-color', c.main)
+    el.style.setProperty('--burst-color-dim', c.dim)
+    el.style.setProperty('--burst-color-bg', c.bg)
+  }
+
+  // ---- Variant B 파티클 생성 ----
+  function buildVBParticles(mult) {
+    const container = document.getElementById('vb-particles')
+    if (!container) return
+    container.innerHTML = ''
+    const c = COLORS[mult] || COLORS[5]
+    const count = 16
+    for (let i = 0; i < count; i++) {
+      const angle = (360 / count) * i
+      const rad = (angle * Math.PI) / 180
+      const dist = 80 + Math.random() * 40
+      const px = Math.cos(rad) * dist
+      const py = Math.sin(rad) * dist
+      const delay = i * 25
+      const size = 8 + Math.random() * 6
+
+      const p = document.createElement('div')
+      p.className = 'vb-particle'
+      p.style.cssText = `
+        position:absolute; top:50%; left:50%;
+        width:${size}px; height:${size}px;
+        border-radius:50%;
+        background:${c.main};
+        box-shadow:0 0 10px ${c.main};
+        --px:${px}px; --py:${py}px; --delay:${delay}ms;
+      `
+      container.appendChild(p)
+    }
+  }
+
+  // ---- Variant C streaks 생성 ----
+  function buildVCStreaks(mult) {
+    const container = document.getElementById('vc-streaks')
+    if (!container) return
+    container.innerHTML = ''
+    const c = COLORS[mult] || COLORS[5]
+    const count = 12
+    for (let i = 0; i < count; i++) {
+      const angle = (360 / count) * i
+      const delay = i * 20
+      const s = document.createElement('div')
+      s.className = 'vc-streak'
+      s.style.cssText = `
+        position:absolute; top:50%; left:50%;
+        height:2px; width:50px;
+        background:linear-gradient(90deg, transparent, ${c.main}, transparent);
+        transform-origin: left center;
+        --sangle:${angle}deg; --sdelay:${delay}ms;
+      `
+      container.appendChild(s)
+    }
+  }
+
+  // ---- 애니메이션 재실행 헬퍼 ----
+  function restartAnim(el) {
+    if (!el) return
+    el.style.animation = 'none'
+    el.offsetHeight // reflow
+    el.style.animation = ''
+  }
+
+  function restartAllIn(parentId) {
+    const parent = document.getElementById(parentId)
+    if (!parent) return
+    const all = parent.querySelectorAll('[style*="animation"], [class*="va-"], [class*="vb-"], [class*="vc-"]')
+    all.forEach(el => restartAnim(el))
+  }
+
+  // ---- Variant A replay ----
+  function replayVariantA() {
+    const mult = parseInt(document.getElementById('va-mult-select').value) || 2
+    applyColors('va-container', mult)
+    document.getElementById('va-text').textContent = 'x' + mult
+    ;['va-wrapper','va-r1','va-r2','va-r3','va-text','va-subtitle'].forEach(id => restartAnim(document.getElementById(id)))
+  }
+
+  function setVAMultiplier(val) {
+    replayVariantA()
+  }
+
+  // ---- Variant B replay ----
+  function replayVariantB() {
+    const mult = parseInt(document.getElementById('vb-mult-select').value) || 3
+    applyColors('vb-container', mult)
+    document.getElementById('vb-text').textContent = 'x' + mult
+    buildVBParticles(mult)
+    ;['vb-wrapper','vb-dim','vb-text','vb-badge'].forEach(id => restartAnim(document.getElementById(id)))
+    // 파티클 재실행
+    const particles = document.querySelectorAll('.vb-particle')
+    particles.forEach(p => restartAnim(p))
+  }
+
+  function setVBMultiplier(val) {
+    replayVariantB()
+  }
+
+  // ---- Variant C replay ----
+  function replayVariantC() {
+    const mult = parseInt(document.getElementById('vc-mult-select').value) || 5
+    applyColors('vc-container', mult)
+    document.getElementById('vc-text').textContent = 'x' + mult
+    buildVCStreaks(mult)
+    ;['vc-wrapper','vc-flash','vc-bg-glow','vc-w1','vc-w2','vc-w3','vc-text'].forEach(id => restartAnim(document.getElementById(id)))
+    // streaks 재실행
+    const streaks = document.querySelectorAll('.vc-streak')
+    streaks.forEach(s => restartAnim(s))
+  }
+
+  function setVCMultiplier(val) {
+    replayVariantC()
+  }
+
+  // ---- 초기화 ----
+  function init() {
+    applyColors('va-container', 2)
+    applyColors('vb-container', 3)
+    applyColors('vc-container', 5)
+    buildVBParticles(3)
+    buildVCStreaks(5)
+  }
+
+  init()
+</script>
+</body>
+</html>

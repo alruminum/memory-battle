@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Issue #78 — Floating Score Animation — 3 Variants</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --vb-bg: #0e0e10;
+      --vb-surface: #18181b;
+      --vb-surface-2: #1f1f23;
+      --vb-border: #2a2a2e;
+      --vb-accent: #D4A843;
+      --vb-accent-dim: #8B7332;
+      --vb-text: #e8e8ea;
+      --vb-text-mid: #8b8b90;
+      --vb-text-dim: #505055;
+      --vb-danger: #ff3b3b;
+      --vb-font-score: 'Barlow Condensed', sans-serif;
+      --vb-font-body: 'Space Grotesk', sans-serif;
+      --vb-combo-ok: #34D399;
+      --vb-body-bg-start: #2a2a35;
+      --vb-body-bg-mid: #16161f;
+      --vb-body-bg-end: #0e0e16;
+      --vb-center-bg-start: #252535;
+      --vb-center-bg-end: #101018;
+      --vb-screw-bg-start: #3a3a4a;
+      --vb-screw-bg-end: #1a1a24;
+      --vb-orange-base: #FF6200;
+      --vb-orange-light: #FF8C35;
+      --vb-orange-dark: #A83F00;
+      --vb-blue-base: #0A7AFF;
+      --vb-blue-light: #3D9AFF;
+      --vb-blue-dark: #0055BB;
+      --vb-green-base: #18B84A;
+      --vb-green-light: #38D46A;
+      --vb-green-dark: #0E7A30;
+      --vb-yellow-base: #F5C000;
+      --vb-yellow-light: #FFD740;
+      --vb-yellow-dark: #A07C00;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #08080a;
+      font-family: var(--vb-font-body);
+      color: var(--vb-text);
+      padding: 32px 20px 48px;
+      min-height: 100vh;
+    }
+
+    /* ── 페이지 헤더 ── */
+    .page-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .page-header h1 {
+      font-family: var(--vb-font-score);
+      font-size: 28px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      color: var(--vb-accent);
+      margin-bottom: 8px;
+    }
+    .page-header p {
+      font-size: 13px;
+      color: var(--vb-text-mid);
+    }
+
+    /* ── 3열 그리드 ── */
+    .variants-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    /* ── 카드 ── */
+    .card {
+      background: var(--vb-surface);
+      border: 1px solid var(--vb-border);
+      border-radius: 20px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .card-header {
+      padding: 16px 20px 12px;
+      border-bottom: 1px solid var(--vb-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .card-header h2 {
+      font-family: var(--vb-font-score);
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: 1px;
+    }
+    .scores {
+      display: flex;
+      gap: 6px;
+    }
+    .score-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 7px;
+      border-radius: 6px;
+      background: var(--vb-surface-2);
+      color: var(--vb-text-mid);
+      letter-spacing: 0.5px;
+    }
+    .score-badge.pick {
+      background: var(--vb-accent);
+      color: #0e0e10;
+    }
+
+    /* ── 폰 프레임 ── */
+    .phone-frame-wrap {
+      padding: 20px 16px;
+      display: flex;
+      justify-content: center;
+      background: #0a0a0c;
+    }
+    .phone-frame {
+      width: 240px;
+      height: 340px;
+      background: var(--vb-bg);
+      border-radius: 24px;
+      border: 2px solid #2a2a2e;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* ── 버튼 패드 공통 ── */
+    .pad-wrap {
+      position: relative;
+      width: 210px;
+      height: 210px;
+    }
+    .pad-body {
+      position: absolute;
+      inset: 0;
+      border-radius: 28px;
+      background: linear-gradient(145deg, var(--vb-body-bg-start) 0%, var(--vb-body-bg-mid) 50%, var(--vb-body-bg-end) 100%);
+      box-shadow: inset 0 2px 1px rgba(255,255,255,0.07), inset 0 -2px 2px rgba(0,0,0,0.5), 0 20px 40px rgba(0,0,0,0.7);
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .pad-btn {
+      position: absolute;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: none;
+      cursor: pointer;
+      transition: transform 70ms ease, filter 70ms ease;
+      z-index: 2;
+    }
+    .pad-btn:active { transform: scale(1.06) translateY(3px) !important; filter: brightness(1.4) !important; }
+    .pad-btn.flash {
+      filter: brightness(1.4) !important;
+      transform: scale(1.06) translateY(3px);
+      transition: transform 70ms ease, filter 70ms ease;
+    }
+    .pad-btn.orange {
+      top: 0; left: 0;
+      background: radial-gradient(circle at 35% 30%, var(--vb-orange-light), var(--vb-orange-base) 55%, var(--vb-orange-dark));
+      box-shadow: 0 5px 0 var(--vb-orange-dark), 0 7px 14px rgba(0,0,0,0.5);
+      filter: brightness(0.75);
+    }
+    .pad-btn.blue {
+      top: 0; right: 0;
+      background: radial-gradient(circle at 35% 30%, var(--vb-blue-light), var(--vb-blue-base) 55%, var(--vb-blue-dark));
+      box-shadow: 0 5px 0 var(--vb-blue-dark), 0 7px 14px rgba(0,0,0,0.5);
+      filter: brightness(0.75);
+    }
+    .pad-btn.green {
+      bottom: 0; left: 0;
+      background: radial-gradient(circle at 35% 30%, var(--vb-green-light), var(--vb-green-base) 55%, var(--vb-green-dark));
+      box-shadow: 0 5px 0 var(--vb-green-dark), 0 7px 14px rgba(0,0,0,0.5);
+      filter: brightness(0.75);
+    }
+    .pad-btn.yellow {
+      bottom: 0; right: 0;
+      background: radial-gradient(circle at 35% 30%, var(--vb-yellow-light), var(--vb-yellow-base) 55%, var(--vb-yellow-dark));
+      box-shadow: 0 5px 0 var(--vb-yellow-dark), 0 7px 14px rgba(0,0,0,0.5);
+      filter: brightness(0.75);
+    }
+    .pad-center {
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 64px; height: 64px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 40% 35%, var(--vb-center-bg-start), var(--vb-center-bg-end));
+      border: 2px solid rgba(255,255,255,0.10);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 3;
+      box-shadow: inset 0 2px 1px rgba(255,255,255,0.07), 0 4px 10px rgba(0,0,0,0.5);
+    }
+    .pad-center-score {
+      text-align: center; line-height: 1.1;
+    }
+    .pad-center-score .label {
+      font-size: 7px;
+      color: #888;
+      letter-spacing: 1px;
+      font-weight: 700;
+    }
+    .pad-center-score .value {
+      font-family: var(--vb-font-score);
+      font-size: 16px;
+      font-weight: 900;
+      color: var(--vb-text);
+    }
+    .screw {
+      position: absolute;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, var(--vb-screw-bg-start), var(--vb-screw-bg-end));
+      border: 1px solid rgba(255,255,255,0.08);
+      z-index: 1;
+    }
+
+    /* ── 플로팅 레이어 (공통) ── */
+    .float-layer {
+      position: absolute;
+      inset: -60px -20px 0 -20px;
+      pointer-events: none;
+      z-index: 10;
+      overflow: visible;
+    }
+
+    /* ── 리플레이 버튼 ── */
+    .replay-btn {
+      display: block;
+      margin: 0 auto 4px;
+      padding: 7px 20px;
+      background: var(--vb-surface-2);
+      border: 1px solid var(--vb-border);
+      border-radius: 20px;
+      color: var(--vb-text-mid);
+      font-family: var(--vb-font-body);
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: background 150ms;
+    }
+    .replay-btn:hover { background: var(--vb-border); color: var(--vb-text); }
+
+    /* ── 카드 하단 설명 ── */
+    .card-desc {
+      padding: 14px 16px 16px;
+      border-top: 1px solid var(--vb-border);
+      font-size: 12px;
+      line-height: 1.6;
+      color: var(--vb-text-mid);
+    }
+    .card-desc strong {
+      color: var(--vb-text);
+      font-weight: 600;
+    }
+
+    /* ══════════════════════════════════════
+       VARIANT A — 심플 Float-Up 애니메이션
+    ══════════════════════════════════════ */
+    @keyframes va-float {
+      0%   { transform: translateY(0); opacity: 1; }
+      20%  { opacity: 1; }
+      100% { transform: translateY(-52px); opacity: 0; }
+    }
+
+    .va-float-label {
+      position: absolute;
+      font-family: var(--vb-font-score);
+      font-size: 22px;
+      font-weight: 900;
+      color: #ffffff;
+      text-shadow: 0 0 12px rgba(255,255,255,0.5);
+      pointer-events: none;
+      animation: va-float 700ms cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+      white-space: nowrap;
+    }
+
+    /* ══════════════════════════════════════
+       VARIANT B — 버튼색 연동 + 배율별 크기
+    ══════════════════════════════════════ */
+    @keyframes vb-float {
+      0%   { transform: translateY(0) scale(1); opacity: 1; }
+      15%  { transform: translateY(-10px) scale(1.12); opacity: 1; }
+      100% { transform: translateY(-60px) scale(0.85); opacity: 0; }
+    }
+    @keyframes vb-glow-pulse {
+      0%   { filter: brightness(1.2); }
+      50%  { filter: brightness(1.8); }
+      100% { filter: brightness(1); }
+    }
+
+    .vb-float-label {
+      position: absolute;
+      font-family: var(--vb-font-score);
+      font-weight: 900;
+      pointer-events: none;
+      animation: vb-float 800ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      white-space: nowrap;
+    }
+
+    /* ══════════════════════════════════════
+       VARIANT C — 파티클 + 링 + 최대 임팩트
+    ══════════════════════════════════════ */
+    @keyframes vc-text-rise {
+      0%   { transform: translateY(0) scale(1.3); opacity: 0; }
+      15%  { transform: translateY(-6px) scale(1); opacity: 1; }
+      80%  { opacity: 1; }
+      100% { transform: translateY(-70px) scale(0.8); opacity: 0; }
+    }
+    @keyframes vc-ring-expand {
+      0%   { transform: scale(0); opacity: 0.7; }
+      100% { transform: scale(2.8); opacity: 0; }
+    }
+    @keyframes vc-particle {
+      0%   { opacity: 1; transform: translate(0,0) scale(1); }
+      100% { opacity: 0; }
+    }
+
+    .vc-float-text {
+      position: absolute;
+      font-family: var(--vb-font-score);
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--vb-accent);
+      text-shadow:
+        0 0 8px rgba(212,168,67,0.9),
+        0 0 24px rgba(212,168,67,0.5);
+      pointer-events: none;
+      animation: vc-text-rise 900ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      white-space: nowrap;
+    }
+    .vc-ring {
+      position: absolute;
+      border-radius: 50%;
+      border: 2px solid;
+      pointer-events: none;
+      animation: vc-ring-expand 400ms ease-out forwards;
+    }
+    .vc-particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      pointer-events: none;
+      animation: vc-particle 500ms ease-out forwards;
+    }
+
+    /* ── 하단 judge ── */
+    .judge-section {
+      max-width: 1100px;
+      margin: 32px auto 0;
+      background: var(--vb-surface);
+      border: 1px solid var(--vb-border);
+      border-radius: 16px;
+      padding: 20px 24px;
+    }
+    .judge-section h3 {
+      font-family: var(--vb-font-score);
+      font-size: 16px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      color: var(--vb-accent);
+      margin-bottom: 14px;
+    }
+    .judge-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+    .judge-table th {
+      text-align: left;
+      padding: 6px 12px;
+      color: var(--vb-text-dim);
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--vb-border);
+    }
+    .judge-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid rgba(42,42,46,0.5);
+      color: var(--vb-text-mid);
+      line-height: 1.4;
+    }
+    .judge-table td:first-child { color: var(--vb-text); font-weight: 600; }
+    .pick-badge {
+      display: inline-block;
+      background: var(--vb-accent);
+      color: #0e0e10;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 10px;
+      margin-left: 6px;
+      letter-spacing: 0.5px;
+    }
+
+    /* 스코어 카운터 표시 */
+    .score-counter {
+      position: absolute;
+      top: 12px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-family: var(--vb-font-score);
+      font-size: 11px;
+      font-weight: 900;
+      color: var(--vb-text-dim);
+      letter-spacing: 1px;
+      z-index: 5;
+    }
+    .score-counter span {
+      color: var(--vb-text);
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 페이지 헤더 -->
+  <div class="page-header">
+    <h1>Issue #78 — Floating Score Animation</h1>
+    <p>버튼 탭 시 "+N점" 플로팅 스코어 애니메이션 · 3 Variants 비교</p>
+  </div>
+
+  <!-- 3열 그리드 -->
+  <div class="variants-grid">
+
+    <!-- ════════════════ VARIANT A ════════════════ -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Variant A — 심플 Float-Up</h2>
+        <div class="scores">
+          <span class="score-badge">UX ★★★★☆</span>
+          <span class="score-badge">선명도 ★★★★★</span>
+        </div>
+      </div>
+
+      <div class="phone-frame-wrap">
+        <div class="phone-frame" id="va-frame">
+          <!-- 스코어 카운터 -->
+          <div class="score-counter">SCORE <span id="va-score">0</span></div>
+
+          <!-- 버튼 패드 -->
+          <div class="pad-wrap" id="va-pad">
+            <div class="pad-body"></div>
+            <div class="screw" style="top:8px;left:8px"></div>
+            <div class="screw" style="top:8px;right:8px"></div>
+            <div class="screw" style="bottom:8px;left:8px"></div>
+            <div class="screw" style="bottom:8px;right:8px"></div>
+
+            <button class="pad-btn orange" onclick="vaFire('orange',0,0)"></button>
+            <button class="pad-btn blue"   onclick="vaFire('blue',130,0)"></button>
+            <button class="pad-btn green"  onclick="vaFire('green',0,130)"></button>
+            <button class="pad-btn yellow" onclick="vaFire('yellow',130,130)"></button>
+
+            <div class="pad-center">
+              <div class="pad-center-score">
+                <div class="label">SCORE</div>
+                <div class="value" id="va-center-score">0</div>
+              </div>
+            </div>
+
+            <!-- 플로팅 레이어 A -->
+            <div class="float-layer" id="va-float-layer"></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding:10px 16px 12px; display:flex; gap:8px; justify-content:center; flex-wrap:wrap">
+        <button class="replay-btn" onclick="vaReplay()">↺ 데모 재생</button>
+        <button class="replay-btn" onclick="vaToggleMultiplier()">배율: <span id="va-mult-label">×1</span></button>
+      </div>
+
+      <div class="card-desc">
+        <strong>심플 Float-Up.</strong> 흰색 "+N" 텍스트가 버튼 중심 위로 직선 상승하며 700ms 페이드아웃.
+        게임 집중을 방해하지 않는 최소 노이즈. 여러 개가 동시에 떠있을 때도 깔끔하게 처리됨.
+        Barlow Condensed 900 weight — 숫자 가독성 최우선.
+      </div>
+    </div>
+
+    <!-- ════════════════ VARIANT B ════════════════ -->
+    <div class="card" style="border-color: var(--vb-accent);">
+      <div class="card-header">
+        <h2>Variant B — 색상 연동<span class="pick-badge">PICK</span></h2>
+        <div class="scores">
+          <span class="score-badge">UX ★★★★★</span>
+          <span class="score-badge pick">배율피드백 ★★★★★</span>
+        </div>
+      </div>
+
+      <div class="phone-frame-wrap">
+        <div class="phone-frame" id="vb-frame">
+          <div class="score-counter">SCORE <span id="vb-score">0</span></div>
+
+          <div class="pad-wrap" id="vb-pad">
+            <div class="pad-body"></div>
+            <div class="screw" style="top:8px;left:8px"></div>
+            <div class="screw" style="top:8px;right:8px"></div>
+            <div class="screw" style="bottom:8px;left:8px"></div>
+            <div class="screw" style="bottom:8px;right:8px"></div>
+
+            <button class="pad-btn orange" onclick="vbFire('orange',0,0)"></button>
+            <button class="pad-btn blue"   onclick="vbFire('blue',130,0)"></button>
+            <button class="pad-btn green"  onclick="vbFire('green',0,130)"></button>
+            <button class="pad-btn yellow" onclick="vbFire('yellow',130,130)"></button>
+
+            <div class="pad-center">
+              <div class="pad-center-score">
+                <div class="label">SCORE</div>
+                <div class="value" id="vb-center-score">0</div>
+              </div>
+            </div>
+
+            <div class="float-layer" id="vb-float-layer"></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding:10px 16px 12px; display:flex; gap:8px; justify-content:center; flex-wrap:wrap">
+        <button class="replay-btn" onclick="vbReplay()">↺ 데모 재생</button>
+        <button class="replay-btn" onclick="vbCycleMultiplier()">배율: <span id="vb-mult-label">×1</span></button>
+      </div>
+
+      <div class="card-desc">
+        <strong>버튼 색상 연동 + 배율별 크기 계단.</strong> 탭한 버튼의 고유색으로 "+N" 표시.
+        ×1=흰색 20px → ×3=버튼색 32px+글로우 → ×5=44px+강한 글로우. 콤보 성장이 시각적으로 체감됨.
+        곡선 상승 궤적 + 스케일 팝 이펙트로 존재감 있음.
+      </div>
+    </div>
+
+    <!-- ════════════════ VARIANT C ════════════════ -->
+    <div class="card">
+      <div class="card-header">
+        <h2>Variant C — 파티클 이펙트</h2>
+        <div class="scores">
+          <span class="score-badge">임팩트 ★★★★★</span>
+          <span class="score-badge">노이즈 ★★★☆☆</span>
+        </div>
+      </div>
+
+      <div class="phone-frame-wrap">
+        <div class="phone-frame" id="vc-frame">
+          <div class="score-counter">SCORE <span id="vc-score">0</span></div>
+
+          <div class="pad-wrap" id="vc-pad">
+            <div class="pad-body"></div>
+            <div class="screw" style="top:8px;left:8px"></div>
+            <div class="screw" style="top:8px;right:8px"></div>
+            <div class="screw" style="bottom:8px;left:8px"></div>
+            <div class="screw" style="bottom:8px;right:8px"></div>
+
+            <button class="pad-btn orange" onclick="vcFire('orange',0,0)"></button>
+            <button class="pad-btn blue"   onclick="vcFire('blue',130,0)"></button>
+            <button class="pad-btn green"  onclick="vcFire('green',0,130)"></button>
+            <button class="pad-btn yellow" onclick="vcFire('yellow',130,130)"></button>
+
+            <div class="pad-center">
+              <div class="pad-center-score">
+                <div class="label">SCORE</div>
+                <div class="value" id="vc-center-score">0</div>
+              </div>
+            </div>
+
+            <div class="float-layer" id="vc-float-layer"></div>
+          </div>
+        </div>
+      </div>
+
+      <div style="padding:10px 16px 12px; display:flex; gap:8px; justify-content:center; flex-wrap:wrap">
+        <button class="replay-btn" onclick="vcReplay()">↺ 데모 재생</button>
+        <button class="replay-btn" onclick="vcCycleMultiplier()">배율: <span id="vc-mult-label">×1</span></button>
+      </div>
+
+      <div class="card-desc">
+        <strong>파티클 + 링 + 최대 임팩트.</strong> 탭 시 골드 링 확산 + 미니 파티클 방사 + "+N" 텍스트 동시 상승.
+        배율이 높을수록 파티클 수 증가 (×1=4개, ×3=6개, ×5=8개). 가장 강렬한 점수 획득 피드백.
+        빠른 연속 입력 시에도 레이어가 겹쳐 화려하게 표현.
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 하단 design-critic 판정 -->
+  <div class="judge-section">
+    <h3>DESIGN CRITIC — 판정 기준</h3>
+    <table class="judge-table">
+      <thead>
+        <tr>
+          <th>기준</th>
+          <th>Variant A</th>
+          <th>Variant B</th>
+          <th>Variant C</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>게임 방해 최소화</td>
+          <td>최우수 — 흰색·직선·빠름</td>
+          <td>우수 — 색+크기 있으나 허용 범위</td>
+          <td>보통 — 파티클이 시선 분산 가능</td>
+        </tr>
+        <tr>
+          <td>배율 피드백 직관성</td>
+          <td>약함 — 크기/색 차이 없음</td>
+          <td>최우수 — 크기+색 계단형</td>
+          <td>우수 — 파티클 수로 표현</td>
+        </tr>
+        <tr>
+          <td>연속 탭 시 가독성</td>
+          <td>우수 — 겹쳐도 명확</td>
+          <td>우수 — 색으로 구분 가능</td>
+          <td>보통 — 파티클 과밀 가능성</td>
+        </tr>
+        <tr>
+          <td>기존 UI 조화</td>
+          <td>최우수 — 어두운 테마와 완벽 조화</td>
+          <td>우수 — 버튼색 연동으로 자연스러움</td>
+          <td>보통 — 골드 파티클이 강조됨</td>
+        </tr>
+      </tbody>
+    </table>
+    <p style="margin-top:12px; font-size:11px; color:var(--vb-text-dim); line-height:1.6;">
+      추천: <strong style="color:var(--vb-accent)">Variant B</strong> — 버튼 색상과 배율 피드백이 동시에 전달되어 게임 UX를 가장 강화함.
+      오답 시 애니메이션 없음. pointerEvents: none으로 입력 방해 없음.
+    </p>
+  </div>
+
+  <script>
+    // ────────────────────────────────────────
+    // 색상 맵
+    // ────────────────────────────────────────
+    const COLOR_MAP = {
+      orange: { base: '#FF6200', light: '#FF8C35', glow: 'rgba(255,98,0,0.7)' },
+      blue:   { base: '#0A7AFF', light: '#3D9AFF', glow: 'rgba(10,122,255,0.7)' },
+      green:  { base: '#18B84A', light: '#38D46A', glow: 'rgba(24,184,74,0.7)' },
+      yellow: { base: '#F5C000', light: '#FFD740', glow: 'rgba(245,192,0,0.7)' },
+    }
+
+    // 버튼 중심 좌표 (pad 210px 기준, 버튼 80px)
+    const BTN_CENTERS = {
+      orange: { x: 40,  y: 40  },
+      blue:   { x: 170, y: 40  },
+      green:  { x: 40,  y: 170 },
+      yellow: { x: 170, y: 170 },
+    }
+
+    // 배율 계산 (comboStreak/5 + 1, max 5)
+    function getMultiplier(streak) {
+      return Math.min(Math.floor(streak / 5) + 1, 5)
+    }
+
+    // ────────────────────────────────────────
+    // 공통 — 버튼 flash 효과
+    // ────────────────────────────────────────
+    function flashBtn(padId, color) {
+      const pad = document.getElementById(padId)
+      const btn = pad.querySelector('.pad-btn.' + color)
+      if (!btn) return
+      btn.classList.add('flash')
+      btn.style.filter = 'brightness(1.4)'
+      btn.style.boxShadow = `0 3px 0 ${COLOR_MAP[color].base}, 0 0 30px ${COLOR_MAP[color].glow}, 0 0 60px ${COLOR_MAP[color].glow}`
+      setTimeout(() => {
+        btn.classList.remove('flash')
+        btn.style.filter = 'brightness(0.75)'
+        btn.style.boxShadow = ''
+      }, 150)
+    }
+
+    // ────────────────────────────────────────
+    // VARIANT A — 심플 Float-Up
+    // ────────────────────────────────────────
+    let vaScore = 0
+    let vaStreak = 0
+    let vaMultiplier = 1
+    let vaMultCycle = 1
+
+    function vaFire(color, _bx, _by) {
+      flashBtn('va-pad', color)
+      const mult = vaMultiplier
+      vaScore += mult
+      document.getElementById('va-score').textContent = vaScore
+      document.getElementById('va-center-score').textContent = vaScore
+
+      const layer = document.getElementById('va-float-layer')
+      const center = BTN_CENTERS[color]
+
+      const el = document.createElement('div')
+      el.className = 'va-float-label'
+      el.textContent = '+' + mult
+      // 버튼 중심에서 살짝 위쪽에 출현
+      el.style.left = (center.x - 16 + 20) + 'px'
+      el.style.top  = (center.y - 30 + 60) + 'px'
+      el.style.fontSize = '22px'
+      layer.appendChild(el)
+
+      setTimeout(() => el.remove(), 750)
+    }
+
+    function vaToggleMultiplier() {
+      vaMultCycle = vaMultCycle >= 5 ? 1 : vaMultCycle + 1
+      vaMultiplier = vaMultCycle
+      document.getElementById('va-mult-label').textContent = '×' + vaMultiplier
+    }
+
+    function vaReplay() {
+      vaScore = 0
+      document.getElementById('va-score').textContent = '0'
+      document.getElementById('va-center-score').textContent = '0'
+      // 자동 탭 시퀀스
+      const seq = [
+        { color: 'orange', delay: 0 },
+        { color: 'blue',   delay: 250 },
+        { color: 'green',  delay: 500 },
+        { color: 'yellow', delay: 750 },
+        { color: 'orange', delay: 1050 },
+        { color: 'blue',   delay: 1250 },
+        { color: 'green',  delay: 1500 },
+      ]
+      seq.forEach(({ color, delay }) => {
+        setTimeout(() => vaFire(color), delay)
+      })
+    }
+
+    // ────────────────────────────────────────
+    // VARIANT B — 버튼색 연동 + 배율 크기
+    // ────────────────────────────────────────
+    let vbScore = 0
+    let vbStreak = 0
+    let vbMultiplier = 1
+    let vbMultCycle = 1
+
+    // 배율별 스타일
+    function vbGetStyle(mult, color) {
+      const sizes = { 1: 20, 2: 26, 3: 32, 4: 38, 5: 44 }
+      const c = COLOR_MAP[color]
+      const sz = sizes[mult]
+      // x1은 흰색, x2+는 버튼색
+      const col = mult === 1 ? '#e8e8ea' : c.base
+      const glow = mult >= 3 ? `0 0 ${8 + mult * 4}px ${c.glow}, 0 0 ${20 + mult * 6}px ${c.glow}` : 'none'
+      return { fontSize: sz + 'px', color: col, textShadow: glow }
+    }
+
+    function vbFire(color) {
+      flashBtn('vb-pad', color)
+      const mult = vbMultiplier
+      vbScore += mult
+      document.getElementById('vb-score').textContent = vbScore
+      document.getElementById('vb-center-score').textContent = vbScore
+
+      const layer = document.getElementById('vb-float-layer')
+      const center = BTN_CENTERS[color]
+      const style = vbGetStyle(mult, color)
+
+      const el = document.createElement('div')
+      el.className = 'vb-float-label'
+      el.textContent = '+' + mult
+      el.style.fontSize   = style.fontSize
+      el.style.color      = style.color
+      el.style.textShadow = style.textShadow
+      // 배율 높을수록 버튼에서 더 높이 시작
+      const offsetY = 30 + mult * 4
+      el.style.left = (center.x - (mult <= 1 ? 10 : 14) + 20) + 'px'
+      el.style.top  = (center.y - offsetY + 60) + 'px'
+      layer.appendChild(el)
+
+      setTimeout(() => el.remove(), 850)
+    }
+
+    function vbCycleMultiplier() {
+      vbMultCycle = vbMultCycle >= 5 ? 1 : vbMultCycle + 1
+      vbMultiplier = vbMultCycle
+      document.getElementById('vb-mult-label').textContent = '×' + vbMultiplier
+    }
+
+    function vbReplay() {
+      vbScore = 0
+      document.getElementById('vb-score').textContent = '0'
+      document.getElementById('vb-center-score').textContent = '0'
+      const seq = [
+        { color: 'orange', delay: 0,    mult: 1 },
+        { color: 'blue',   delay: 280,  mult: 1 },
+        { color: 'green',  delay: 560,  mult: 2 },
+        { color: 'yellow', delay: 820,  mult: 2 },
+        { color: 'orange', delay: 1100, mult: 3 },
+        { color: 'blue',   delay: 1350, mult: 3 },
+        { color: 'green',  delay: 1600, mult: 4 },
+        { color: 'yellow', delay: 1850, mult: 5 },
+      ]
+      seq.forEach(({ color, delay, mult }) => {
+        setTimeout(() => {
+          vbMultiplier = mult
+          vbFire(color)
+        }, delay)
+      })
+    }
+
+    // ────────────────────────────────────────
+    // VARIANT C — 파티클 + 링 + 최대 임팩트
+    // ────────────────────────────────────────
+    let vcScore = 0
+    let vcMultiplier = 1
+    let vcMultCycle = 1
+
+    function vcFire(color) {
+      flashBtn('vc-pad', color)
+      const mult = vcMultiplier
+      vcScore += mult
+      document.getElementById('vc-score').textContent = vcScore
+      document.getElementById('vc-center-score').textContent = vcScore
+
+      const layer = document.getElementById('vc-float-layer')
+      const center = BTN_CENTERS[color]
+      const c = COLOR_MAP[color]
+      const cx = center.x + 20
+      const cy = center.y + 60
+
+      // 1) 링 이펙트
+      const ring = document.createElement('div')
+      ring.className = 'vc-ring'
+      const ringSize = 36 + mult * 6
+      ring.style.width  = ringSize + 'px'
+      ring.style.height = ringSize + 'px'
+      ring.style.borderColor = c.base
+      ring.style.left = (cx - ringSize / 2) + 'px'
+      ring.style.top  = (cy - ringSize / 2) + 'px'
+      ring.style.boxShadow = `0 0 8px ${c.glow}`
+      layer.appendChild(ring)
+      setTimeout(() => ring.remove(), 420)
+
+      // 2) 파티클 (배율에 따라 수 증가)
+      const particleCount = Math.min(4 + (mult - 1) * 2, 8)
+      for (let i = 0; i < particleCount; i++) {
+        const angle = (i / particleCount) * 360
+        const rad   = angle * Math.PI / 180
+        const dist  = 28 + mult * 6
+        const dx    = Math.cos(rad) * dist
+        const dy    = Math.sin(rad) * dist
+
+        const p = document.createElement('div')
+        p.className = 'vc-particle'
+        p.style.background = i % 2 === 0 ? c.base : c.light
+        p.style.left = (cx - 2) + 'px'
+        p.style.top  = (cy - 2) + 'px'
+        p.style.boxShadow = `0 0 4px ${c.glow}`
+        p.style.setProperty('--dx', dx + 'px')
+        p.style.setProperty('--dy', dy + 'px')
+        p.style.animationDuration = (400 + Math.random() * 150) + 'ms'
+        // translate 끝 위치를 keyframe에 직접 적용
+        p.style.animation = 'none'
+        p.style.transition = 'transform 500ms ease-out, opacity 500ms ease-out'
+        layer.appendChild(p)
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            p.style.transform = `translate(${dx}px, ${dy}px) scale(0.2)`
+            p.style.opacity = '0'
+          })
+        })
+        setTimeout(() => p.remove(), 560)
+      }
+
+      // 3) 텍스트 (+N)
+      const txt = document.createElement('div')
+      txt.className = 'vc-float-text'
+      const fontSize = 22 + mult * 3
+      txt.style.fontSize = fontSize + 'px'
+      txt.style.left = (cx - fontSize * 0.4) + 'px'
+      txt.style.top  = (cy - 44) + 'px'
+      // 배율 높을수록 골드에서 하얀색으로 스펙트럼
+      if (mult >= 4) {
+        txt.style.color = '#FFD740'
+        txt.style.textShadow = '0 0 8px rgba(255,215,64,0.9), 0 0 30px rgba(255,215,64,0.6)'
+      }
+      txt.textContent = '+' + mult
+      layer.appendChild(txt)
+      setTimeout(() => txt.remove(), 950)
+    }
+
+    function vcCycleMultiplier() {
+      vcMultCycle = vcMultCycle >= 5 ? 1 : vcMultCycle + 1
+      vcMultiplier = vcMultCycle
+      document.getElementById('vc-mult-label').textContent = '×' + vcMultiplier
+    }
+
+    function vcReplay() {
+      vcScore = 0
+      document.getElementById('vc-score').textContent = '0'
+      document.getElementById('vc-center-score').textContent = '0'
+      const seq = [
+        { color: 'orange', delay: 0,    mult: 1 },
+        { color: 'blue',   delay: 250,  mult: 1 },
+        { color: 'green',  delay: 500,  mult: 2 },
+        { color: 'yellow', delay: 750,  mult: 3 },
+        { color: 'orange', delay: 1050, mult: 3 },
+        { color: 'blue',   delay: 1300, mult: 4 },
+        { color: 'green',  delay: 1550, mult: 5 },
+        { color: 'yellow', delay: 1800, mult: 5 },
+      ]
+      seq.forEach(({ color, delay, mult }) => {
+        setTimeout(() => {
+          vcMultiplier = mult
+          vcFire(color)
+        }, delay)
+      })
+    }
+
+    // 페이지 로드 시 각 variant 자동 재생 (0.5s 딜레이)
+    setTimeout(() => { vaReplay();  }, 500)
+    setTimeout(() => { vbReplay();  }, 800)
+    setTimeout(() => { vcReplay();  }, 1100)
+  </script>
+</body>
+</html>
