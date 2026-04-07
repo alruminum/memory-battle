@@ -38,7 +38,7 @@ function StageArea({ countdown, clearingStage, isPlaying, stage }: StageAreaProp
   if (clearingStage !== null) {
     return <div data-testid="clearing">CLEAR</div>
   }
-  if (isPlaying) {
+  if (isPlaying && countdown === null) {
     return <div data-testid="playing">STAGE {String(stage).padStart(2, '0')}</div>
   }
   return <div data-testid="idle" />
@@ -82,5 +82,24 @@ describe('[#61/#64] StageArea 카운트다운 힌트 버그픽스', () => {
     render(<StageArea countdown={null} clearingStage={null} isPlaying={false} stage={1} />)
     expect(screen.queryByText('깜빡이는 순서 그대로 눌러요')).toBeNull()
     expect(screen.queryByText('더 빠르면 콤보가 누적됩니다')).toBeNull()
+  })
+})
+
+describe('[#66] StageArea — isPlaying=true & countdown !== null 시 스테이지 콘텐츠 미표시', () => {
+  it('TC6: isPlaying=true, countdown=3, stage=5 → stage 콘텐츠 미표시, countdown UI 표시', () => {
+    render(<StageArea countdown={3} clearingStage={null} isPlaying={true} stage={5} />)
+    expect(screen.queryByTestId('playing')).toBeNull()
+    expect(screen.getByTestId('countdown-number')).toBeInTheDocument()
+  })
+
+  it('TC7: isPlaying=true, countdown=null, stage=5 → stage 콘텐츠 정상 표시 (회귀 없음)', () => {
+    render(<StageArea countdown={null} clearingStage={null} isPlaying={true} stage={5} />)
+    expect(screen.getByTestId('playing')).toBeInTheDocument()
+    expect(screen.getByTestId('playing').textContent).toBe('STAGE 05')
+  })
+
+  it('TC8: isPlaying=true, countdown=3, stage=7 (리트라이 시나리오) → stage 콘텐츠 미표시', () => {
+    render(<StageArea countdown={3} clearingStage={null} isPlaying={true} stage={7} />)
+    expect(screen.queryByTestId('playing')).toBeNull()
   })
 })

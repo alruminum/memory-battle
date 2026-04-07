@@ -111,7 +111,7 @@ function StageArea({ countdown, clearingStage, isPlaying, stage }: StageAreaProp
       </div>
     )
   }
-  if (isPlaying) {
+  if (isPlaying && countdown === null) {
     return (
       <div style={{ textAlign: 'center' }}>
         <div style={{
