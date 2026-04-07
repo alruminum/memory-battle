@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design Preview — #52 카운트다운 / #53 CLEAR / #54 ComboIndicator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ─── CSS 변수 (src/index.css 에서 직접 추출) ─── */
+  :root {
+    --vb-bg: #0e0e10;
+    --vb-surface: #18181b;
+    --vb-surface-2: #1f1f23;
+    --vb-border: #2a2a2e;
+    --vb-accent: #D4A843;
+    --vb-accent-dim: #8B7332;
+    --vb-text: #e8e8ea;
+    --vb-text-mid: #8b8b90;
+    --vb-text-dim: #505055;
+    --vb-danger: #ff3b3b;
+    --vb-combo-ok: #34D399;
+    --vb-combo-over: #F87171;
+    --vb-font-score: 'Barlow Condensed', sans-serif;
+    --vb-font-body: 'Space Grotesk', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #111113;
+    color: var(--vb-text);
+    font-family: var(--vb-font-body);
+    min-height: 100vh;
+  }
+
+  /* ─── 페이지 헤더 ─── */
+  .page-header {
+    padding: 28px 32px 20px;
+    border-bottom: 1px solid #2a2a2e;
+    background: #0e0e10;
+  }
+  .page-header h1 {
+    font-family: var(--vb-font-score);
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    color: var(--vb-accent);
+    margin-bottom: 6px;
+  }
+  .page-header p { font-size: 13px; color: var(--vb-text-dim); }
+  .issue-badges { display: flex; gap: 8px; margin-top: 10px; }
+  .issue-badge {
+    font-size: 11px; font-weight: 600; padding: 3px 8px;
+    background: #1f1f23; border: 1px solid #3a3a3e;
+    border-radius: 4px; color: var(--vb-text-mid);
+  }
+
+  /* ─── 탭 ─── */
+  .tabs {
+    display: flex;
+    gap: 0;
+    background: #0e0e10;
+    border-bottom: 1px solid #2a2a2e;
+    padding: 0 32px;
+  }
+  .tab-btn {
+    padding: 14px 20px;
+    font-family: var(--vb-font-score);
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    color: var(--vb-text-dim);
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .tab-btn:hover { color: var(--vb-text-mid); }
+  .tab-btn.active { color: var(--vb-accent); border-bottom-color: var(--vb-accent); }
+
+  /* ─── 탭 패널 ─── */
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ─── Variant 섹션 ─── */
+  .variant-section {
+    padding: 32px;
+    border-bottom: 1px solid #1a1a1e;
+  }
+  .variant-label {
+    font-family: var(--vb-font-score);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 3px;
+    color: var(--vb-text-dim);
+    margin-bottom: 6px;
+  }
+  .variant-title {
+    font-family: var(--vb-font-score);
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+  .variant-desc { font-size: 12px; color: var(--vb-text-mid); margin-bottom: 20px; }
+
+  /* ─── 변경 대상 3열 그리드 ─── */
+  .change-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+  @media (max-width: 900px) {
+    .change-grid { grid-template-columns: 1fr; }
+  }
+
+  .change-card {
+    background: var(--vb-surface);
+    border: 1px solid var(--vb-border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .change-card-header {
+    padding: 10px 14px;
+    background: var(--vb-surface-2);
+    border-bottom: 1px solid var(--vb-border);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--vb-text-dim);
+    text-transform: uppercase;
+  }
+  .change-card-body {
+    padding: 24px 16px;
+    min-height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--vb-bg);
+  }
+
+  /* ─── design-critic 표 ─── */
+  .critic-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin-top: 4px;
+  }
+  .critic-table th {
+    text-align: left;
+    padding: 8px 12px;
+    background: var(--vb-surface-2);
+    color: var(--vb-text-dim);
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+  .critic-table td {
+    padding: 8px 12px;
+    border-top: 1px solid var(--vb-border);
+    color: var(--vb-text-mid);
+    vertical-align: top;
+  }
+  .critic-table tr:hover td { background: #14141a; }
+  .score-cell {
+    font-family: var(--vb-font-score);
+    font-size: 18px;
+    font-weight: 900;
+    white-space: nowrap;
+  }
+  .pick-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    padding: 2px 8px;
+    background: var(--vb-accent);
+    color: #000;
+    border-radius: 3px;
+  }
+
+  /* ─── Replay 버튼 ─── */
+  .replay-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 10px 16px 12px;
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--vb-text-dim);
+    background: none;
+    border: 1px solid var(--vb-border);
+    border-radius: 5px;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .replay-btn:hover { color: var(--vb-text); border-color: var(--vb-text-mid); }
+
+  /* ═══════════════════════════════════════════
+     COMPONENT STYLES — 공통 game HUD shell
+  ═══════════════════════════════════════════ */
+
+  .hud-shell {
+    background: var(--vb-bg);
+    border: 1px solid var(--vb-border);
+    border-radius: 8px;
+    overflow: hidden;
+    width: 100%;
+  }
+  .hud-bar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: var(--vb-surface);
+    border-bottom: 1px solid var(--vb-border);
+    font-family: var(--vb-font-score);
+  }
+  .hud-cell {
+    padding: 6px 10px;
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+  }
+  .hud-cell:first-child { border-right: 1px solid var(--vb-border); }
+  .hud-label { font-size: 8px; font-weight: 700; letter-spacing: 2px; color: var(--vb-text-dim); }
+  .hud-value { font-size: 16px; font-weight: 900; color: var(--vb-text); line-height: 1; }
+
+  /* ═══ VARIANT A — 애니메이션 버전 ═══ */
+
+  /* 카운트다운 A */
+  @keyframes countPulseA {
+    0%   { transform: scale(1.2); opacity: 0; }
+    30%  { transform: scale(1); opacity: 1; }
+    70%  { transform: scale(1); opacity: 1; }
+    100% { transform: scale(0.85); opacity: 0; }
+  }
+  .countdown-a-container {
+    text-align: center;
+    padding: 16px 12px;
+  }
+  .countdown-a-number {
+    font-family: var(--vb-font-score);
+    font-size: 64px;
+    font-weight: 900;
+    color: var(--vb-accent);
+    line-height: 1;
+    text-shadow: 0 0 32px rgba(212,168,67,0.5);
+    animation: countPulseA 0.8s ease forwards;
+    display: block;
+  }
+  .countdown-a-hint1 {
+    font-family: var(--vb-font-body);
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--vb-text);
+    margin-top: 8px;
+    opacity: 0;
+    animation: slideUpFadeA 0.4s 0.2s ease forwards;
+  }
+  .countdown-a-hint2 {
+    font-family: var(--vb-font-body);
+    font-size: 11px;
+    color: var(--vb-text-mid);
+    margin-top: 3px;
+    opacity: 0;
+    animation: slideUpFadeA 0.4s 0.35s ease forwards;
+  }
+  @keyframes slideUpFadeA {
+    from { transform: translateY(6px); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+  }
+
+  /* CLEAR A */
+  @keyframes clearFlashA {
+    0%  { color: var(--vb-accent); text-shadow: 0 0 20px rgba(212,168,67,0.6); }
+    50% { color: #fff; text-shadow: 0 0 30px rgba(255,255,255,0.4); }
+    100%{ color: var(--vb-accent); text-shadow: 0 0 20px rgba(212,168,67,0.6); }
+  }
+  .clear-a-container { text-align: center; padding: 16px 12px; }
+  .clear-a-stage {
+    font-family: var(--vb-font-score);
+    font-size: 11px;
+    color: var(--vb-accent);
+    letter-spacing: 2px;
+  }
+  .clear-a-text {
+    font-family: var(--vb-font-score);
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--vb-accent);
+    letter-spacing: 2px;
+    animation: clearFlashA 0.6s ease infinite;
+  }
+
+  /* ComboIndicator A — 게이지 바 */
+  @keyframes barFillA {
+    from { width: 0%; }
+    to   { width: var(--fill-pct); }
+  }
+  .combo-a {
+    padding: 8px 14px;
+    display: flex; flex-direction: column; gap: 5px;
+    width: 100%;
+  }
+  .combo-a-top {
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .combo-a-label {
+    font-family: var(--vb-font-score);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: var(--vb-accent);
+  }
+  .combo-a-fraction {
+    font-family: var(--vb-font-score);
+    font-size: 14px;
+    font-weight: 900;
+    color: var(--vb-text);
+  }
+  .combo-a-fraction span { color: var(--vb-text-dim); font-size: 11px; }
+  .combo-a-track {
+    height: 6px;
+    background: var(--vb-border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .combo-a-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--vb-accent-dim), var(--vb-accent));
+    border-radius: 3px;
+    animation: barFillA 0.5s ease;
+  }
+  .combo-a-mult {
+    font-family: var(--vb-font-score);
+    font-size: 12px;
+    font-weight: 800;
+    color: var(--vb-text-dim);
+    letter-spacing: 1px;
+  }
+  .combo-a-mult b { color: var(--vb-combo-ok); font-size: 14px; }
+
+  /* ═══ VARIANT B — 건전지/블록 버전 ═══ */
+
+  /* 카운트다운 B */
+  @keyframes ringExpandB {
+    0%  { transform: scale(0.6); opacity: 0; }
+    50% { transform: scale(1); opacity: 1; }
+    100%{ transform: scale(1); opacity: 1; }
+  }
+  .countdown-b-wrapper {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 14px 12px;
+  }
+  .countdown-b-ring {
+    position: relative;
+    width: 80px; height: 80px;
+    display: flex; align-items: center; justify-content: center;
+    border: 3px solid var(--vb-accent);
+    border-radius: 50%;
+    box-shadow: 0 0 24px rgba(212,168,67,0.35), inset 0 0 16px rgba(212,168,67,0.1);
+    animation: ringExpandB 0.5s ease;
+    margin-bottom: 10px;
+  }
+  .countdown-b-number {
+    font-family: var(--vb-font-score);
+    font-size: 52px;
+    font-weight: 900;
+    color: var(--vb-accent);
+    line-height: 1;
+  }
+  .countdown-b-hint1 {
+    font-size: 11px; font-weight: 600; color: var(--vb-text);
+    background: rgba(212,168,67,0.08);
+    border: 1px solid rgba(212,168,67,0.2);
+    border-radius: 4px;
+    padding: 4px 10px;
+    margin-bottom: 4px;
+    letter-spacing: 0.3px;
+  }
+  .countdown-b-hint2 {
+    font-size: 10px; color: var(--vb-text-dim); letter-spacing: 0.5px;
+  }
+
+  /* CLEAR B — 체크마크 */
+  @keyframes checkDrawB {
+    from { stroke-dashoffset: 40; }
+    to   { stroke-dashoffset: 0; }
+  }
+  .clear-b-container {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 12px;
+    gap: 4px;
+  }
+  .clear-b-check {
+    width: 36px; height: 36px;
+    margin-bottom: 4px;
+  }
+  .clear-b-check path {
+    stroke: var(--vb-combo-ok);
+    stroke-width: 3;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-dasharray: 40;
+    stroke-dashoffset: 40;
+    animation: checkDrawB 0.4s 0.1s ease forwards;
+  }
+  .clear-b-stage {
+    font-family: var(--vb-font-score);
+    font-size: 10px; letter-spacing: 2px; color: var(--vb-text-dim);
+  }
+  .clear-b-text {
+    font-family: var(--vb-font-score);
+    font-size: 20px; font-weight: 800;
+    color: var(--vb-combo-ok); letter-spacing: 2px;
+  }
+
+  /* ComboIndicator B — 블록/건전지 */
+  @keyframes blockPopB {
+    0%  { transform: scaleY(0); }
+    70% { transform: scaleY(1.1); }
+    100%{ transform: scaleY(1); }
+  }
+  .combo-b {
+    padding: 8px 14px;
+    display: flex; flex-direction: column; gap: 4px;
+    width: 100%;
+  }
+  .combo-b-top {
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .combo-b-label {
+    font-family: var(--vb-font-score);
+    font-size: 10px; font-weight: 800; letter-spacing: 2px;
+    color: var(--vb-text-dim);
+  }
+  .combo-b-mult {
+    font-family: var(--vb-font-score);
+    font-size: 18px; font-weight: 900;
+    color: var(--vb-accent);
+  }
+  .combo-b-blocks {
+    display: flex; gap: 3px; align-items: flex-end; height: 18px;
+  }
+  .combo-b-block {
+    width: 10px;
+    border-radius: 2px 2px 0 0;
+    animation: blockPopB 0.3s ease;
+  }
+  .combo-b-block.filled { background: var(--vb-accent); }
+  .combo-b-block.empty  { background: var(--vb-border); }
+  .combo-b-fraction {
+    font-family: var(--vb-font-score);
+    font-size: 11px; color: var(--vb-text-dim);
+  }
+  .combo-b-fraction b { color: var(--vb-text); }
+
+  /* ═══ VARIANT C — 미니멀/숫자 강조 버전 ═══ */
+
+  /* 카운트다운 C */
+  @keyframes countFlipC {
+    0%  { opacity: 0; transform: translateY(-10px) scale(1.1); }
+    40% { opacity: 1; transform: translateY(0) scale(1); }
+    100%{ opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .countdown-c-wrapper {
+    padding: 12px 10px;
+    display: grid;
+    grid-template-rows: auto auto auto;
+    gap: 6px;
+    text-align: center;
+  }
+  .countdown-c-sep {
+    height: 1px;
+    background: var(--vb-border);
+    margin: 0 20px;
+  }
+  .countdown-c-number {
+    font-family: var(--vb-font-score);
+    font-size: 72px;
+    font-weight: 900;
+    color: var(--vb-accent);
+    line-height: 1;
+    text-shadow: 0 0 40px rgba(212,168,67,0.3);
+    animation: countFlipC 0.5s ease;
+  }
+  .countdown-c-text-block { padding: 2px 0; }
+  .countdown-c-hint1 {
+    font-size: 13px; font-weight: 700; color: var(--vb-text);
+    line-height: 1.5;
+  }
+  .countdown-c-hint2 {
+    font-size: 11px; color: var(--vb-text-dim); line-height: 1.5;
+  }
+
+  /* CLEAR C — 도트 패턴 */
+  @keyframes dotRevealC {
+    from { opacity: 0; transform: scale(0); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+  .clear-c-container { text-align: center; padding: 12px; }
+  .clear-c-dots {
+    display: flex; justify-content: center; gap: 5px; margin-bottom: 6px;
+  }
+  .clear-c-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--vb-accent);
+    animation: dotRevealC 0.25s ease both;
+  }
+  .clear-c-dot:nth-child(1) { animation-delay: 0s; }
+  .clear-c-dot:nth-child(2) { animation-delay: 0.07s; }
+  .clear-c-dot:nth-child(3) { animation-delay: 0.14s; }
+  .clear-c-stage {
+    font-family: var(--vb-font-score);
+    font-size: 10px; letter-spacing: 2px; color: var(--vb-text-dim);
+  }
+  .clear-c-text {
+    font-family: var(--vb-font-score);
+    font-size: 22px; font-weight: 800;
+    color: var(--vb-text); letter-spacing: 3px;
+  }
+
+  /* ComboIndicator C — 숫자 카운터 강조 */
+  @keyframes numTickC {
+    0%  { transform: translateY(-100%); opacity: 0; }
+    100%{ transform: translateY(0); opacity: 1; }
+  }
+  .combo-c {
+    padding: 6px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+  }
+  .combo-c-counter {
+    display: flex; align-items: baseline; gap: 2px;
+    font-family: var(--vb-font-score);
+  }
+  .combo-c-current {
+    font-size: 28px; font-weight: 900; color: var(--vb-accent);
+    line-height: 1;
+    overflow: hidden;
+    animation: numTickC 0.25s ease;
+  }
+  .combo-c-sep2 { font-size: 14px; color: var(--vb-border); }
+  .combo-c-next { font-size: 18px; font-weight: 900; color: var(--vb-text-dim); }
+  .combo-c-right {
+    flex: 1;
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .combo-c-label {
+    font-family: var(--vb-font-score);
+    font-size: 10px; font-weight: 800; letter-spacing: 2px;
+    color: var(--vb-text-dim);
+  }
+  .combo-c-sublabel {
+    font-size: 10px; color: var(--vb-text-dim);
+  }
+  .combo-c-sublabel b { color: var(--vb-combo-ok); font-weight: 700; }
+  .combo-c-mult {
+    font-family: var(--vb-font-score);
+    font-size: 16px; font-weight: 900;
+    color: var(--vb-combo-ok);
+    margin-left: auto;
+  }
+
+  /* ─── design-critic 섹션 ─── */
+  .critic-section {
+    padding: 32px;
+    background: #0a0a0c;
+    border-top: 1px solid #2a2a2e;
+  }
+  .critic-section h2 {
+    font-family: var(--vb-font-score);
+    font-size: 14px; font-weight: 900; letter-spacing: 3px;
+    color: var(--vb-text-dim); margin-bottom: 16px;
+    text-transform: uppercase;
+  }
+
+  /* ─── 상태 전환 버튼 ─── */
+  .toggle-row {
+    display: flex; gap: 6px; flex-wrap: wrap;
+    margin: 0 16px 8px;
+  }
+  .toggle-btn {
+    font-size: 10px; font-weight: 700; letter-spacing: 1px;
+    padding: 4px 10px;
+    background: var(--vb-surface-2); border: 1px solid var(--vb-border);
+    border-radius: 4px; color: var(--vb-text-dim); cursor: pointer;
+    transition: all 0.12s;
+  }
+  .toggle-btn.active {
+    background: rgba(212,168,67,0.12);
+    border-color: var(--vb-accent);
+    color: var(--vb-accent);
+  }
+  .toggle-btn:hover:not(.active) { border-color: var(--vb-text-dim); color: var(--vb-text-mid); }
+</style>
+</head>
+<body>
+
+<!-- ─── 페이지 헤더 ─── -->
+<div class="page-header">
+  <h1>DESIGN PREVIEW</h1>
+  <p>GamePage UI 변경 3곳 — 3 Variants 비교</p>
+  <div class="issue-badges">
+    <span class="issue-badge">#52 카운트다운 힌트 문구</span>
+    <span class="issue-badge">#53 FULL COMBO! 제거</span>
+    <span class="issue-badge">#54 ComboIndicator 개선</span>
+  </div>
+</div>
+
+<!-- ─── 탭 ─── -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('A', this)">VARIANT A — 게이지 바</button>
+  <button class="tab-btn" onclick="switchTab('B', this)">VARIANT B — 블록 카운터</button>
+  <button class="tab-btn" onclick="switchTab('C', this)">VARIANT C — 숫자 포커스</button>
+  <button class="tab-btn" onclick="switchTab('CRITIC', this)">DESIGN CRITIC</button>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     VARIANT A
+══════════════════════════════════════════════════════ -->
+<div id="panel-A" class="tab-panel active">
+  <div class="variant-section">
+    <div class="variant-label">VARIANT A</div>
+    <div class="variant-title" style="color: var(--vb-accent);">게이지 바 — 선형 진행감</div>
+    <div class="variant-desc">
+      카운트다운은 확장-축소 펄스 + 슬라이드업 힌트 / CLEAR는 명멸 애니 / ComboIndicator는 게이지 바로 다음 배율까지 거리 시각화
+    </div>
+
+    <div class="change-grid">
+      <!-- #52 카운트다운 A -->
+      <div class="change-card">
+        <div class="change-card-header">#52 카운트다운</div>
+        <div class="toggle-row" style="margin: 8px 16px 0;">
+          <button class="toggle-btn active" onclick="setCountA(3, this)">3</button>
+          <button class="toggle-btn" onclick="setCountA(2, this)">2</button>
+          <button class="toggle-btn" onclick="setCountA(1, this)">1</button>
+        </div>
+        <div class="change-card-body" id="countdown-a-body">
+          <div class="countdown-a-container">
+            <span class="countdown-a-number" id="cda-num">3</span>
+            <div class="countdown-a-hint1">깜빡이는 순서 그대로 눌러요</div>
+            <div class="countdown-a-hint2">더 빠르면 콤보가 누적됩니다</div>
+          </div>
+        </div>
+        <button class="replay-btn" onclick="replayCountA()">↺ 재생</button>
+      </div>
+
+      <!-- #53 CLEAR A -->
+      <div class="change-card">
+        <div class="change-card-header">#53 STAGE CLEAR</div>
+        <div class="change-card-body" id="clear-a-body">
+          <div class="clear-a-container">
+            <div class="clear-a-stage">STAGE 07</div>
+            <div class="clear-a-text">CLEAR</div>
+          </div>
+        </div>
+        <button class="replay-btn" onclick="replayClearA()">↺ 재생</button>
+      </div>
+
+      <!-- #54 ComboIndicator A -->
+      <div class="change-card">
+        <div class="change-card-header">#54 ComboIndicator</div>
+        <div class="toggle-row" style="margin: 8px 16px 0;">
+          <button class="toggle-btn active" onclick="setComboA(3, this)">3콤보</button>
+          <button class="toggle-btn" onclick="setComboA(7, this)">7콤보</button>
+          <button class="toggle-btn" onclick="setComboA(12, this)">12콤보</button>
+        </div>
+        <div class="change-card-body" id="combo-a-body" style="padding: 12px 0; align-items: stretch;">
+          <div class="combo-a" id="combo-a-inner">
+            <!-- JS로 렌더 -->
+          </div>
+        </div>
+        <button class="replay-btn" onclick="replayComboA()">↺ 재생</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     VARIANT B
+══════════════════════════════════════════════════════ -->
+<div id="panel-B" class="tab-panel">
+  <div class="variant-section">
+    <div class="variant-label">VARIANT B</div>
+    <div class="variant-title" style="color: var(--vb-combo-ok);">블록 카운터 — 건전지형 충전감</div>
+    <div class="variant-desc">
+      카운트다운은 원형 링 + 알약형 힌트 박스 / CLEAR는 체크마크 드로우 애니 / ComboIndicator는 블록 10칸으로 다음 배율까지 충전 표현
+    </div>
+
+    <div class="change-grid">
+      <!-- #52 카운트다운 B -->
+      <div class="change-card">
+        <div class="change-card-header">#52 카운트다운</div>
+        <div class="toggle-row" style="margin: 8px 16px 0;">
+          <button class="toggle-btn active" onclick="setCountB(3, this)">3</button>
+          <button class="toggle-btn" onclick="setCountB(2, this)">2</button>
+          <button class="toggle-btn" onclick="setCountB(1, this)">1</button>
+        </div>
+        <div class="change-card-body" id="countdown-b-body">
+          <div class="countdown-b-wrapper">
+            <div class="countdown-b-ring">
+              <span class="countdown-b-number" id="cdb-num">3</span>
+            </div>
+            <div class="countdown-b-hint1">깜빡이는 순서 그대로 눌러요</div>
+            <div class="countdown-b-hint2">더 빠르면 콤보가 누적됩니다</div>
+          </div>
+        </div>
+        <button class="replay-btn" onclick="replayCountB()">↺ 재생</button>
+      </div>
+
+      <!-- #53 CLEAR B -->
+      <div class="change-card">
+        <div class="change-card-header">#53 STAGE CLEAR</div>
+        <div class="change-card-body" id="clear-b-body">
+          <div class="clear-b-container">
+            <svg class="clear-b-check" viewBox="0 0 36 36">
+              <path d="M8 18 L15 25 L28 11" class="" style="stroke:#34D399;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:40;stroke-dashoffset:0;"/>
+            </svg>
+            <div class="clear-b-stage">STAGE 07</div>
+            <div class="clear-b-text">CLEAR</div>
+          </div>
+        </div>
+        <button class="replay-btn" onclick="replayClearB()">↺ 재생</button>
+      </div>
+
+      <!-- #54 ComboIndicator B -->
+      <div class="change-card">
+        <div class="change-card-header">#54 ComboIndicator</div>
+        <div class="toggle-row" style="margin: 8px 16px 0;">
+          <button class="toggle-btn active" onclick="setComboB(3, this)">3콤보</button>
+          <button class="toggle-btn" onclick="setComboB(7, this)">7콤보</button>
+          <button class="toggle-btn" onclick="setComboB(12, this)">12콤보</button>
+        </div>
+        <div class="change-card-body" id="combo-b-body" style="padding: 12px 0; align-items: stretch;">
+          <div class="combo-b" id="combo-b-inner">
+            <!-- JS로 렌더 -->
+          </div>
+        </div>
+        <button class="replay-btn" onclick="replayComboB()">↺ 재생</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     VARIANT C
+══════════════════════════════════════════════════════ -->
+<div id="panel-C" class="tab-panel">
+  <div class="variant-section">
+    <div class="variant-label">VARIANT C</div>
+    <div class="variant-title" style="color: var(--vb-text);">숫자 포커스 — 정보 밀도 미니멀</div>
+    <div class="variant-desc">
+      카운트다운은 큰 숫자 + 구분선 + 2줄 힌트 영역 / CLEAR는 도트 ···+ CLEAR 텍스트 / ComboIndicator는 현재/임계값 큰 숫자 + 배율 뱃지
+    </div>
+
+    <div class="change-grid">
+      <!-- #52 카운트다운 C -->
+      <div class="change-card">
+        <div class="change-card-header">#52 카운트다운</div>
+        <div class="toggle-row" style="margin: 8px 16px 0;">
+          <button class="toggle-btn active" onclick="setCountC(3, this)">3</button>
+          <button class="toggle-btn" onclick="setCountC(2, this)">2</button>
+          <button class="toggle-btn" onclick="setCountC(1, this)">1</button>
+        </div>
+        <div class="change-card-body" id="countdown-c-body">
+          <div class="countdown-c-wrapper">
+            <span class="countdown-c-number" id="cdc-num">3</span>
+            <div class="countdown-c-sep"></div>
+            <div class="countdown-c-text-block">
+              <div class="countdown-c-hint1">깜빡이는 순서 그대로 눌러요</div>
+              <div class="countdown-c-hint2">더 빠르면 콤보가 누적됩니다</div>
+            </div>
+          </div>
+        </div>
+        <button class="replay-btn" onclick="replayCountC()">↺ 재생</button>
+      </div>
+
+      <!-- #53 CLEAR C -->
+      <div class="change-card">
+        <div class="change-card-header">#53 STAGE CLEAR</div>
+        <div class="change-card-body" id="clear-c-body">
+          <div class="clear-c-container">
+            <div class="clear-c-dots">
+              <div class="clear-c-dot"></div>
+              <div class="clear-c-dot"></div>
+              <div class="clear-c-dot"></div>
+            </div>
+            <div class="clear-c-stage">STAGE 07</div>
+            <div class="clear-c-text">CLEAR</div>
+          </div>
+        </div>
+        <button class="replay-btn" onclick="replayClearC()">↺ 재생</button>
+      </div>
+
+      <!-- #54 ComboIndicator C -->
+      <div class="change-card">
+        <div class="change-card-header">#54 ComboIndicator</div>
+        <div class="toggle-row" style="margin: 8px 16px 0;">
+          <button class="toggle-btn active" onclick="setComboC(3, this)">3콤보</button>
+          <button class="toggle-btn" onclick="setComboC(7, this)">7콤보</button>
+          <button class="toggle-btn" onclick="setComboC(12, this)">12콤보</button>
+        </div>
+        <div class="change-card-body" id="combo-c-body" style="padding: 12px 4px; align-items: stretch;">
+          <div class="combo-c" id="combo-c-inner">
+            <!-- JS로 렌더 -->
+          </div>
+        </div>
+        <button class="replay-btn" onclick="replayComboC()">↺ 재생</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     DESIGN CRITIC
+══════════════════════════════════════════════════════ -->
+<div id="panel-CRITIC" class="tab-panel">
+  <div class="critic-section">
+    <h2>DESIGN CRITIC — 4축 평가</h2>
+    <table class="critic-table">
+      <thead>
+        <tr>
+          <th>기준</th>
+          <th>Variant A</th>
+          <th>Variant B</th>
+          <th>Variant C</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong style="color:var(--vb-text)">인지 명확성</strong><br><span style="font-size:10px;">힌트 문구 가독성, 카운트 숫자·CLEAR 즉각 인지</span></td>
+          <td><span class="score-cell" style="color:#D4A843">85</span><br>슬라이드업으로 시선 유도 자연스러움. 힌트 두 줄이 숫자 아래 명확히 배치</td>
+          <td><span class="score-cell" style="color:#D4A843">88</span><br>링 + 알약 박스로 힌트가 분리된 영역에 배치. 시각적 위계 최상</td>
+          <td><span class="score-cell" style="color:#34D399">92</span> <span class="pick-badge">PICK</span><br>구분선으로 숫자와 힌트 명확히 분리. 미니멀해서 핵심 정보 즉각 인지</td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--vb-text)">게임 분위기</strong><br><span style="font-size:10px;">긴장감·몰입감, 아케이드 감성</span></td>
+          <td><span class="score-cell" style="color:#34D399">90</span> <span class="pick-badge">PICK</span><br>펄스 애니메이션 + 게이지 바 충전이 긴장감과 성취감 모두 커버</td>
+          <td><span class="score-cell" style="color:#D4A843">87</span><br>체크마크 + 블록 충전이 레트로 게임기 감성. 시각 쾌감 있음</td>
+          <td><span class="score-cell" style="color:#D4A843">82</span><br>미니멀해서 게임 감성보다 앱 감성에 가까움. 긴장감 다소 약함</td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--vb-text)">ComboIndicator 정보 전달</strong><br><span style="font-size:10px;">현재 콤보, 다음 임계값, 배율 모두 즉각 파악</span></td>
+          <td><span class="score-cell" style="color:#D4A843">84</span><br>게이지 + 분수(3/5)로 진행도 명확. 단, 배율 정보가 하단 작은 텍스트로 약함</td>
+          <td><span class="score-cell" style="color:#D4A843">86</span><br>블록 10칸으로 직관적. 배율은 우상단 큰 숫자로 강조. 분수 정보 소박</td>
+          <td><span class="score-cell" style="color:#34D399">91</span> <span class="pick-badge">PICK</span><br>현재/임계값 큰 숫자 표시로 정보 밀도 최적. 배율 뱃지 별도 강조</td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--vb-text)">터치 친화성</strong><br><span style="font-size:10px;">최소 44px, 시각 피드백 반응성</span></td>
+          <td><span class="score-cell" style="color:#34D399">90</span><br>toggle 버튼 충분. 게이지 바 즉각 갱신 시각 피드백 우수</td>
+          <td><span class="score-cell" style="color:#34D399">89</span><br>블록 팝 애니메이션으로 입력 시 즉각 반응 표현 명확</td>
+          <td><span class="score-cell" style="color:#D4A843">85</span><br>정적 구성이라 애니메이션 피드백이 가장 약함. 숫자 틱 애니로 보완 가능</td>
+        </tr>
+        <tr>
+          <td><strong style="color:var(--vb-text)">종합</strong></td>
+          <td><span class="score-cell" style="color:#D4A843">87</span><br>게임 분위기 + 진행감 최강. 콤보 정보 전달 보완 여지 있음</td>
+          <td><span class="score-cell" style="color:#D4A843">88</span><br>레트로 감성 + 시각 피드백 균형. 세 항목 평균적으로 고득점</td>
+          <td><span class="score-cell" style="color:#34D399">90</span> <span class="pick-badge">PICK</span><br>인지 명확성 + 정보 전달 최우수. 게임 감성은 A로 보완 가능</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div style="margin-top: 24px; padding: 16px; background: #13131a; border: 1px solid #2a2a2e; border-radius: 8px;">
+      <div style="font-family: var(--vb-font-score); font-size: 11px; font-weight: 800; letter-spacing: 3px; color: var(--vb-text-dim); margin-bottom: 8px;">CRITIC 결론</div>
+      <p style="font-size: 12px; color: var(--vb-text-mid); line-height: 1.7;">
+        <strong style="color: var(--vb-accent)">Variant C</strong>가 인지 명확성·정보 전달에서 우세하며 종합 최고점. 단, 게임 분위기는 <strong style="color: var(--vb-text)">A</strong>가 가장 강하므로 C의 숫자 포커스 레이아웃을 기반으로 하되 A의 카운트다운 펄스 애니메이션을 채택하는 혼합도 고려 가능.<br><br>
+        <strong style="color: var(--vb-text)">#53 CLEAR 표현</strong>은 세 variant 모두 "FULL COMBO!" 제거 후 단순 "CLEAR" 표기. B의 체크마크 드로우가 완료감 연출 면에서 추가 점수.
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ─── 탭 전환 ─── */
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'))
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'))
+  document.getElementById('panel-' + id).classList.add('active')
+  btn.classList.add('active')
+}
+
+/* ─── 콤보 로직 (gameLogic 동일) ─── */
+function getMultiplier(streak) { return Math.floor(streak / 5) + 1 }
+function getNextThreshold(streak) { return (Math.floor(streak / 5) + 1) * 5 }
+function getFillPct(streak) {
+  const base = Math.floor(streak / 5) * 5
+  return ((streak - base) / 5) * 100
+}
+
+/* ══ VARIANT A ══ */
+let comboAValue = 3
+function renderComboA(streak) {
+  const mult = getMultiplier(streak)
+  const next = getNextThreshold(streak)
+  const fill = getFillPct(streak)
+  const inner = document.getElementById('combo-a-inner')
+  inner.innerHTML = ''
+  inner.style.setProperty('--fill-pct', fill + '%')
+  inner.innerHTML = `
+    <div class="combo-a-top">
+      <span class="combo-a-label">COMBO</span>
+      <span class="combo-a-fraction">${streak}<span> / ${next}</span></span>
+    </div>
+    <div class="combo-a-track">
+      <div class="combo-a-fill" style="width:${fill}%; --fill-pct:${fill}%"></div>
+    </div>
+    <div class="combo-a-mult">NEXT &gt; <b>x${mult + 1}</b> at ${next}</div>
+  `
+}
+function setComboA(val, btn) {
+  comboAValue = val
+  document.querySelectorAll('#panel-A .toggle-row .toggle-btn').forEach(b => b.classList.remove('active'))
+  btn.classList.add('active')
+  renderComboA(val)
+}
+function replayComboA() { renderComboA(comboAValue) }
+function setCountA(n, btn) {
+  document.querySelectorAll('#panel-A .toggle-row .toggle-btn').forEach(b => b.classList.remove('active'))
+  btn.classList.add('active')
+  replayCountAWith(n)
+}
+function replayCountAWith(n) {
+  const body = document.getElementById('countdown-a-body')
+  body.innerHTML = `
+    <div class="countdown-a-container">
+      <span class="countdown-a-number">${n}</span>
+      <div class="countdown-a-hint1">깜빡이는 순서 그대로 눌러요</div>
+      <div class="countdown-a-hint2">더 빠르면 콤보가 누적됩니다</div>
+    </div>
+  `
+}
+function replayCountA() { replayCountAWith(document.getElementById('cda-num') ? parseInt(document.getElementById('cda-num').textContent || '3') : 3) }
+function replayClearA() {
+  const body = document.getElementById('clear-a-body')
+  body.innerHTML = `
+    <div class="clear-a-container">
+      <div class="clear-a-stage">STAGE 07</div>
+      <div class="clear-a-text">CLEAR</div>
+    </div>
+  `
+}
+renderComboA(3)
+
+/* ══ VARIANT B ══ */
+let comboBValue = 3
+function renderComboB(streak) {
+  const mult = getMultiplier(streak)
+  const next = getNextThreshold(streak)
+  const base = Math.floor(streak / 5) * 5
+  const progress = streak - base
+  const inner = document.getElementById('combo-b-inner')
+  let blocks = ''
+  for (let i = 0; i < 5; i++) {
+    const h = 8 + i * 2
+    blocks += `<div class="combo-b-block ${i < progress ? 'filled' : 'empty'}" style="height:${h}px;animation-delay:${i*0.04}s"></div>`
+  }
+  inner.innerHTML = `
+    <div class="combo-b-top">
+      <span class="combo-b-label">COMBO STREAK</span>
+      <span class="combo-b-mult">x${mult}</span>
+    </div>
+    <div class="combo-b-blocks">${blocks}</div>
+    <div class="combo-b-fraction"><b>${streak}</b> / ${next} → x${mult + 1}</div>
+  `
+}
+function setComboB(val, btn) {
+  comboBValue = val
+  document.querySelectorAll('#panel-B .toggle-row .toggle-btn').forEach(b => b.classList.remove('active'))
+  btn.classList.add('active')
+  renderComboB(val)
+}
+function replayComboB() { renderComboB(comboBValue) }
+function setCountB(n, btn) {
+  document.querySelectorAll('#panel-B .toggle-row .toggle-btn').forEach(b => b.classList.remove('active'))
+  btn.classList.add('active')
+  const body = document.getElementById('countdown-b-body')
+  body.innerHTML = `
+    <div class="countdown-b-wrapper">
+      <div class="countdown-b-ring">
+        <span class="countdown-b-number">${n}</span>
+      </div>
+      <div class="countdown-b-hint1">깜빡이는 순서 그대로 눌러요</div>
+      <div class="countdown-b-hint2">더 빠르면 콤보가 누적됩니다</div>
+    </div>
+  `
+}
+function replayCountB() { setCountB(3, document.querySelector('#panel-B .toggle-btn.active') || document.querySelector('#panel-B .toggle-btn')) }
+function replayClearB() {
+  const body = document.getElementById('clear-b-body')
+  body.innerHTML = `
+    <div class="clear-b-container">
+      <svg class="clear-b-check" viewBox="0 0 36 36">
+        <path d="M8 18 L15 25 L28 11" style="stroke:#34D399;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:40;stroke-dashoffset:40;animation:checkDrawB 0.4s 0.1s ease forwards;"/>
+      </svg>
+      <div class="clear-b-stage">STAGE 07</div>
+      <div class="clear-b-text">CLEAR</div>
+    </div>
+  `
+}
+renderComboB(3)
+
+/* ══ VARIANT C ══ */
+let comboCValue = 3
+function renderComboC(streak) {
+  const mult = getMultiplier(streak)
+  const next = getNextThreshold(streak)
+  const inner = document.getElementById('combo-c-inner')
+  inner.innerHTML = `
+    <div class="combo-c-counter">
+      <span class="combo-c-current">${streak}</span>
+      <span class="combo-c-sep2">/</span>
+      <span class="combo-c-next">${next}</span>
+    </div>
+    <div class="combo-c-right">
+      <span class="combo-c-label">COMBO</span>
+      <span class="combo-c-sublabel">다음 배율 <b>x${mult + 1}</b> 까지</span>
+    </div>
+    <span class="combo-c-mult">x${mult}</span>
+  `
+}
+function setComboC(val, btn) {
+  comboCValue = val
+  document.querySelectorAll('#panel-C .toggle-row .toggle-btn').forEach(b => b.classList.remove('active'))
+  btn.classList.add('active')
+  renderComboC(val)
+}
+function replayComboC() { renderComboC(comboCValue) }
+function setCountC(n, btn) {
+  document.querySelectorAll('#panel-C .toggle-row .toggle-btn').forEach(b => b.classList.remove('active'))
+  btn.classList.add('active')
+  const body = document.getElementById('countdown-c-body')
+  body.innerHTML = `
+    <div class="countdown-c-wrapper">
+      <span class="countdown-c-number">${n}</span>
+      <div class="countdown-c-sep"></div>
+      <div class="countdown-c-text-block">
+        <div class="countdown-c-hint1">깜빡이는 순서 그대로 눌러요</div>
+        <div class="countdown-c-hint2">더 빠르면 콤보가 누적됩니다</div>
+      </div>
+    </div>
+  `
+}
+function replayCountC() { setCountC(3, document.querySelector('#panel-C .toggle-btn.active') || document.querySelector('#panel-C .toggle-btn')) }
+function replayClearC() {
+  const body = document.getElementById('clear-c-body')
+  body.innerHTML = `
+    <div class="clear-c-container">
+      <div class="clear-c-dots">
+        <div class="clear-c-dot"></div>
+        <div class="clear-c-dot"></div>
+        <div class="clear-c-dot"></div>
+      </div>
+      <div class="clear-c-stage">STAGE 07</div>
+      <div class="clear-c-text">CLEAR</div>
+    </div>
+  `
+}
+renderComboC(3)
+</script>
+</body>
+</html>

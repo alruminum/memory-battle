@@ -208,6 +208,8 @@ _(impl 없음 — 문서 구조 작업만)_ · Issues: [#19](https://github.com/
 | 03 combo-indicator-v2 | [impl/03-combo-indicator-v2.md](docs/milestones/v03/epics/epic-11-ui-improvements/impl/03-combo-indicator-v2.md) | [#54](https://github.com/alruminum/memory-battle/issues/54) |
 | 04 hud-stg-countdown-fix | [impl/04-hud-stg-countdown-fix.md](docs/milestones/v03/epics/epic-11-ui-improvements/impl/04-hud-stg-countdown-fix.md) | [#66](https://github.com/alruminum/memory-battle/issues/66) |
 | 05 visibility-api-fix | [impl/05-visibility-api-fix.md](docs/milestones/v03/epics/epic-10-gameover-overlay/impl/05-visibility-api-fix.md) | [#51](https://github.com/alruminum/memory-battle/issues/51) |
+| 04 countdown-blink-fix | [impl/04-countdown-blink-fix.md](docs/milestones/v03/epics/epic-11-ui-improvements/impl/04-countdown-blink-fix.md) | [#61](https://github.com/alruminum/memory-battle/issues/61) |
+| 06 hud-stg-countdown-fix | [impl/06-hud-stg-countdown-fix.md](docs/milestones/v03/epics/epic-11-ui-improvements/impl/06-hud-stg-countdown-fix.md) | [#66](https://github.com/alruminum/memory-battle/issues/66) |
 
 ---
 
@@ -316,21 +318,21 @@ Closes/Related to #NNN
 ## 에이전트 호출 규칙 (메인 Claude 준수)
 
 - **서브에이전트 base 우회 금지**: 에이전트 호출 시 해당 에이전트 base의 워크플로우를 우회하는 방식으로 작업 지시 금지.
-- **architect 호출 시 반드시 Mode 명시**: Mode A(시스템 설계) / Mode B(모듈 계획) / Mode C(SPEC_GAP) / Mode D(태스크 분해) / Mode E(기술 에픽) 중 하나로 호출. "특정 파일 직접 수정" 형태의 지시 금지.
-  - **프롬프트 첫 줄 형식 필수**: `Mode X — [용도 한 줄 설명]` 형태로 작성. 예: `Mode B — 모듈별 구현 계획 파일 작성`. Mode 문자만 단독 표기 금지.
-  - PRD/스펙 변경으로 설계 문서(game-logic.md 등) 업데이트가 필요하면 → 변경된 PRD 내용과 함께 Mode B로 호출. architect가 base 워크플로우(TRD 현행화 포함)대로 처리한다.
+- **architect 호출 시 반드시 Mode 명시**: System Design(Mode A) / Module Plan(Mode B) / SPEC_GAP(Mode C) / Task Decompose(Mode D) / Technical Epic(Mode E) 중 하나로 호출. "특정 파일 직접 수정" 형태의 지시 금지.
+  - **프롬프트 첫 줄 형식 필수**: `[Mode명] — [용도 한 줄 설명]` 형태로 작성. 예: `Module Plan(Mode B) — 모듈별 구현 계획 파일 작성`. Mode 단독 표기 금지.
+  - PRD/스펙 변경으로 설계 문서(game-logic.md 등) 업데이트가 필요하면 → 변경된 PRD 내용과 함께 Module Plan(Mode B)으로 호출. architect가 공통 지침(TRD 현행화 포함)대로 처리한다.
 
 ### architect Mode 상세
 
 | Mode | 용도 | 산출물 |
 |---|---|---|
-| **Mode A** | 시스템 전체 구조 설계 | `docs/architecture.md` 등 설계 문서 |
-| **Mode B** | 모듈별 구현 계획 파일 작성 | `docs/impl/NN-*.md` ← **기본값** |
-| **Mode C** | SPEC_GAP 피드백 처리 | impl 파일 수정 |
-| **Mode D** | 큰 에픽 → stories/태스크 분해 | `stories.md` 업데이트 |
-| **Mode E** | 기술 에픽 설계 (성능·보안·리팩) | `docs/` 설계 문서 |
+| **System Design(Mode A)** | 시스템 전체 구조 설계 | `docs/architecture.md` 등 설계 문서 |
+| **Module Plan(Mode B)** | 모듈별 구현 계획 파일 작성 | `docs/impl/NN-*.md` ← **기본값** |
+| **SPEC_GAP(Mode C)** | SPEC_GAP 피드백 처리 | impl 파일 수정 |
+| **Task Decompose(Mode D)** | Epic stories → 기술 태스크 분해 + impl batch 작성 | stories 업데이트 + impl 파일들 |
+| **Technical Epic(Mode E)** | 기술 에픽 설계 (성능·보안·리팩) | `docs/` 설계 문서 |
 
-> Mode를 명시하지 않으면 architect가 거부함 (PreToolUse 훅). **구현 전 계획이면 Mode B가 기본.**
+> Mode를 명시하지 않으면 architect가 거부함 (PreToolUse 훅). **구현 전 계획이면 Module Plan(Mode B)가 기본.**
 > **버그픽스 시**: 프롬프트 첫 줄에 `버그픽스 —` 명시 필수 (architect가 Epic/Story 이슈 생성 스킵)
 
 ### designer 루프 트리거 기준

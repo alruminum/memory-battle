@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Issue #45 — 게임오버 흔들림 + 이유 표시 시안</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ───────────────────────────────────────────────────────────────
+       실제 CSS 변수 — src/index.css 기준 (2026-04-03 기준)
+       하드코딩 금지: 이 값들은 소스에서 직접 복사한 것
+    ─────────────────────────────────────────────────────────────── */
+    :root {
+      --vb-bg: #0e0e10;
+      --vb-surface: #18181b;
+      --vb-surface-2: #1f1f23;
+      --vb-border: #2a2a2e;
+      --vb-accent: #D4A843;
+      --vb-accent-dim: #8B7332;
+      --vb-text: #e8e8ea;
+      --vb-text-mid: #8b8b90;
+      --vb-text-dim: #505055;
+      --vb-danger: #ff3b3b;
+      --vb-font-score: 'Barlow Condensed', sans-serif;
+      --vb-font-body: 'Space Grotesk', sans-serif;
+      --vb-combo-ok: #34D399;
+      --vb-combo-over: #F87171;
+      --vb-orange-base: #FF6200;
+      --vb-orange-light: #FF8C35;
+      --vb-orange-dark: #A83F00;
+      --vb-blue-base: #0A7AFF;
+      --vb-blue-light: #3D9AFF;
+      --vb-blue-dark: #0055BB;
+      --vb-green-base: #18B84A;
+      --vb-green-light: #38D46A;
+      --vb-green-dark: #0E7A30;
+      --vb-yellow-base: #F5C000;
+      --vb-yellow-light: #FFD740;
+      --vb-yellow-dark: #A07C00;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #090909;
+      color: var(--vb-text);
+      font-family: var(--vb-font-body);
+      min-height: 100vh;
+      padding: 32px 24px 64px;
+    }
+
+    /* ─────────── 페이지 헤더 ─────────── */
+    .page-header {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+    .issue-badge {
+      display: inline-block;
+      background: var(--vb-surface);
+      border: 1px solid var(--vb-border);
+      border-radius: 6px;
+      padding: 4px 14px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--vb-accent);
+      font-family: var(--vb-font-score);
+      letter-spacing: 2px;
+      margin-bottom: 14px;
+    }
+    .page-title {
+      font-family: var(--vb-font-score);
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing: 3px;
+      color: var(--vb-text);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .page-title span { color: var(--vb-accent); }
+    .page-sub {
+      font-size: 13px;
+      color: var(--vb-text-mid);
+    }
+
+    /* ─────────── 전역 컨트롤 ─────────── */
+    .global-controls {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 36px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .ctrl-sep {
+      width: 1px;
+      height: 24px;
+      background: var(--vb-border);
+      margin: 0 6px;
+    }
+    .ctrl-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--vb-text-dim);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .ctrl-btn {
+      padding: 8px 18px;
+      border-radius: 8px;
+      border: 1px solid var(--vb-border);
+      background: var(--vb-surface);
+      color: var(--vb-text);
+      font-family: var(--vb-font-body);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+    .ctrl-btn:hover { background: var(--vb-surface-2); }
+    .ctrl-btn.active {
+      background: rgba(212,168,67,0.15);
+      border-color: var(--vb-accent);
+      color: var(--vb-accent);
+    }
+
+    /* ─────────── 3열 그리드 ─────────── */
+    .variants-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* ─────────── 카드 ─────────── */
+    .variant-card {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+    .variant-label {
+      font-family: var(--vb-font-score);
+      font-size: 16px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      color: var(--vb-text);
+      text-transform: uppercase;
+    }
+    .variant-label em { color: var(--vb-accent); font-style: normal; }
+    .variant-concept {
+      font-size: 11px;
+      color: var(--vb-text-mid);
+      font-weight: 600;
+      margin-top: 3px;
+    }
+
+    /* ─────────── phone-frame ─────────── */
+    .phone-frame {
+      width: 100%;
+      aspect-ratio: 375 / 680;
+      background: var(--vb-bg);
+      border-radius: 20px;
+      border: 2px solid var(--vb-border);
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* ─────────── 게임 화면 목업 공통 ─────────── */
+    .mock-screen {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      background: var(--vb-bg);
+      position: relative;
+    }
+    .mock-titlebar {
+      padding: 9px 12px 7px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 1px solid var(--vb-border);
+      flex-shrink: 0;
+    }
+    .mock-title {
+      font-family: var(--vb-font-score);
+      font-size: 13px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--vb-text);
+    }
+    .mock-title em { color: var(--vb-accent); font-style: normal; }
+
+    .mock-hud {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      background: var(--vb-surface);
+      border-bottom: 1px solid var(--vb-border);
+      flex-shrink: 0;
+    }
+    .mock-hud-cell {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 6px 4px;
+      gap: 2px;
+    }
+    .mock-hud-cell + .mock-hud-cell { border-left: 1px solid var(--vb-border); }
+    .hud-label {
+      font-size: 6px;
+      font-weight: 600;
+      color: var(--vb-text-dim);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+    .hud-value {
+      font-family: var(--vb-font-score);
+      font-size: 15px;
+      font-weight: 900;
+      color: var(--vb-text);
+      line-height: 1;
+    }
+    .hud-value.accent { color: var(--vb-accent); }
+
+    .mock-stage-area {
+      flex: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .mock-stage-num {
+      font-family: var(--vb-font-score);
+      font-size: 40px;
+      font-weight: 900;
+      color: var(--vb-text);
+      line-height: 1;
+    }
+    .mock-combo-area {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 28px;
+      flex-shrink: 0;
+    }
+    .mock-combo-badge {
+      background: var(--vb-accent);
+      color: #000;
+      font-family: var(--vb-font-score);
+      font-size: 10px;
+      font-weight: 900;
+      padding: 3px 9px;
+      border-radius: 4px;
+      letter-spacing: 1px;
+    }
+    .mock-button-pad {
+      flex: 3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px;
+    }
+    .button-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      width: 100%;
+      max-width: 140px;
+    }
+    .btn-circle {
+      aspect-ratio: 1;
+      border-radius: 10px;
+    }
+    .btn-orange { background: radial-gradient(circle at 35% 35%, #FF8C35, #FF6200, #A83F00); }
+    .btn-blue   { background: radial-gradient(circle at 35% 35%, #3D9AFF, #0A7AFF, #0055BB); }
+    .btn-green  { background: radial-gradient(circle at 35% 35%, #38D46A, #18B84A, #0E7A30); }
+    .btn-yellow { background: radial-gradient(circle at 35% 35%, #FFD740, #F5C000, #A07C00); }
+
+    .mock-timer-bar {
+      flex-shrink: 0;
+      height: 5px;
+      background: var(--vb-border);
+      margin: 0 10px 4px;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .mock-timer-fill {
+      height: 100%;
+      width: 40%;
+      background: var(--vb-combo-ok);
+      border-radius: 3px;
+    }
+    .mock-ad {
+      flex-shrink: 0;
+      height: 26px;
+      background: var(--vb-surface);
+      border-top: 1px solid var(--vb-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .mock-ad span {
+      font-size: 7px;
+      color: var(--vb-text-dim);
+      letter-spacing: 1px;
+    }
+
+    /* ─────────── 재생 버튼 ─────────── */
+    .replay-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: 1px solid var(--vb-border);
+      background: var(--vb-surface);
+      color: var(--vb-text-mid);
+      font-family: var(--vb-font-body);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      width: 100%;
+      letter-spacing: 0.5px;
+    }
+    .replay-btn:hover { background: var(--vb-surface-2); color: var(--vb-text); }
+
+    /* ─────────── 카드 설명 ─────────── */
+    .card-desc {
+      background: var(--vb-surface);
+      border: 1px solid var(--vb-border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+    .desc-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+    .desc-key {
+      font-size: 9px;
+      color: var(--vb-text-dim);
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      white-space: nowrap;
+      flex-shrink: 0;
+      padding-top: 1px;
+    }
+    .desc-val {
+      font-size: 11px;
+      color: var(--vb-text);
+      font-weight: 500;
+      text-align: right;
+      line-height: 1.4;
+    }
+    .desc-divider {
+      height: 1px;
+      background: var(--vb-border);
+    }
+
+    /* ─────────── design-critic 판정 ─────────── */
+    .design-critic {
+      max-width: 1200px;
+      margin: 52px auto 0;
+      background: var(--vb-surface);
+      border: 1px solid var(--vb-border);
+      border-radius: 16px;
+      padding: 28px 32px;
+    }
+    .critic-title {
+      font-family: var(--vb-font-score);
+      font-size: 17px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      color: var(--vb-text);
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .critic-title em { color: var(--vb-accent); font-style: normal; }
+    .critic-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .critic-table th {
+      padding: 8px 12px;
+      text-align: left;
+      font-size: 9px;
+      font-weight: 600;
+      color: var(--vb-text-dim);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--vb-border);
+    }
+    .critic-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--vb-border);
+      font-size: 12px;
+      color: var(--vb-text);
+      vertical-align: middle;
+    }
+    .critic-table tr:last-child td { border-bottom: none; }
+    .score-pill {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-family: var(--vb-font-score);
+      font-size: 12px;
+      font-weight: 800;
+      background: var(--vb-surface-2);
+      color: var(--vb-text-mid);
+    }
+    .score-high {
+      background: rgba(212,168,67,0.18);
+      color: var(--vb-accent);
+    }
+    .score-mid {
+      background: rgba(52,211,153,0.13);
+      color: var(--vb-combo-ok);
+    }
+    .pick-badge {
+      display: inline-block;
+      padding: 2px 9px;
+      border-radius: 4px;
+      background: var(--vb-accent);
+      color: #000;
+      font-family: var(--vb-font-score);
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: 1px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+    .critic-note {
+      margin-top: 16px;
+      font-size: 12px;
+      color: var(--vb-text-mid);
+      line-height: 1.7;
+      border-top: 1px solid var(--vb-border);
+      padding-top: 16px;
+    }
+    .critic-note strong { color: var(--vb-text); }
+    .critic-note code { color: var(--vb-accent); font-family: monospace; }
+
+    /* ════════════════════════════════════════════════════════════
+       VARIANT A — 심플 다크 오버레이
+       shake: ±8px, 0.55s 감쇠 / overlay: rgba(0,0,0,0.82) 페이드인
+    ════════════════════════════════════════════════════════════ */
+    @keyframes shake-a {
+      0%   { transform: translateX(0); }
+      10%  { transform: translateX(-8px); }
+      20%  { transform: translateX(8px); }
+      30%  { transform: translateX(-8px); }
+      40%  { transform: translateX(8px); }
+      50%  { transform: translateX(-5px); }
+      60%  { transform: translateX(5px); }
+      70%  { transform: translateX(-3px); }
+      80%  { transform: translateX(3px); }
+      90%  { transform: translateX(-1px); }
+      100% { transform: translateX(0); }
+    }
+    @keyframes overlay-a-in {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes text-a-pop {
+      0%   { transform: scale(0.88); opacity: 0; }
+      55%  { transform: scale(1.04); opacity: 1; }
+      100% { transform: scale(1);    opacity: 1; }
+    }
+
+    #screen-a.is-shaking {
+      animation: shake-a 0.55s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    }
+    #overlay-a {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.82);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      border-radius: inherit;
+    }
+    #overlay-a.is-visible {
+      display: flex;
+      animation: overlay-a-in 0.22s ease both;
+    }
+    .overlay-a-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: 1.5px solid var(--vb-text-mid);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: var(--vb-text-mid);
+    }
+    .overlay-a-title {
+      font-family: var(--vb-font-score);
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: 3px;
+      color: var(--vb-text);
+      text-transform: uppercase;
+    }
+    .overlay-a-reason {
+      font-family: var(--vb-font-body);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--vb-text-mid);
+      letter-spacing: 0.5px;
+    }
+    .overlay-a-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    #overlay-a.is-visible .overlay-a-content {
+      animation: text-a-pop 0.28s ease 0.18s both;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       VARIANT B — 위험 신호 레드 틴트 + 테두리 플래시
+       shake: ±16px + 회전, 0.7s / overlay: rgba(255,59,59,0.22)
+    ════════════════════════════════════════════════════════════ */
+    @keyframes shake-b {
+      0%   { transform: translateX(0) rotate(0deg); }
+      8%   { transform: translateX(-16px) rotate(-1.2deg); }
+      16%  { transform: translateX(16px) rotate(1.2deg); }
+      24%  { transform: translateX(-13px) rotate(-0.8deg); }
+      32%  { transform: translateX(13px) rotate(0.8deg); }
+      40%  { transform: translateX(-9px) rotate(-0.4deg); }
+      48%  { transform: translateX(9px) rotate(0.4deg); }
+      56%  { transform: translateX(-5px); }
+      64%  { transform: translateX(5px); }
+      76%  { transform: translateX(-2px); }
+      88%  { transform: translateX(2px); }
+      100% { transform: translateX(0) rotate(0deg); }
+    }
+    @keyframes tint-b-in {
+      0%   { opacity: 0; }
+      12%  { opacity: 1; }
+      100% { opacity: 1; }
+    }
+    @keyframes border-b-flash {
+      0%, 100% { box-shadow: inset 0 0 0 2px transparent; }
+      20%, 50%, 80% { box-shadow: inset 0 0 0 2px var(--vb-danger); }
+      35%, 65%, 95% { box-shadow: inset 0 0 0 2px rgba(255,59,59,0.3); }
+    }
+    @keyframes reason-b-in {
+      from { transform: translateY(14px) scale(0.9); opacity: 0; }
+      to   { transform: translateY(0) scale(1);     opacity: 1; }
+    }
+
+    #frame-b.is-shaking {
+      animation: shake-b 0.7s cubic-bezier(0.36, 0.07, 0.19, 0.97) both,
+                 border-b-flash 0.7s ease both;
+    }
+    #overlay-b {
+      position: absolute;
+      inset: 0;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      border-radius: inherit;
+      overflow: hidden;
+    }
+    #overlay-b.is-visible {
+      display: flex;
+    }
+    .overlay-b-tint {
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 59, 59, 0.22);
+      border-radius: inherit;
+    }
+    #overlay-b.is-visible .overlay-b-tint {
+      animation: tint-b-in 0.3s ease 0.08s both;
+    }
+    .overlay-b-content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+    .overlay-b-reason {
+      font-family: var(--vb-font-score);
+      font-size: 44px;
+      font-weight: 900;
+      color: #fff;
+      letter-spacing: 1px;
+      line-height: 1;
+      text-shadow: 0 0 28px rgba(255,59,59,0.95), 0 2px 8px rgba(0,0,0,0.7);
+    }
+    .overlay-b-sub {
+      font-family: var(--vb-font-score);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      color: rgba(255,255,255,0.55);
+      text-transform: uppercase;
+    }
+    #overlay-b.is-visible .overlay-b-reason {
+      animation: reason-b-in 0.22s ease 0.22s both;
+    }
+    #overlay-b.is-visible .overlay-b-sub {
+      animation: reason-b-in 0.22s ease 0.32s both;
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       VARIANT C — backdrop blur + --vb-surface 패널 슬라이드업
+       shake: ±6px, 0.5s 부드러운 감쇠 / spring 패널 등장
+    ════════════════════════════════════════════════════════════ */
+    @keyframes shake-c {
+      0%   { transform: translateX(0); }
+      12%  { transform: translateX(-6px); }
+      25%  { transform: translateX(6px); }
+      37%  { transform: translateX(-4px); }
+      50%  { transform: translateX(4px); }
+      62%  { transform: translateX(-2px); }
+      75%  { transform: translateX(2px); }
+      87%  { transform: translateX(-1px); }
+      100% { transform: translateX(0); }
+    }
+    @keyframes backdrop-c-in {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes panel-c-up {
+      from { transform: translateY(100%); opacity: 0.6; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+    @keyframes icon-c-spin {
+      from { transform: rotate(-80deg) scale(0.6); opacity: 0; }
+      to   { transform: rotate(0deg) scale(1);    opacity: 1; }
+    }
+
+    #screen-c.is-shaking {
+      animation: shake-c 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    }
+    #overlay-c {
+      position: absolute;
+      inset: 0;
+      display: none;
+      align-items: flex-end;
+      justify-content: center;
+      border-radius: inherit;
+      overflow: hidden;
+    }
+    #overlay-c.is-visible {
+      display: flex;
+    }
+    .overlay-c-backdrop {
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+    }
+    #overlay-c.is-visible .overlay-c-backdrop {
+      backdrop-filter: blur(6px);
+      background: rgba(14, 14, 16, 0.52);
+      animation: backdrop-c-in 0.28s ease 0.12s both;
+    }
+    .overlay-c-panel {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      background: var(--vb-surface);
+      border-top: 1px solid var(--vb-border);
+      border-radius: 14px 14px 0 0;
+      padding: 14px 16px 22px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      transform: translateY(100%);
+    }
+    #overlay-c.is-visible .overlay-c-panel {
+      animation: panel-c-up 0.38s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both;
+    }
+    .panel-c-handle {
+      width: 28px;
+      height: 3px;
+      border-radius: 2px;
+      background: var(--vb-border);
+      margin-bottom: 4px;
+    }
+    .panel-c-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255, 59, 59, 0.1);
+      border: 1.5px solid rgba(255, 59, 59, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: var(--vb-danger);
+    }
+    #overlay-c.is-visible .panel-c-icon {
+      animation: icon-c-spin 0.3s ease 0.52s both;
+    }
+    .panel-c-title {
+      font-family: var(--vb-font-score);
+      font-size: 16px;
+      font-weight: 900;
+      letter-spacing: 2px;
+      color: var(--vb-text);
+      text-transform: uppercase;
+    }
+    .panel-c-reason {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--vb-accent);
+      font-family: var(--vb-font-body);
+    }
+    .panel-c-desc {
+      font-size: 10px;
+      color: var(--vb-text-mid);
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    /* ─────────── 반응형 ─────────── */
+    @media (max-width: 900px) {
+      .variants-grid { grid-template-columns: 1fr; max-width: 420px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ─────────── 헤더 ─────────── -->
+  <div class="page-header">
+    <div class="issue-badge">ISSUE #45</div>
+    <div class="page-title"><em>M</em>emory Battle — 게임오버 전환 시안</div>
+    <div class="page-sub">흔들림(shake) 애니메이션 + 이유 텍스트 오버레이 · 3가지 미적 방향</div>
+  </div>
+
+  <!-- ─────────── 전역 컨트롤 ─────────── -->
+  <div class="global-controls">
+    <span class="ctrl-label">이유</span>
+    <button class="ctrl-btn active" id="btn-timeover" onclick="setReason('timeover', this)">타임오버</button>
+    <button class="ctrl-btn" id="btn-wrong" onclick="setReason('wrong', this)">잘못된 입력</button>
+    <div class="ctrl-sep"></div>
+    <button class="ctrl-btn" onclick="playAll()">↺ 전체 재생</button>
+  </div>
+
+  <!-- ─────────── 3열 그리드 ─────────── -->
+  <div class="variants-grid">
+
+    <!-- ═══════════════ VARIANT A ═══════════════ -->
+    <div class="variant-card">
+      <div class="card-header">
+        <div>
+          <div class="variant-label">Variant <em>A</em></div>
+          <div class="variant-concept">심플 · 다크 오버레이 + 텍스트</div>
+        </div>
+      </div>
+
+      <div class="phone-frame">
+        <div class="mock-screen" id="screen-a">
+          <div class="mock-titlebar">
+            <div class="mock-title"><em>M</em>EMORY BATTLE</div>
+          </div>
+          <div class="mock-hud">
+            <div class="mock-hud-cell">
+              <span class="hud-label">SCORE</span>
+              <span class="hud-value">1,240</span>
+            </div>
+            <div class="mock-hud-cell">
+              <span class="hud-label">STG</span>
+              <span class="hud-value">07</span>
+            </div>
+            <div class="mock-hud-cell">
+              <span class="hud-label">DAILY</span>
+              <span class="hud-value accent">#3 ›</span>
+            </div>
+          </div>
+          <div class="mock-stage-area">
+            <div class="mock-stage-num">07</div>
+          </div>
+          <div class="mock-combo-area">
+            <div class="mock-combo-badge">×3 COMBO</div>
+          </div>
+          <div class="mock-button-pad">
+            <div class="button-grid">
+              <div class="btn-circle btn-orange"></div>
+              <div class="btn-circle btn-blue"></div>
+              <div class="btn-circle btn-green"></div>
+              <div class="btn-circle btn-yellow"></div>
+            </div>
+          </div>
+          <div class="mock-timer-bar"><div class="mock-timer-fill"></div></div>
+          <div class="mock-ad"><span>AD BANNER</span></div>
+
+          <!-- Overlay A -->
+          <div id="overlay-a">
+            <div class="overlay-a-content">
+              <div class="overlay-a-icon">✕</div>
+              <div class="overlay-a-title">GAME OVER</div>
+              <div class="overlay-a-reason" id="reason-a">타임오버</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="replay-btn" onclick="playA()">↺ 애니메이션 재생</button>
+
+      <div class="card-desc">
+        <div class="desc-row">
+          <span class="desc-key">오버레이</span>
+          <span class="desc-val">rgba(0,0,0,0.82) 풀스크린</span>
+        </div>
+        <div class="desc-divider"></div>
+        <div class="desc-row">
+          <span class="desc-key">Shake</span>
+          <span class="desc-val">±8px · 0.55s · X축 감쇠</span>
+        </div>
+        <div class="desc-divider"></div>
+        <div class="desc-row">
+          <span class="desc-key">이유</span>
+          <span class="desc-val">✕ 아이콘 + GAME OVER + 이유 텍스트</span>
+        </div>
+        <div class="desc-divider"></div>
+        <div class="desc-row">
+          <span class="desc-key">전환</span>
+          <span class="desc-val">0.2s 딜레이 페이드인 · 1s 후 결과 화면</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ VARIANT B ═══════════════ -->
+    <div class="variant-card">
+      <div class="card-header">
+        <div>
+          <div class="variant-label">Variant <em>B</em></div>
+          <div class="variant-concept">위험 신호 · 레드 틴트 + 대형 텍스트</div>
+        </div>
+      </div>
+
+      <div class="phone-frame" id="frame-b">
+        <div class="mock-screen" id="screen-b">
+          <div class="mock-titlebar">
+            <div class="mock-title"><em>M</em>EMORY BATTLE</div>
+          </div>
+          <div class="mock-hud">
+            <div class="mock-hud-cell">
+              <span class="hud-label">SCORE</span>
+              <span class="hud-value">1,240</span>
+            </div>
+            <div class="mock-hud-cell">
+              <span class="hud-label">STG</span>
+              <span class="hud-value">07</span>
+            </div>
+            <div class="mock-hud-cell">
+              <span class="hud-label">DAILY</span>
+              <span class="hud-value accent">#3 ›</span>
+            </div>
+          </div>
+          <div class="mock-stage-area">
+            <div class="mock-stage-num">07</div>
+          </div>
+          <div class="mock-combo-area">
+            <div class="mock-combo-badge">×3 COMBO</div>
+          </div>
+          <div class="mock-button-pad">
+            <div class="button-grid">
+              <div class="btn-circle btn-orange"></div>
+              <div class="btn-circle btn-blue"></div>
+              <div class="btn-circle btn-green"></div>
+              <div class="btn-circle btn-yellow"></div>
+            </div>
+          </div>
+          <div class="mock-timer-bar"><div class="mock-timer-fill"></div></div>
+          <div class="mock-ad"><span>AD BANNER</span></div>
+
+          <!-- Overlay B -->
+          <div id="overlay-b">
+            <div class="overlay-b-tint"></div>
+            <div class="overlay-b-content">
+              <div class="overlay-b-reason" id="reason-b">타임오버</div>
+              <div class="overlay-b-sub" id="reason-b-sub">TIME OVER</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="replay-btn" onclick="playB()">↺ 애니메이션 재생</button>
+
+      <div class="card-desc">
+        <div class="desc-row">
+          <span class="desc-key">오버레이</span>
+          <span class="desc-val">--vb-danger rgba(255,59,59,0.22) 틴트</span>
+        </div>
+        <div class="desc-divider"></div>
+        <div class="desc-row">
+          <span class="desc-key">Shake</span>
+          <span class="desc-val">±16px + 회전 · 0.7s · 테두리 flash 동반</span>
+        </div>
+        <div class="desc-divider"></div>
+        <div class="desc-row">
+          <span class="desc-key">이유</span>
+          <span class="desc-val">44px 대형 텍스트 · 레드 글로우 그림자</span>
+        </div>
+        <div class="desc-divider"></div>
+        <div class="desc-row">
+          <span class="desc-key">전환</span>
+          <span class="desc-val">0.08s 딜레이 틴트 · 1s 후 결과 화면</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ VARIANT C ═══════════════ -->
+    <div class="variant-card">
+      <div class="card-header">
+        <div>
+          <div class="variant-label">Variant <em>C</em></div>
+          <div class="variant-concept">테마 통합 · backdrop blur + 패널 슬라이드업</div>
+        </div>
+      </div>
+
+      <div class="phone-frame">
+        <div class="mock-screen" id="screen-c">
+          <div class="mock-titlebar">
+            <div class="mock-title"><em>M</em>EMORY BATTLE</div>
+          </div>
+          <div class="mock-hud">
+            <div class="mock-hud-cell">
+              <span class="hud-label">SCORE</span>
+              <span class="hud-value">1,240</span>
+            </div>
+            <div class="mock-hud-cell">
+              <span class="hud-label">STG</span>
+              <span class="hud-value">07</span>
+            </div>
+            <div class="mock-hud-cell">
+              <span class="hud-label">DAILY</span>
+              <span class="hud-value accent">#3 ›</span>
+            </div>
+          </div>
+          <div class="mock-stage-area">
+            <div class="mock-stage-num">07</div>
+          </div>
+          <div class="mock-combo-area">
+            <div class="mock-combo-badge">×3 COMBO</div>
+          </div>
+          <div class="mock-button-pad">
+            <div class="button-grid">
+              <div class="btn-circle btn-orange"></div>
+              <div class="btn-circle btn-blue"></div>
+              <div class="btn-circle btn-green"></div>
+              <div class="btn-circle btn-yellow"></div>
+            </div>
+          </div>
+          <div class="mock-timer-bar"><div class="mock-timer-fill"></div></div>
+          <div class="mock-ad"><span>AD BANNER</span></div>
+
+          <!-- Overlay C -->
+          <div id="overlay-c">
+            <div class="overlay-c-backdrop"></div>
+            <div class="overlay-c-panel">
+              <div class="panel-c-handle"></div>
+              <div class="panel-c-icon">⚠</div>
+              <div class="panel-c-title">GAME OVER</div>
+              <div class="panel-c-reason" id="reason-c">타임오버</div>
+              <div class="panel-c-desc" id="reason-c-desc">제한시간 내에 입력하지 못했어요.<br/>다시 도전해보세요!</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="replay-btn" onclick="playC()">↺ 애니메이션 재생</button>
+
+      <div class="card-desc">
+        <div class="desc-row">
+          <span class="desc-key">오버레이</span>
+          <span class="desc-val">backdrop-blur(6px) + --vb-surface 패널</span>
+        </div>
+        <div class="desc-divider"></div>
+        <div class="desc-row">
+          <span class="desc-key">Shake</span>
+          <span class="desc-val">±6px · 0.5s · 부드러운 X축 감쇠</span>
+        </div>
+        <div class="desc-divider"></div>
+        <div class="desc-row">
+          <span class="desc-key">이유</span>
+          <span class="desc-val">아이콘 + 이유 + 설명 텍스트 계층 구조</span>
+        </div>
+        <div class="desc-divider"></div>
+        <div class="desc-row">
+          <span class="desc-key">전환</span>
+          <span class="desc-val">0.12s 딜레이 blur · spring 슬라이드업 · 1s 후 결과</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ─────────── design-critic 판정 ─────────── -->
+  <div class="design-critic">
+    <div class="critic-title">Design <em>Critic</em> 판정</div>
+    <table class="critic-table">
+      <thead>
+        <tr>
+          <th>평가 축</th>
+          <th>Variant A</th>
+          <th>Variant B</th>
+          <th>Variant C</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>레이아웃 구조</td>
+          <td><span class="score-pill">중앙 오버레이</span></td>
+          <td><span class="score-pill">풀스크린 틴트</span></td>
+          <td><span class="score-pill score-high">바텀 패널</span></td>
+        </tr>
+        <tr>
+          <td>색상 팔레트</td>
+          <td><span class="score-pill">무채색 검정</span></td>
+          <td><span class="score-pill">--vb-danger 레드</span></td>
+          <td><span class="score-pill score-high">--vb-surface 테마</span></td>
+        </tr>
+        <tr>
+          <td>타이포 성격</td>
+          <td><span class="score-pill score-mid">정적 미니멀</span></td>
+          <td><span class="score-pill score-high">임팩트 대형</span></td>
+          <td><span class="score-pill score-mid">정보형 레이어드</span></td>
+        </tr>
+        <tr>
+          <td>인터랙션 강조</td>
+          <td><span class="score-pill score-mid">페이드 등장</span></td>
+          <td><span class="score-pill">강렬한 충격감</span></td>
+          <td><span class="score-pill score-high">Spring 슬라이드업</span></td>
+        </tr>
+        <tr>
+          <td>게임 브랜드 일관성</td>
+          <td><span class="score-pill">4 / 5</span></td>
+          <td><span class="score-pill">3 / 5</span></td>
+          <td><span class="score-pill score-high">5 / 5 <span class="pick-badge">PICK</span></span></td>
+        </tr>
+        <tr>
+          <td>이유 전달 가독성</td>
+          <td><span class="score-pill score-mid">4 / 5</span></td>
+          <td><span class="score-pill score-high">5 / 5</span></td>
+          <td><span class="score-pill score-high">5 / 5</span></td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="critic-note">
+      <strong>Critic 의견:</strong>
+      A는 범용적이나 개성이 약하고 기존 게임 UI와의 연결이 느슨함.
+      B는 충격감이 즉각적으로 전달되는 장점이 있으나 <code>--vb-danger(#ff3b3b)</code> 계열 오버레이가 게임 UI의 골드 어센트 테마와 충돌 가능.
+      C는 <code>--vb-surface(#18181b)</code> 패널이 기존 HUD/버튼 스타일과 통일성을 유지하고,
+      이유·설명을 계층적으로 담을 수 있어 가독성·브랜드 일관성 모두 우수.
+      engineer 구현 시 <code>backdrop-filter</code> WebView 지원 여부 확인 필요.
+      미지원 환경에서는 Variant A 방식으로 graceful fallback 고려.
+    </div>
+  </div>
+
+  <!-- ─────────── JavaScript ─────────── -->
+  <script>
+    var currentReason = 'timeover'
+
+    var REASONS = {
+      timeover: {
+        a: '타임오버',
+        b: '타임오버',
+        bSub: 'TIME OVER',
+        c: '타임오버',
+        cDesc: '제한시간 내에 입력하지 못했어요.\n다시 도전해보세요!',
+      },
+      wrong: {
+        a: '잘못된 입력',
+        b: '잘못된 입력',
+        bSub: 'WRONG INPUT',
+        c: '잘못된 입력',
+        cDesc: '틀린 버튼을 눌렀어요.\n다시 도전해보세요!',
+      },
+    }
+
+    function setReason(reason, btn) {
+      currentReason = reason
+      document.querySelectorAll('.ctrl-btn').forEach(function(b) { b.classList.remove('active') })
+      btn.classList.add('active')
+      applyReasonText()
+    }
+
+    function applyReasonText() {
+      var r = REASONS[currentReason]
+      document.getElementById('reason-a').textContent = r.a
+      document.getElementById('reason-b').textContent = r.b
+      document.getElementById('reason-b-sub').textContent = r.bSub
+      document.getElementById('reason-c').textContent = r.c
+      document.getElementById('reason-c-desc').innerHTML = r.cDesc.replace('\n', '<br/>')
+    }
+
+    /* 애니메이션 리셋 헬퍼 */
+    function resetAnim(el) {
+      el.style.animation = 'none'
+      void el.offsetWidth
+      el.style.animation = ''
+    }
+
+    /* ─── Variant A ─── */
+    function playA() {
+      var screen = document.getElementById('screen-a')
+      var overlay = document.getElementById('overlay-a')
+
+      screen.classList.remove('is-shaking')
+      overlay.classList.remove('is-visible')
+      resetAnim(screen)
+      resetAnim(overlay)
+
+      screen.classList.add('is-shaking')
+      setTimeout(function() {
+        overlay.classList.add('is-visible')
+      }, 180)
+      setTimeout(function() {
+        screen.classList.remove('is-shaking')
+      }, 600)
+    }
+
+    /* ─── Variant B ─── */
+    function playB() {
+      var frame = document.getElementById('frame-b')
+      var overlay = document.getElementById('overlay-b')
+      var reason = document.getElementById('reason-b')
+      var sub = document.getElementById('reason-b-sub')
+
+      frame.classList.remove('is-shaking')
+      overlay.classList.remove('is-visible')
+      resetAnim(frame)
+      resetAnim(overlay)
+      resetAnim(reason)
+      resetAnim(sub)
+
+      frame.classList.add('is-shaking')
+      setTimeout(function() {
+        overlay.classList.add('is-visible')
+      }, 80)
+      setTimeout(function() {
+        frame.classList.remove('is-shaking')
+      }, 750)
+    }
+
+    /* ─── Variant C ─── */
+    function playC() {
+      var screen = document.getElementById('screen-c')
+      var overlay = document.getElementById('overlay-c')
+      var panel = overlay.querySelector('.overlay-c-panel')
+      var icon = overlay.querySelector('.panel-c-icon')
+
+      screen.classList.remove('is-shaking')
+      overlay.classList.remove('is-visible')
+      resetAnim(screen)
+      resetAnim(overlay)
+      resetAnim(panel)
+      resetAnim(icon)
+
+      screen.classList.add('is-shaking')
+      setTimeout(function() {
+        overlay.classList.add('is-visible')
+      }, 120)
+      setTimeout(function() {
+        screen.classList.remove('is-shaking')
+      }, 560)
+    }
+
+    /* ─── 전체 재생 ─── */
+    function playAll() {
+      playA()
+      setTimeout(playB, 80)
+      setTimeout(playC, 160)
+    }
+
+    /* ─── 로드 시 자동 재생 ─── */
+    window.addEventListener('load', function() {
+      setTimeout(playAll, 700)
+    })
+  </script>
+</body>
+</html>
