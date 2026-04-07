@@ -10,7 +10,7 @@ import { ComboTimer } from '../components/game/ComboTimer'
 import { BannerAd } from '../components/ads/BannerAd'
 import { MultiplierBurst } from '../components/game/MultiplierBurst'
 import { GameOverOverlay } from '../components/game/GameOverOverlay'
-import { FloatingScore, FloatingItem } from '../components/game/FloatingScore'
+import { FloatingScore, type FloatingItem } from '../components/game/FloatingScore'
 
 // 타이틀·HUD strip을 GameOverOverlay(z-index 200) 위에 렌더링하여 backdrop-filter blur 영향에서 제외
 const Z_ABOVE_OVERLAY = 201
