@@ -1,9 +1,13 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 interface MultiplierBurstProps {
   multiplier: number
   isVisible: boolean
   onComplete: () => void
+}
+
+interface ParticleData {
+  px: number; py: number; size: number; delay: number
 }
 
 function getMultiplierColor(multiplier: number): string {
@@ -14,34 +18,40 @@ function getMultiplierColor(multiplier: number): string {
   return '#E879F9' // x5+
 }
 
-const PARTICLE_ANGLES = [0, 45, 90, 135, 180, 225, 270, 315]
+const PARTICLE_COUNT = 16
 
 export function MultiplierBurst({ multiplier, isVisible, onComplete }: MultiplierBurstProps) {
   const [phase, setPhase] = useState<'idle' | 'burst' | 'fadeout'>('idle')
-  // onComplete 최신 참조를 캡처 — useEffect deps 재실행 없이 처리
   const onCompleteRef = useRef(onComplete)
-  useEffect(() => {
-    onCompleteRef.current = onComplete
-  })
+  useEffect(() => { onCompleteRef.current = onComplete })
+
+  const particles = useMemo<ParticleData[]>(() => {
+    if (!isVisible) return []
+    return Array.from({ length: PARTICLE_COUNT }, (_, i) => {
+      const angle = (360 / PARTICLE_COUNT) * i
+      const rad = (angle * Math.PI) / 180
+      const dist = 80 + Math.random() * 40
+      const size = 8 + Math.random() * 6
+      return {
+        px: Math.cos(rad) * dist,
+        py: Math.sin(rad) * dist,
+        size,
+        delay: i * 25,
+      }
+    })
+  }, [isVisible])
 
   useEffect(() => {
     if (!isVisible) {
       setPhase('idle')
       return
     }
-
-    // 단계 1: burst (scale-up + 파티클, 0ms~400ms)
     setPhase('burst')
-
-    // 단계 2: fadeout (400ms~600ms)
-    const fadeTimer = setTimeout(() => setPhase('fadeout'), 400)
-
-    // 단계 3: 완료 (600ms)
+    const fadeTimer = setTimeout(() => setPhase('fadeout'), 1400)
     const doneTimer = setTimeout(() => {
       setPhase('idle')
       onCompleteRef.current()
-    }, 600)
-
+    }, 1800)
     return () => {
       clearTimeout(fadeTimer)
       clearTimeout(doneTimer)
@@ -51,60 +61,84 @@ export function MultiplierBurst({ multiplier, isVisible, onComplete }: Multiplie
   if (phase === 'idle') return null
 
   const color = getMultiplierColor(multiplier)
+  const colorDim = `${color}18`
   const isFading = phase === 'fadeout'
 
   return (
     <div style={{
       position: 'fixed',
       inset: 0,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
       pointerEvents: 'none',
       zIndex: 100,
       opacity: isFading ? 0 : 1,
-      transition: isFading ? 'opacity 200ms ease-out' : 'none',
+      transition: isFading ? 'opacity 400ms ease-out' : 'none',
     }}>
-      {/* xN 숫자 */}
+      {/* 배경 방사형 dim */}
       <div style={{
-        fontFamily: 'var(--vb-font-score)',
-        fontSize: 72,
-        fontWeight: 900,
-        color,
-        textShadow: `0 0 40px ${color}99, 0 0 80px ${color}44`,
-        transform: phase === 'burst' ? 'scale(1)' : 'scale(0.4)',
-        transition: phase === 'burst' ? 'transform 400ms cubic-bezier(0.17, 0.89, 0.32, 1.3)' : 'none',
-        letterSpacing: 2,
-        position: 'relative',
-        zIndex: 101,
-      }}>
-        x{multiplier}
-      </div>
+        position: 'absolute',
+        inset: 0,
+        background: `radial-gradient(ellipse at center, ${colorDim} 0%, rgba(14,14,16,0.85) 70%)`,
+        animation: 'vb-bg-in 200ms ease-out both',
+      }} />
 
-      {/* 파티클 8개 */}
-      {PARTICLE_ANGLES.map((angle, i) => (
+      {/* 파티클 16개 */}
+      {particles.map((p, i) => (
         <div
           key={i}
           style={{
             position: 'absolute',
             top: '50%',
             left: '50%',
-            transformOrigin: 'center',
-            width: 10,
-            height: 10,
+            width: p.size,
+            height: p.size,
             borderRadius: '50%',
             backgroundColor: color,
-            boxShadow: `0 0 8px ${color}`,
-            transform: phase === 'burst'
-              ? `translate(-50%, -50%) rotate(${angle}deg) translateY(-80px) scale(1)`
-              : `translate(-50%, -50%) rotate(${angle}deg) translateY(0px) scale(0)`,
-            transition: phase === 'burst'
-              ? `transform 300ms cubic-bezier(0.17, 0.67, 0.83, 0.67) ${i * 15}ms`
-              : 'none',
-            opacity: isFading ? 0 : 1,
-          }}
+            boxShadow: `0 0 10px ${color}`,
+            animation: `vb-particle-fly 800ms cubic-bezier(0.1, 0.8, 0.2, 1) ${p.delay}ms both`,
+            ['--px' as string]: `${p.px}px`,
+            ['--py' as string]: `${p.py}px`,
+          } as React.CSSProperties}
         />
       ))}
+
+      {/* xN 텍스트 */}
+      <div style={{
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        fontFamily: 'var(--vb-font-score)',
+        fontSize: 88,
+        fontWeight: 900,
+        color,
+        letterSpacing: 2,
+        textShadow: `0 0 60px ${color}, 0 0 120px ${color}66`,
+        animation: 'vb-text-bounce 500ms cubic-bezier(0.34, 1.56, 0.64, 1) 100ms both',
+        zIndex: 1,
+      }}>
+        x{multiplier}
+      </div>
+
+      {/* COMBO BOOST 배지 */}
+      <div style={{
+        position: 'absolute',
+        top: 'calc(50% + 52px)',
+        left: '50%',
+        background: color,
+        color: '#000',
+        fontFamily: 'var(--vb-font-body)',
+        fontSize: 11,
+        fontWeight: 700,
+        letterSpacing: 2,
+        textTransform: 'uppercase' as const,
+        padding: '4px 12px',
+        borderRadius: 20,
+        whiteSpace: 'nowrap' as const,
+        animation: 'vb-badge-in 300ms ease-out 500ms both',
+        zIndex: 1,
+      }}>
+        COMBO BOOST
+      </div>
     </div>
   )
 }

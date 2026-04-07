@@ -184,3 +184,32 @@ body {
   flex-direction: column;
   overflow: hidden;
 }
+
+/* MultiplierBurst 강화 이펙트 (Issue #77) */
+@keyframes vb-particle-fly {
+  0% {
+    transform: translate(-50%, -50%) translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -50%) translate(var(--px), var(--py)) scale(0);
+    opacity: 0;
+  }
+}
+
+@keyframes vb-text-bounce {
+  0%   { transform: scale(0) rotate(-10deg); opacity: 0; }
+  50%  { transform: scale(1.2) rotate(3deg); opacity: 1; }
+  70%  { transform: scale(0.95) rotate(-1deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+@keyframes vb-badge-in {
+  0%   { opacity: 0; transform: translateX(-50%) translateY(10px) scale(0.8); }
+  100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+
+@keyframes vb-bg-in {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
