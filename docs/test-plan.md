@@ -4,6 +4,7 @@
 > 테스트 코드 작성 전 명세 문서. 실제 코드 작성/실행은 별도 진행.
 >
 > **업데이트 이력**
+> - 2026-04-08: §2 F그룹 추가 — FloatingScore 색상/크기 임계값 조정 (#86): F-1(getLabelColor x1 버튼색), F-2(getLabelSize 새 수치), F-3(getLabelGlow x2 임계값) TC 갱신 명세
 > - 2026-04-07: §2 E그룹 영향 없음 — 힌트 텍스트 fontSize/color 스타일 변경 (#83). 텍스트 내용·data-testid 유지로 기존 E-1~E-5 TC 변경 불필요.
 > - 2026-04-07: §2 E그룹 갱신 + §5 MANUAL TC 추가 — 카운트다운 힌트 2줄 고정 표시로 스펙 변경 (#82)
 > - 2026-04-07: §5 수동 검증 4건 추가 + #66 TC 3건 갱신 — HUD STG 카운트다운 중 `--` → `00` 스펙 변경 (#76)
@@ -429,6 +430,65 @@ INPUT 상태에서 `sequence.length`와 store의 `stage`는 항상 같아야 한
 | E-3 | 정상 흐름 | countdown=1 시 양쪽 힌트 문구 모두 표시 | `render(<StageArea countdown={1} .../>)` | `hint-line1`, `hint-line2` 모두 존재 | 🟡 High |
 | E-4 | 엣지 케이스 | countdown=null 시 힌트 블록 미표시 | `render(<StageArea countdown={null} .../>)` | `hint-line1`, `hint-line2` 모두 null | 🔴 Critical |
 | E-5 | 회귀 | countdown 3→2 rerender 시 2줄 문구 유지 | `rerender(<StageArea countdown={2} .../>)` | `hint-line1`, `hint-line2` 모두 유지 | 🟡 High |
+
+---
+
+### F. `src/__tests__/FloatingScore.test.ts` — FloatingScore 색상/크기/글로우 단위 테스트
+
+> 파일 경로: `src/__tests__/FloatingScore.test.ts`
+> 순수 함수. mock 불필요.
+>
+> **커버 대상 함수**: `getLabelColor`, `getLabelSize`, `getLabelGlow`
+>
+> **변경 이력**: F-1(x1 기대값 버튼색), F-2(크기 기대값), F-3-2(x2 글로우 기대값) — #86 임계값 조정으로 갱신
+
+---
+
+#### F-1. `getLabelColor(color, multiplier)` — x1도 버튼색 반환
+
+기존 x1=흰색(#e8e8ea) 분기 제거. x1부터 버튼 고유색 반환.
+
+| # | 유형 | 케이스 설명 | 입력 | 기대값 | 우선순위 |
+|---|---|---|---|---|---|
+| F-1-1 | 정상 흐름 | x1, orange → 버튼색 #FF6200 | `getLabelColor('orange', 1)` | `'#FF6200'` | 🔴 Critical |
+| F-1-2 | 정상 흐름 | x1, blue → 버튼색 #0A7AFF | `getLabelColor('blue', 1)` | `'#0A7AFF'` | 🔴 Critical |
+| F-1-3 | 정상 흐름 | x1, green → 버튼색 #18B84A | `getLabelColor('green', 1)` | `'#18B84A'` | 🔴 Critical |
+| F-1-4 | 정상 흐름 | x1, yellow → 버튼색 #F5C000 | `getLabelColor('yellow', 1)` | `'#F5C000'` | 🔴 Critical |
+| F-1-5 | 정상 흐름 | x2, orange → #FF6200 | `getLabelColor('orange', 2)` | `'#FF6200'` | 🟡 High |
+| F-1-6 | 정상 흐름 | x2, blue → #0A7AFF | `getLabelColor('blue', 2)` | `'#0A7AFF'` | 🟡 High |
+| F-1-7 | 정상 흐름 | x3, green → #18B84A | `getLabelColor('green', 3)` | `'#18B84A'` | 🟡 High |
+| F-1-8 | 정상 흐름 | x5, yellow → #F5C000 | `getLabelColor('yellow', 5)` | `'#F5C000'` | 🟠 Medium |
+
+---
+
+#### F-2. `getLabelSize(multiplier)` — 룩업 테이블 기반 크기
+
+새 수치: x1=24, x2=30, x3=36, x4=40, x5+=44
+
+| # | 유형 | 케이스 설명 | 입력 | 기대값 | 우선순위 |
+|---|---|---|---|---|---|
+| F-2-1 | 정상 흐름 | x1 → 24px (기본 크기 상향) | `getLabelSize(1)` | `24` | 🔴 Critical |
+| F-2-2 | 정상 흐름 | x2 → 30px | `getLabelSize(2)` | `30` | 🔴 Critical |
+| F-2-3 | 정상 흐름 | x3 → 36px | `getLabelSize(3)` | `36` | 🔴 Critical |
+| F-2-4 | 정상 흐름 | x4 → 40px | `getLabelSize(4)` | `40` | 🟡 High |
+| F-2-5 | 정상 흐름 | x5 → 44px (상한값) | `getLabelSize(5)` | `44` | 🔴 Critical |
+| F-2-6 | 엣지 케이스 | x6 → 44px (cap 유지) | `getLabelSize(6)` | `44` | 🟡 High |
+| F-2-7 | 엣지 케이스 | x10 → 44px (매우 큰 배율도 cap) | `getLabelSize(10)` | `44` | 🟠 Medium |
+
+---
+
+#### F-3. `getLabelGlow(color, multiplier)` — 글로우 임계값 x3 → x2
+
+| # | 유형 | 케이스 설명 | 입력 | 기대값 | 우선순위 |
+|---|---|---|---|---|---|
+| F-3-1 | 정상 흐름 | x1, orange → 글로우 없음 | `getLabelGlow('orange', 1)` | `'none'` | 🔴 Critical |
+| F-3-2 | 정상 흐름 | x2, blue → 글로우 적용 (기존 'none' → 변경) | `getLabelGlow('blue', 2)` | not `'none'` | 🔴 Critical |
+| F-3-3 | 정상 흐름 | x2, orange → hex 색상 포함 확인 | `getLabelGlow('orange', 2)` | contains `'#FF6200'`, not contains `'var(--'` | 🔴 Critical |
+| F-3-4 | 정상 흐름 | x2, orange → 정확한 수치 (strength=16, spread=32) | `getLabelGlow('orange', 2)` | `'0 0 16px #FF6200, 0 0 32px #FF620088'` | 🔴 Critical |
+| F-3-5 | 정상 흐름 | x3, orange → 글로우 적용 | `getLabelGlow('orange', 3)` | `'0 0 20px #FF6200, 0 0 38px #FF620088'` | 🟡 High |
+| F-3-6 | 정상 흐름 | x5, yellow → 정확한 수치 (strength=28, spread=50) | `getLabelGlow('yellow', 5)` | `'0 0 28px #F5C000, 0 0 50px #F5C00088'` | 🟡 High |
+| F-3-7 | 정상 흐름 | 배율 증가 시 글로우 강도 증가 (x2 !== x5) | x2 vs x5 비교 | `x5 !== x2` | 🟠 Medium |
+| F-3-8 | 정상 흐름 | x3, green → hex 색상 일치 확인 | `getLabelGlow('green', 3)` | contains `'#18B84A'`, not contains `'var(--'` | 🟡 High |
 
 ---
 

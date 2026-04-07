@@ -2,24 +2,23 @@ import { describe, it, expect } from 'vitest'
 import { getLabelColor, getLabelSize, getLabelGlow } from '../components/game/FloatingScore'
 
 // ── F-1. getLabelColor ──────────────────────────────────────────────────────
-// 근거: impl/10-floating-score.md — x1은 흰색 #e8e8ea, x2+는 버튼 고유 hex 색상
-// (impl/14-floating-score-fix.md: CSS 변수+hex suffix 파싱 실패로 hex 직접 반환으로 변경)
+// 근거: impl/15-floating-score-threshold.md — x1부터 버튼 고유 hex 색상 반환 (흰색 분기 제거)
 
 describe('F-1. getLabelColor', () => {
-  it('F-1-1: multiplier=1, orange → 흰색 #e8e8ea (x1 고정)', () => {
-    expect(getLabelColor('orange', 1)).toBe('#e8e8ea')
+  it('F-1-1: multiplier=1, orange → 버튼 고유색 #FF6200 (x1부터 버튼색)', () => {
+    expect(getLabelColor('orange', 1)).toBe('#FF6200')
   })
 
-  it('F-1-2: multiplier=1, blue → 흰색 #e8e8ea (색상 무관, x1은 항상 흰색)', () => {
-    expect(getLabelColor('blue', 1)).toBe('#e8e8ea')
+  it('F-1-2: multiplier=1, blue → 버튼 고유색 #0A7AFF', () => {
+    expect(getLabelColor('blue', 1)).toBe('#0A7AFF')
   })
 
-  it('F-1-3: multiplier=1, green → 흰색 #e8e8ea', () => {
-    expect(getLabelColor('green', 1)).toBe('#e8e8ea')
+  it('F-1-3: multiplier=1, green → 버튼 고유색 #18B84A', () => {
+    expect(getLabelColor('green', 1)).toBe('#18B84A')
   })
 
-  it('F-1-4: multiplier=1, yellow → 흰색 #e8e8ea', () => {
-    expect(getLabelColor('yellow', 1)).toBe('#e8e8ea')
+  it('F-1-4: multiplier=1, yellow → 버튼 고유색 #F5C000', () => {
+    expect(getLabelColor('yellow', 1)).toBe('#F5C000')
   })
 
   it('F-1-5: multiplier=2, orange → #FF6200', () => {
@@ -40,24 +39,23 @@ describe('F-1. getLabelColor', () => {
 })
 
 // ── F-2. getLabelSize ───────────────────────────────────────────────────────
-// 근거: impl/10-floating-score.md — 배율별 크기 계단: x1=20, x2=26, x3=32, x4=38, x5+=44
-// 공식: Math.min(20 + (multiplier - 1) * 6, 44)
+// 근거: impl/15-floating-score-threshold.md — 룩업 테이블: x1=24, x2=30, x3=36, x4=40, x5+=44
 
 describe('F-2. getLabelSize', () => {
-  it('F-2-1: x1 → 20px', () => {
-    expect(getLabelSize(1)).toBe(20)
+  it('F-2-1: x1 → 24px', () => {
+    expect(getLabelSize(1)).toBe(24)
   })
 
-  it('F-2-2: x2 → 26px', () => {
-    expect(getLabelSize(2)).toBe(26)
+  it('F-2-2: x2 → 30px', () => {
+    expect(getLabelSize(2)).toBe(30)
   })
 
-  it('F-2-3: x3 → 32px', () => {
-    expect(getLabelSize(3)).toBe(32)
+  it('F-2-3: x3 → 36px', () => {
+    expect(getLabelSize(3)).toBe(36)
   })
 
-  it('F-2-4: x4 → 38px', () => {
-    expect(getLabelSize(4)).toBe(38)
+  it('F-2-4: x4 → 40px', () => {
+    expect(getLabelSize(4)).toBe(40)
   })
 
   it('F-2-5: x5 → 44px (상한값 도달)', () => {
@@ -74,7 +72,7 @@ describe('F-2. getLabelSize', () => {
 })
 
 // ── F-3. getLabelGlow ───────────────────────────────────────────────────────
-// 근거: impl/10-floating-score.md — x1/x2 → 'none', x3+ → text-shadow 문자열
+// 근거: impl/15-floating-score-threshold.md — x1 → 'none', x2+ → text-shadow 문자열
 // 공식: strength = 8 + multiplier * 4, spread = 20 + multiplier * 6
 // (impl/14-floating-score-fix.md: CSS 변수 대신 hex 직접값 사용 — 'var(--vb-orange-base)88' 파싱 실패 수정)
 
@@ -83,8 +81,9 @@ describe('F-3. getLabelGlow', () => {
     expect(getLabelGlow('orange', 1)).toBe('none')
   })
 
-  it('F-3-2: x2, blue → "none" (글로우 없음)', () => {
-    expect(getLabelGlow('blue', 2)).toBe('none')
+  it('F-3-2: x2, blue → 글로우 적용 (x2부터 글로우 시작)', () => {
+    // strength = 8 + 2*4 = 16, spread = 20 + 2*6 = 32
+    expect(getLabelGlow('blue', 2)).toBe('0 0 16px #0A7AFF, 0 0 32px #0A7AFF88')
   })
 
   it('F-3-3: x3, orange → text-shadow 문자열 반환 (not "none")', () => {

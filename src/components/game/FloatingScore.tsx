@@ -26,16 +26,18 @@ const BUTTON_COLORS: Record<ButtonColor, string> = {
 }
 
 export function getLabelColor(color: ButtonColor, multiplier: number): string {
-  if (multiplier === 1) return '#e8e8ea'
   return BUTTON_COLORS[color]
 }
 
+const SIZE_TABLE: Record<number, number> = { 1: 24, 2: 30, 3: 36, 4: 40 }
+
 export function getLabelSize(multiplier: number): number {
-  return Math.min(20 + (multiplier - 1) * 6, 44)
+  if (multiplier >= 5) return 44
+  return SIZE_TABLE[multiplier] ?? 24
 }
 
 export function getLabelGlow(color: ButtonColor, multiplier: number): string {
-  if (multiplier < 3) return 'none'
+  if (multiplier < 2) return 'none'
   const base = BUTTON_COLORS[color]
   const strength = 8 + multiplier * 4
   const spread = 20 + multiplier * 6
