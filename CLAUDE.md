@@ -178,6 +178,7 @@ _(impl 없음 — 문서 구조 작업만)_ · Issues: [#19](https://github.com/
 | impl | 계획 파일 | Issue |
 |---|---|---|
 | 01 quality-fix | [impl/01-quality-fix.md](docs/milestones/v03/epics/epic-08-gamepage-refactor/impl/01-quality-fix.md) | [#24](https://github.com/alruminum/memory-battle/issues/24) |
+| 02 floating-item-type-fix | [impl/02-floating-item-type-fix.md](docs/milestones/v03/epics/epic-08-gamepage-refactor/impl/02-floating-item-type-fix.md) | [#80](https://github.com/alruminum/memory-battle/issues/80) |
 
 **Epic 09 — 콤보 시스템 전면 개편 (PRD v0.3.1)** · [stories](docs/milestones/v03/epics/epic-09-combo-v031/stories.md)
 

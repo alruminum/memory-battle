@@ -26,12 +26,12 @@
           {
             "type": "command",
             "timeout": 5,
-            "command": "python3 -c \"import sys,json,re,os; d=json.load(sys.stdin); fp=d.get('tool_input',{}).get('file_path',''); pattern=r'(docs/(architecture|game-logic|db-schema|sdk|ui-spec|domain-logic|reference)[^/]*[.]md|(^|/)prd[.]md|(^|/)trd[.]md)'; print(json.dumps({'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':f'❌ {fp} 는 에이전트 소유 파일. 직접 수정 금지 → architect/designer/product-planner 에이전트 호출.'}})) if re.search(pattern, fp) and not os.path.exists('/tmp/memory_architect_active') else None\" 2>/dev/null || true"
+            "command": "python3 -c \"import sys,json,re,os; d=json.load(sys.stdin); fp=d.get('tool_input',{}).get('file_path',''); pattern=r'(docs/(architecture|game-logic|db-schema|sdk|ui-spec|domain-logic|reference)[^/]*[.]md|(^|/)prd[.]md|(^|/)trd[.]md)'; print(json.dumps({'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':f'❌ {fp} 는 에이전트 소유 파일. 직접 수정 금지 → architect/designer/product-planner 에이전트 호출.'}})) if re.search(pattern, fp) and not os.path.exists('/tmp/mb_architect_active') else None\" 2>/dev/null || true"
           },
           {
             "type": "command",
             "timeout": 5,
-            "command": "python3 -c \"import sys,json,re,os; d=json.load(sys.stdin); fp=d.get('tool_input',{}).get('file_path',''); is_src=bool(re.search(r'(^|/)src/',fp)); is_test=bool(re.search(r'(^|/)src/__tests__/',fp)); harness_active=os.path.exists('/tmp/memory_harness_active'); print(json.dumps({'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':'❌ src/** 는 engineer 에이전트 소유. 직접 수정 금지 → architect Mode B → validator Mode A PASS → engineer 순서로 진행.'}})) if is_src and not is_test and not harness_active else None\" 2>/dev/null || true"
+            "command": "python3 -c \"import sys,json,re,os; d=json.load(sys.stdin); fp=d.get('tool_input',{}).get('file_path',''); is_src=bool(re.search(r'(^|/)src/',fp)); is_test=bool(re.search(r'(^|/)src/__tests__/',fp)); harness_active=os.path.exists('/tmp/mb_harness_active'); print(json.dumps({'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':'❌ src/** 는 engineer 에이전트 소유. 직접 수정 금지 → architect Mode B → validator Mode A PASS → engineer 순서로 진행.'}})) if is_src and not is_test and not harness_active else None\" 2>/dev/null || true"
           },
           {
             "type": "command",
@@ -46,12 +46,12 @@
           {
             "type": "command",
             "timeout": 5,
-            "command": "python3 -c \"import sys,json,re,os; d=json.load(sys.stdin); fp=d.get('tool_input',{}).get('file_path',''); pattern=r'(docs/(architecture|game-logic|db-schema|sdk|ui-spec|domain-logic|reference)[^/]*[.]md|(^|/)prd[.]md|(^|/)trd[.]md)'; print(json.dumps({'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':f'❌ {fp} 는 에이전트 소유 파일. 직접 수정 금지 → architect/designer/product-planner 에이전트 호출.'}})) if re.search(pattern, fp) and not os.path.exists('/tmp/memory_architect_active') else None\" 2>/dev/null || true"
+            "command": "python3 -c \"import sys,json,re,os; d=json.load(sys.stdin); fp=d.get('tool_input',{}).get('file_path',''); pattern=r'(docs/(architecture|game-logic|db-schema|sdk|ui-spec|domain-logic|reference)[^/]*[.]md|(^|/)prd[.]md|(^|/)trd[.]md)'; print(json.dumps({'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':f'❌ {fp} 는 에이전트 소유 파일. 직접 수정 금지 → architect/designer/product-planner 에이전트 호출.'}})) if re.search(pattern, fp) and not os.path.exists('/tmp/mb_architect_active') else None\" 2>/dev/null || true"
           },
           {
             "type": "command",
             "timeout": 5,
-            "command": "python3 -c \"import sys,json,re,os; d=json.load(sys.stdin); fp=d.get('tool_input',{}).get('file_path',''); is_src=bool(re.search(r'(^|/)src/',fp)); is_test=bool(re.search(r'(^|/)src/__tests__/',fp)); print(json.dumps({'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':'❌ src/** 는 engineer 에이전트 소유. 직접 수정 금지 → architect Mode B → validator Mode A PASS → engineer 순서로 진행.'}})) if is_src and not is_test else None\" 2>/dev/null || true"
+            "command": "python3 -c \"import sys,json,re,os; d=json.load(sys.stdin); fp=d.get('tool_input',{}).get('file_path',''); is_src=bool(re.search(r'(^|/)src/',fp)); is_test=bool(re.search(r'(^|/)src/__tests__/',fp)); harness_active=os.path.exists('/tmp/mb_harness_active'); print(json.dumps({'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':'❌ src/** 는 engineer 에이전트 소유. 직접 수정 금지 → architect Mode B → validator Mode A PASS → engineer 순서로 진행.'}})) if is_src and not is_test and not harness_active else None\" 2>/dev/null || true"
           },
           {
             "type": "command",
@@ -66,7 +66,7 @@
           {
             "type": "command",
             "timeout": 5,
-            "command": "python3 -c \"import sys,json,os,re,subprocess; d=json.load(sys.stdin); cmd=d.get('tool_input',{}).get('command',''); is_commit=bool(re.search(r'git commit',cmd)); staged=subprocess.run(['git','diff','--cached','--name-only'],capture_output=True,text=True).stdout if is_commit else ''; has_src=bool(re.search(r'^src/',staged,re.MULTILINE)); print(json.dumps({'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':'❌ git commit 전 pr-reviewer LGTM 필요. /tmp/memory_pr_reviewer_lgtm 없음.'}})) if is_commit and has_src and not os.path.exists('/tmp/memory_pr_reviewer_lgtm') else None\" 2>/dev/null || true"
+            "command": "python3 -c \"import sys,json,os,re,subprocess; d=json.load(sys.stdin); cmd=d.get('tool_input',{}).get('command',''); is_commit=bool(re.search(r'git commit',cmd)); staged=subprocess.run(['git','diff','--cached','--name-only'],capture_output=True,text=True).stdout if is_commit else ''; has_src=bool(re.search(r'^src/',staged,re.MULTILINE)); print(json.dumps({'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':'❌ git commit 전 pr-reviewer LGTM 필요. /tmp/mb_pr_reviewer_lgtm 없음.'}})) if is_commit and has_src and not os.path.exists('/tmp/mb_pr_reviewer_lgtm') else None\" 2>/dev/null || true"
           }
         ]
       },
@@ -86,27 +86,27 @@
           {
             "type": "command",
             "timeout": 5,
-            "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); a=d.get('tool_input',{}).get('subagent_type'); print(json.dumps({'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':'❌ engineer 전 Plan Validation PASS 필요. /tmp/memory_plan_validation_passed 없음.'}})) if a=='engineer' and not os.path.exists('/tmp/memory_plan_validation_passed') else None\" 2>/dev/null || true"
+            "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); a=d.get('tool_input',{}).get('subagent_type'); print(json.dumps({'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':'❌ engineer 전 Plan Validation PASS 필요. /tmp/mb_plan_validation_passed 없음.'}})) if a=='engineer' and not os.path.exists('/tmp/mb_plan_validation_passed') else None\" 2>/dev/null || true"
           },
           {
             "type": "command",
             "timeout": 5,
-            "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); a=d.get('tool_input',{}).get('subagent_type'); ha=os.path.exists('/tmp/memory_harness_active'); print(json.dumps({'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':'❌ engineer는 harness-executor.sh를 통해서만 호출 가능. /tmp/memory_harness_active 없음. 메인 Claude에서 직접 engineer 호출 금지 — bash .claude/harness-executor.sh impl2로 호출하라.'}})) if a=='engineer' and not ha else None\" 2>/dev/null || true"
+            "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); a=d.get('tool_input',{}).get('subagent_type'); ha=os.path.exists('/tmp/mb_harness_active'); print(json.dumps({'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':'❌ engineer는 harness-executor.sh를 통해서만 호출 가능. /tmp/mb_harness_active 없음. 메인 Claude에서 직접 engineer 호출 금지 — bash .claude/harness-executor.sh impl2로 호출하라.'}})) if a=='engineer' and not ha else None\" 2>/dev/null || true"
           },
           {
             "type": "command",
             "timeout": 5,
-            "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); a=d.get('tool_input',{}).get('subagent_type'); dr=os.path.exists('/tmp/memory_designer_ran'); cp=os.path.exists('/tmp/memory_design_critic_passed'); print(json.dumps({'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':'❌ designer 실행 후 engineer 바로 불가. 올바른 순서: design-critic PICK → 유저 승인 → architect impl 계획 → validator Mode A PASS → engineer'}})) if a=='engineer' and dr and not cp else None\" 2>/dev/null || true"
+            "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); a=d.get('tool_input',{}).get('subagent_type'); dr=os.path.exists('/tmp/mb_designer_ran'); cp=os.path.exists('/tmp/mb_design_critic_passed'); print(json.dumps({'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':'❌ designer 실행 후 engineer 바로 불가. 올바른 순서: design-critic PICK → 유저 승인 → architect impl 계획 → validator Mode A PASS → engineer'}})) if a=='engineer' and dr and not cp else None\" 2>/dev/null || true"
           },
           {
             "type": "command",
             "timeout": 5,
-            "command": "python3 -c \"import sys,json,re,os; d=json.load(sys.stdin); t=d.get('tool_input',{}); a=t.get('subagent_type'); prompt=t.get('prompt',''); mode_b=bool(re.search(r'Mode B',prompt,re.IGNORECASE)); print(json.dumps({'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':'❌ validator Mode B 전 test-engineer PASS 필요. /tmp/memory_test_engineer_passed 없음.'}})) if a=='validator' and mode_b and not os.path.exists('/tmp/memory_test_engineer_passed') else None\" 2>/dev/null || true"
+            "command": "python3 -c \"import sys,json,re,os; d=json.load(sys.stdin); t=d.get('tool_input',{}); a=t.get('subagent_type'); prompt=t.get('prompt',''); mode_b=bool(re.search(r'Mode B',prompt,re.IGNORECASE)); print(json.dumps({'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':'❌ validator Mode B 전 test-engineer PASS 필요. /tmp/mb_test_engineer_passed 없음.'}})) if a=='validator' and mode_b and not os.path.exists('/tmp/mb_test_engineer_passed') else None\" 2>/dev/null || true"
           },
           {
             "type": "command",
             "timeout": 5,
-            "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); a=d.get('tool_input',{}).get('subagent_type'); print(json.dumps({'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':'❌ pr-reviewer 전 validator Mode B PASS 필요. /tmp/memory_validator_b_passed 없음.'}})) if a=='pr-reviewer' and not os.path.exists('/tmp/memory_validator_b_passed') else None\" 2>/dev/null || true"
+            "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); a=d.get('tool_input',{}).get('subagent_type'); print(json.dumps({'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':'❌ pr-reviewer 전 validator Mode B PASS 필요. /tmp/mb_validator_b_passed 없음.'}})) if a=='pr-reviewer' and not os.path.exists('/tmp/mb_validator_b_passed') else None\" 2>/dev/null || true"
           },
           {
             "type": "command",
@@ -116,12 +116,12 @@
           {
             "type": "command",
             "timeout": 5,
-            "command": "python3 -c \"import sys,json,os; from datetime import datetime; d=json.load(sys.stdin); t=d.get('tool_input',{}); a=t.get('subagent_type','?'); pr=t.get('prompt','')[:80].replace('\\n',' '); caller='harness-executor' if os.path.exists('/tmp/memory_harness_active') else 'main-claude'; ts=datetime.now().strftime('%H:%M:%S'); line=f'[{ts}] {caller} → {a} | {pr}\\n'; open('/tmp/memory-agent-calls.log','a').write(line)\" 2>/dev/null || true"
+            "command": "python3 -c \"import sys,json,os; from datetime import datetime; d=json.load(sys.stdin); t=d.get('tool_input',{}); a=t.get('subagent_type','?'); pr=t.get('prompt','')[:80].replace('\\n',' '); caller='harness-executor' if os.path.exists('/tmp/mb_harness_active') else 'main-claude'; ts=datetime.now().strftime('%H:%M:%S'); line=f'[{ts}] {caller} → {a} | {pr}\\n'; open('/tmp/memory-agent-calls.log','a').write(line)\" 2>/dev/null || true"
           },
           {
             "type": "command",
             "timeout": 5,
-            "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); a=d.get('tool_input',{}).get('subagent_type',''); open(f'/tmp/memory_{a}_active','w').close() if a else None\" 2>/dev/null || true"
+            "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); a=d.get('tool_input',{}).get('subagent_type',''); open(f'/tmp/mb_{a}_active','w').close() if a else None\" 2>/dev/null || true"
           }
         ]
       }
@@ -133,7 +133,7 @@
           {
             "type": "command",
             "timeout": 5,
-            "command": "python3 -c \"import sys,json,re,os; d=json.load(sys.stdin); cmd=d.get('tool_input',{}).get('command',''); resp=str(d.get('tool_response','')); is_commit=bool(re.search(r'git commit',cmd)); success='error' not in resp.lower() and 'failed' not in resp.lower(); [os.remove(f) for f in ['/tmp/memory_pr_reviewer_lgtm','/tmp/memory_test_engineer_passed'] if os.path.exists(f)] if is_commit and success else None\" 2>/dev/null || true"
+            "command": "python3 -c \"import sys,json,re,os; d=json.load(sys.stdin); cmd=d.get('tool_input',{}).get('command',''); resp=str(d.get('tool_response','')); is_commit=bool(re.search(r'git commit',cmd)); success='error' not in resp.lower() and 'failed' not in resp.lower(); [os.remove(f) for f in ['/tmp/mb_pr_reviewer_lgtm','/tmp/mb_test_engineer_passed'] if os.path.exists(f)] if is_commit and success else None\" 2>/dev/null || true"
           }
         ]
       },
@@ -143,42 +143,42 @@
           {
             "type": "command",
             "timeout": 5,
-            "command": "python3 -c \"import sys,json,re,os; d=json.load(sys.stdin); inp=d.get('tool_input',{}); resp=str(d.get('tool_response','')); prompt=inp.get('prompt',''); [open('/tmp/memory_plan_validation_passed','w').close() if re.search(r'Mode C|Plan Validation',prompt,re.IGNORECASE) else None, open('/tmp/memory_validator_b_passed','w').close() if re.search(r'Mode B',prompt,re.IGNORECASE) else None] if inp.get('subagent_type')=='validator' and 'PASS' in resp else None\" 2>/dev/null || true"
+            "command": "python3 -c \"import sys,json,re,os; d=json.load(sys.stdin); inp=d.get('tool_input',{}); resp=str(d.get('tool_response','')); prompt=inp.get('prompt',''); [open('/tmp/mb_plan_validation_passed','w').close() if re.search(r'Mode C|Plan Validation',prompt,re.IGNORECASE) else None, open('/tmp/mb_validator_b_passed','w').close() if re.search(r'Mode B',prompt,re.IGNORECASE) else None] if inp.get('subagent_type')=='validator' and 'PASS' in resp else None\" 2>/dev/null || true"
           },
           {
             "type": "command",
             "timeout": 5,
-            "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); inp=d.get('tool_input',{}); resp=str(d.get('tool_response','')); open('/tmp/memory_test_engineer_passed','w').close() if inp.get('subagent_type')=='test-engineer' and 'TESTS_PASS' in resp else None\" 2>/dev/null || true"
+            "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); inp=d.get('tool_input',{}); resp=str(d.get('tool_response','')); open('/tmp/mb_test_engineer_passed','w').close() if inp.get('subagent_type')=='test-engineer' and 'TESTS_PASS' in resp else None\" 2>/dev/null || true"
           },
           {
             "type": "command",
             "timeout": 5,
-            "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); inp=d.get('tool_input',{}); resp=str(d.get('tool_response','')); open('/tmp/memory_pr_reviewer_lgtm','w').close() if inp.get('subagent_type')=='pr-reviewer' and 'LGTM' in resp and 'CHANGES_REQUESTED' not in resp else None\" 2>/dev/null || true"
+            "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); inp=d.get('tool_input',{}); resp=str(d.get('tool_response','')); open('/tmp/mb_pr_reviewer_lgtm','w').close() if inp.get('subagent_type')=='pr-reviewer' and 'LGTM' in resp and 'CHANGES_REQUESTED' not in resp else None\" 2>/dev/null || true"
           },
           {
             "type": "command",
             "timeout": 5,
-            "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); inp=d.get('tool_input',{}); resp=str(d.get('tool_response','')); open('/tmp/memory_security_review_passed','w').close() if inp.get('subagent_type')=='security-reviewer' and 'SECURE' in resp and 'VULNERABILITIES_FOUND' not in resp else None\" 2>/dev/null || true"
+            "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); inp=d.get('tool_input',{}); resp=str(d.get('tool_response','')); open('/tmp/mb_security_review_passed','w').close() if inp.get('subagent_type')=='security-reviewer' and 'SECURE' in resp and 'VULNERABILITIES_FOUND' not in resp else None\" 2>/dev/null || true"
           },
           {
             "type": "command",
             "timeout": 5,
-            "command": "python3 -c \"import sys,json,re,os; d=json.load(sys.stdin); inp=d.get('tool_input',{}); a=inp.get('subagent_type'); prompt=inp.get('prompt',''); mode_b=bool(re.search(r'Mode B',prompt,re.IGNORECASE)); [os.remove(f) for f in ['/tmp/memory_plan_validation_passed','/tmp/memory_validator_b_passed','/tmp/memory_test_engineer_passed','/tmp/memory_pr_reviewer_lgtm','/tmp/memory_security_review_passed','/tmp/memory_designer_ran','/tmp/memory_design_critic_passed'] if os.path.exists(f)] if a=='architect' and mode_b else None\" 2>/dev/null || true"
+            "command": "python3 -c \"import sys,json,re,os; d=json.load(sys.stdin); inp=d.get('tool_input',{}); a=inp.get('subagent_type'); prompt=inp.get('prompt',''); mode_b=bool(re.search(r'Mode B',prompt,re.IGNORECASE)); [os.remove(f) for f in ['/tmp/mb_plan_validation_passed','/tmp/mb_validator_b_passed','/tmp/mb_test_engineer_passed','/tmp/mb_pr_reviewer_lgtm','/tmp/mb_security_review_passed','/tmp/mb_designer_ran','/tmp/mb_design_critic_passed'] if os.path.exists(f)] if a=='architect' and mode_b else None\" 2>/dev/null || true"
           },
           {
             "type": "command",
             "timeout": 5,
-            "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); a=d.get('tool_input',{}).get('subagent_type'); [os.remove(f) for f in ['/tmp/memory_test_engineer_passed','/tmp/memory_pr_reviewer_lgtm','/tmp/memory_security_review_passed','/tmp/memory_validator_b_passed'] if os.path.exists(f)] if a=='engineer' else None\" 2>/dev/null || true"
+            "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); a=d.get('tool_input',{}).get('subagent_type'); [os.remove(f) for f in ['/tmp/mb_test_engineer_passed','/tmp/mb_pr_reviewer_lgtm','/tmp/mb_security_review_passed','/tmp/mb_validator_b_passed'] if os.path.exists(f)] if a=='engineer' else None\" 2>/dev/null || true"
           },
           {
             "type": "command",
             "timeout": 5,
-            "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); a=d.get('tool_input',{}).get('subagent_type'); [os.remove('/tmp/memory_harness_active') for _ in [1] if os.path.exists('/tmp/memory_harness_active')] if a in ['harness-executor'] else None\" 2>/dev/null || true"
+            "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); a=d.get('tool_input',{}).get('subagent_type'); [os.remove('/tmp/mb_harness_active') for _ in [1] if os.path.exists('/tmp/mb_harness_active')] if a in ['harness-executor'] else None\" 2>/dev/null || true"
           },
           {
             "type": "command",
             "timeout": 5,
-            "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); a=d.get('tool_input',{}).get('subagent_type',''); f='/tmp/memory_'+a+'_active'; os.remove(f) if a and os.path.exists(f) else None\" 2>/dev/null || true"
+            "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); a=d.get('tool_input',{}).get('subagent_type',''); f='/tmp/mb_'+a+'_active'; os.remove(f) if a and os.path.exists(f) else None\" 2>/dev/null || true"
           },
           {
             "type": "command",
@@ -188,12 +188,12 @@
           {
             "type": "command",
             "timeout": 5,
-            "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); a=d.get('tool_input',{}).get('subagent_type'); [open('/tmp/memory_designer_ran','w').close(), [os.remove('/tmp/memory_design_critic_passed') for _ in [1] if os.path.exists('/tmp/memory_design_critic_passed')], [os.remove('/tmp/memory_plan_validation_passed') for _ in [1] if os.path.exists('/tmp/memory_plan_validation_passed')]] if a=='designer' else None\" 2>/dev/null || true"
+            "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); a=d.get('tool_input',{}).get('subagent_type'); [open('/tmp/mb_designer_ran','w').close(), [os.remove('/tmp/mb_design_critic_passed') for _ in [1] if os.path.exists('/tmp/mb_design_critic_passed')], [os.remove('/tmp/mb_plan_validation_passed') for _ in [1] if os.path.exists('/tmp/mb_plan_validation_passed')]] if a=='designer' else None\" 2>/dev/null || true"
           },
           {
             "type": "command",
             "timeout": 5,
-            "command": "python3 -c \"import sys,json; d=json.load(sys.stdin); inp=d.get('tool_input',{}); resp=str(d.get('tool_response','')); open('/tmp/memory_design_critic_passed','w').close() if inp.get('subagent_type')=='design-critic' and 'PICK' in resp and 'ITERATE' not in resp and 'ESCALATE' not in resp else None\" 2>/dev/null || true"
+            "command": "python3 -c \"import sys,json; d=json.load(sys.stdin); inp=d.get('tool_input',{}); resp=str(d.get('tool_response','')); open('/tmp/mb_design_critic_passed','w').close() if inp.get('subagent_type')=='design-critic' and 'PICK' in resp and 'ITERATE' not in resp and 'ESCALATE' not in resp else None\" 2>/dev/null || true"
           },
           {
             "type": "command",

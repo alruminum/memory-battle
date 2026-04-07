@@ -22,3 +22,4 @@
 
 - 2026-04-05 | 01-countdown-hint | success | attempt 1. 로컬 useState+useEffect 750ms 타이머 패턴. countdown null→숫자 전환만 감지하는 의존성 패턴([countdown===null?null:'active'])이 깔끔. key={countdown} 재마운트 flipIn도 정상. (390a583)
 - 2026-04-07 | 09-multiplier-burst-enhance | validator_fail | ```
+- 2026-04-07 | 10-floating-score | validator_fail |    - 현상: `ButtonPad onPress`로 전달되는 함수 참조가 매 렌더마다 교체
