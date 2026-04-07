@@ -55,7 +55,7 @@ function StageArea({ countdown, clearingStage, isPlaying, stage }: StageAreaProp
         {/* 힌트 문구 블록 — 2줄 고정, 타이머 전환 없음 (#82) */}
         <div className="countdown-hint" style={{ padding: '2px 0' }}>
           <div style={{
-            fontSize: 13,
+            fontSize: 15,
             fontWeight: 700,
             color: 'var(--vb-text)',
             lineHeight: 1.5,
@@ -63,9 +63,9 @@ function StageArea({ countdown, clearingStage, isPlaying, stage }: StageAreaProp
             깜빡이는 순서 그대로 누르세요
           </div>
           <div style={{
-            fontSize: 12,
+            fontSize: 13,
             fontWeight: 500,
-            color: 'var(--vb-text-dim)',
+            color: 'var(--vb-text-mid)',
             lineHeight: 1.5,
             marginTop: 2,
           }}>
