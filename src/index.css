@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&family=Space+Grotesk:wght@400;600;700&display=swap');
 
 :root {
+  color-scheme: dark;
   --vb-bg: #0e0e10;
   --vb-surface: #18181b;
   --vb-surface-2: #1f1f23;
