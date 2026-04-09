@@ -36,6 +36,7 @@ export function ComboIndicator({ comboStreak }: ComboIndicatorProps) {
                 background: isFilled ? 'var(--vb-accent)' : 'var(--vb-border)',
                 transformOrigin: 'bottom',
                 animation: (isFilled && i === filledCount - 1) ? 'blockPop 0.3s ease' : 'none',
+                boxShadow: isFilled ? '0 0 7px 2px rgba(212, 168, 67, 0.5)' : 'none',  // amber glow
               }}
             />
           )
