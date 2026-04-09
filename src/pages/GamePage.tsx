@@ -298,14 +298,16 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
         alignItems: 'center',
         flexShrink: 0,
         minHeight: 60,
+        gap: 6,
+        marginBottom: 16,
       }}>
-        {/* [#95] ComboTimer 고정 높이 anchor 래퍼
-          height: 28 — ComboTimer 활성화 시 실제 DOM 높이(~24px)와 일치, 여유 4px 포함
+        {/* [#97] ComboTimer 고정 높이 anchor 래퍼
+          height: 34 — ComboTimer 활성화 시 실제 DOM 높이(~24px) + 여유 10px (글로우 헤드 수용)
           overflow: visible — 글로우 헤드 점(right: -3, height 8px)이 트랙 영역 밖에 위치하므로 clip 방지
-          ComboTimer return null 시에도 28px 공간이 유지되어 ComboIndicator Y 좌표 고정됨
+          ComboTimer return null 시에도 34px 공간이 유지되어 ComboIndicator Y 좌표 고정됨
       */}
       <div style={{
-        height: 28,
+        height: 34,
         overflow: 'visible',
         display: 'flex',
         alignItems: 'center',
