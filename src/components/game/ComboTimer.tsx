@@ -7,9 +7,10 @@ interface ComboTimerProps {
   inputStartTime: number     // INPUT 페이즈 시작 시각 (timestamp). store.sequenceStartTime. 0 = 미설정
   isActive: boolean          // INPUT 상태 여부. true일 때 바 게이지가 줄어들기 시작
   isBreaking?: boolean       // 콤보 깨짐 상태. true 시 collapse 애니메이션 후 숨김 (optional, defaults false)
+  isShowing?: boolean        // SHOWING 페이즈 여부. true 시 풀 바(100%) 정적 렌더링 (DOM 유지, 레이아웃 안정화)
 }
 
-export function ComboTimer({ computerShowTime, inputStartTime, isActive, isBreaking = false }: ComboTimerProps) {
+export function ComboTimer({ computerShowTime, inputStartTime, isActive, isBreaking = false, isShowing = false }: ComboTimerProps) {
   const [elapsedMs, setElapsedMs] = useState(0)
   const [collapsePhase, setCollapsePhase] = useState<CollapsePhase>('none')
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -95,17 +96,21 @@ export function ComboTimer({ computerShowTime, inputStartTime, isActive, isBreak
   }, [isActive, inputStartTime])
 
   // 렌더링 조건
-  // · isActive=false && collapsePhase='none' → null (INPUT 아닐 때 숨김)
-  // · collapsePhase='done'                   → null (붕괴 완료 후 숨김)
-  if (!isActive && collapsePhase === 'none') return null
+  // · isActive=false && isShowing=false && collapsePhase='none' → null (INPUT/SHOWING 아닐 때 숨김)
+  // · isShowing=true                        → 풀 바(100%) 정적 렌더 (DOM 유지, 레이아웃 안정화)
+  // · collapsePhase='done'                  → null (붕괴 완료 후 숨김)
+  if (!isActive && !isShowing && collapsePhase === 'none') return null
   if (collapsePhase === 'done') return null
 
+  // SHOWING 중에는 elapsed를 0으로 취급 → 항상 풀 바(100%) 표시
+  const displayElapsedMs = (isShowing && !isActive) ? 0 : elapsedMs
+
   // 게이지 수치
-  const ratio = Math.max(0, 1 - elapsedMs / computerShowTime)
+  const ratio = Math.max(0, 1 - displayElapsedMs / computerShowTime)
   const fillWidth = `${ratio * 100}%`
 
   // 상태별 색상
-  const isOver = elapsedMs >= computerShowTime
+  const isOver = displayElapsedMs >= computerShowTime
   const fillColor = isOver ? 'var(--vb-combo-over)' : 'var(--vb-accent)'
   const glowColor = isOver
     ? 'rgba(248,113,113,0.7)'
