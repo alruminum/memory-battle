@@ -122,7 +122,7 @@ computerShowTime = flashDuration × sequenceLength
 - **클리어 보너스**: `stageClear` 시 `clearBonus × 클리어 직전 배율` 추가 (버튼 점수는 이미 addInput에서 배율 포함)
 - **isFullCombo**: 콤보 스트릭 증가/리셋 판정에만 사용, 점수 계산에는 미사용 ⚠️ v0.3.2-hotfix (#59)
 - **스택 증가**: 풀콤보 달성 후 스택 +1 (상한 없음)
-- **스택 리셋**: 풀콤보 실패 시 스택 0으로 리셋
+- **스택 리셋**: 풀콤보 실패 시 배율 하한으로 리셋 — `newStreak = floor(prevStreak / 5) × 5` ⚠️ v0.3.3 (#90). 배율(xN)은 유지되고 그 배율의 스택 하한값(N-1)×5으로 리셋. x1(0~4): 0, x2(5~9): 5, x3(10~14): 10 …
 - **multiplierIncreased 플래그**: stageClear 처리 시 이전 배율과 새 배율 비교, 상승했으면 `true`
 
 ```typescript
@@ -150,7 +150,9 @@ const onStageClear = (
   const userInputTime = inputCompleteTime - sequenceStartTime
   const isFullCombo = userInputTime < computerShowTime
 
-  const newStreak = isFullCombo ? prevComboStreak + 1 : 0  // 상한 없음
+  // ⚠️ v0.3.3 (#90): 실패 시 배율 유지 — floor(prev/5)*5로 리셋 (x1 구간은 0)
+  const prevMultiplierBase = Math.floor(prevComboStreak / 5) * 5
+  const newStreak = isFullCombo ? prevComboStreak + 1 : prevMultiplierBase
 
   const prevMultiplier = getComboMultiplier(prevComboStreak)
   const newMultiplier = getComboMultiplier(newStreak)
