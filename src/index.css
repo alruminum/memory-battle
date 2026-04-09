@@ -116,9 +116,10 @@
 
 /* 콤보 블록 채워질 때 팝 애니메이션 */
 @keyframes blockPop {
-  0%  { transform: scaleY(0); }
-  70% { transform: scaleY(1.1); }
-  100%{ transform: scaleY(1); }
+  0%   { transform: scaleY(0);    filter: brightness(1);   }
+  65%  { transform: scaleY(1.12); filter: brightness(2.8); }  /* fill peak + 불 켜지는 순간 */
+  80%  { transform: scaleY(1.06); filter: brightness(1.5); }  /* 잔열 */
+  100% { transform: scaleY(1);    filter: brightness(1);   }
 }
 
 * {
