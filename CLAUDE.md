@@ -192,6 +192,7 @@ _(impl 없음 — 문서 구조 작업만)_ · Issues: [#19](https://github.com/
 | 06 score-immediate-multiplier | [impl/06-score-immediate-multiplier.md](docs/milestones/v03/epics/epic-09-combo-v031/impl/06-score-immediate-multiplier.md) | [#59](https://github.com/alruminum/memory-battle/issues/59) |
 | 07 result-maxstreak-fix | [impl/07-result-maxstreak-fix.md](docs/milestones/v03/epics/epic-09-combo-v031/impl/07-result-maxstreak-fix.md) | [#88](https://github.com/alruminum/memory-battle/issues/88) |
 | 08 multiplier-burst-badge-fix | [impl/08-multiplier-burst-badge-fix.md](docs/milestones/v03/epics/epic-09-combo-v031/impl/08-multiplier-burst-badge-fix.md) | [#89](https://github.com/alruminum/memory-battle/issues/89) |
+| 09 combo-timer-clearing-fix | [impl/09-combo-timer-clearing-fix.md](docs/milestones/v03/epics/epic-09-combo-v031/impl/09-combo-timer-clearing-fix.md) | [#91](https://github.com/alruminum/memory-battle/issues/91) |
 
 **Epic 10 — 게임오버 오버레이** · [stories](docs/milestones/v03/epics/epic-10-gameover-overlay/stories.md) · Epic: [#46](https://github.com/alruminum/memory-battle/issues/46)
 
