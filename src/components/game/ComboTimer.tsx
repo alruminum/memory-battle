@@ -124,6 +124,16 @@ export function ComboTimer({ computerShowTime, inputStartTime, isActive, isBreak
       <span style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', opacity: 0, pointerEvents: 'none' }}>
         {(elapsedMs / 1000).toFixed(2)}
       </span>
+      {/* 레이블 텍스트 */}
+      <span style={{
+        fontSize: 9,
+        fontWeight: 600,
+        color: 'var(--vb-text-dim)',
+        letterSpacing: 2,
+        marginBottom: 4,
+      }}>
+        콤보타이머
+      </span>
       {/* 트랙 */}
       <div
         data-testid="combo-timer-track"
