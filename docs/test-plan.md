@@ -4,6 +4,7 @@
 > 테스트 코드 작성 전 명세 문서. 실제 코드 작성/실행은 별도 진행.
 >
 > **업데이트 이력**
+> - 2026-04-09: §5 수동 검증 5건 추가 — blockPop brightness burst + ComboIndicator boxShadow glow (#93)
 > - 2026-04-08: §2 F그룹 추가 — FloatingScore 색상/크기 임계값 조정 (#86): F-1(getLabelColor x1 버튼색), F-2(getLabelSize 새 수치), F-3(getLabelGlow x2 임계값) TC 갱신 명세
 > - 2026-04-07: §2 E그룹 영향 없음 — 힌트 텍스트 fontSize/color 스타일 변경 (#83). 텍스트 내용·data-testid 유지로 기존 E-1~E-5 TC 변경 불필요.
 > - 2026-04-07: §2 E그룹 갱신 + §5 MANUAL TC 추가 — 카운트다운 힌트 2줄 고정 표시로 스펙 변경 (#82)
@@ -580,3 +581,8 @@ INPUT 상태에서 `sequence.length`와 store의 `stage`는 항상 같아야 한
 | countdown 잔존: 카운트다운(3→2→1) 힌트 문구 정상 표시 회귀 없음 (이슈 #75) | 카운트다운 진행 중 숫자+힌트 문구 정상 표시 확인 (#52 회귀 없음) |
 | countdown 잔존: 카운트다운 종료 후 HUD STG `--` → `01` 전환 정상 (이슈 #75) | 카운트다운 종료 → HUD STG 셀이 `--`에서 `01`로 전환되는지 확인 (#66 회귀 없음) |
 | countdown 잔존: SHOWING/INPUT/RESULT 기존 동작 회귀 없음 (이슈 #75) | 게임 진행 전 구간 정상 동작 확인 |
+| blockPop brightness burst: 블록 채워질 때 황금색 밝게 번쩍임 (이슈 #93) | comboStreak=1~4 증가 시 새로 채워지는 블록이 scaleY 올라오면서 brightness 발광 후 안정되는지 시각 확인 |
+| blockPop brightness burst: 방금 채워진 블록에만 애니메이션 적용 (이슈 #93) | 기존 채워진 블록은 재발광 없이 glow만 유지, 신규 블록만 burst 확인 |
+| ComboIndicator boxShadow glow: 채워진 블록 amber glow 잔류 (이슈 #93) | blockPop 애니메이션 완료 후에도 채워진 블록에 황금 halo glow 지속 표시 확인 |
+| blockPop 빠른 연타: 연속 comboStreak 증가 시 애니메이션 중단 없음 (이슈 #93) | 1초 이내 comboStreak 연속 증가 시 각 블록 애니메이션 독립 실행 확인 |
+| blockPop brightness: 주변 UI 침범 없음 (이슈 #93) | 발광 효과가 HUD/버튼 등 주변 요소에 번짐 현상 없는지 확인 |
