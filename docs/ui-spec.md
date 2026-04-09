@@ -62,9 +62,11 @@
 
 | 조건 | 표시 |
 |---|---|
-| `comboStreak === 0` | null (미표시) |
-| `comboStreak > 0` | `x{floor(comboStreak/5)+1} COMBO STREAK` 텍스트 상시 표시 |
+| `comboStreak === 0` | 5칸 빈 블록 + x1 상시 표시 (항상 보임) |
+| `comboStreak > 0` | `x{floor(comboStreak/5)+1}` + 진행 블록 상시 표시 |
 | 풀콤보 클리어 직후 | 디자인 중심 "컴퓨터를 이겼다" 피드백 (텍스트 최소화) |
+
+> **v0.3.1 patch** (이슈 #95): streak=0 시 `null` 반환(미표시) → 항상 표시로 변경. ComboTimer 비활성 시 레이아웃 앵커 역할 겸임.
 
 > 배율 공식: `floor(comboStreak / 5) + 1` (상한 없음)
 > 구버전 `isComboActive` 기반 300ms 연속 입력 판정 및 `COMBO!` 글로우 텍스트 제거
