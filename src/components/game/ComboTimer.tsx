@@ -6,10 +6,10 @@ interface ComboTimerProps {
   computerShowTime: number   // 컴퓨터 시연 총 시간 (ms). flashDuration × sequenceLength
   inputStartTime: number     // INPUT 페이즈 시작 시각 (timestamp). store.sequenceStartTime. 0 = 미설정
   isActive: boolean          // INPUT 상태 여부. true일 때 바 게이지가 줄어들기 시작
-  isBreaking: boolean        // 콤보 깨짐 상태. true 시 collapse 애니메이션 후 숨김
+  isBreaking?: boolean       // 콤보 깨짐 상태. true 시 collapse 애니메이션 후 숨김 (optional, defaults false)
 }
 
-export function ComboTimer({ computerShowTime, inputStartTime, isActive, isBreaking }: ComboTimerProps) {
+export function ComboTimer({ computerShowTime, inputStartTime, isActive, isBreaking = false }: ComboTimerProps) {
   const [elapsedMs, setElapsedMs] = useState(0)
   const [collapsePhase, setCollapsePhase] = useState<CollapsePhase>('none')
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -120,6 +120,10 @@ export function ComboTimer({ computerShowTime, inputStartTime, isActive, isBreak
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 0 4px' }}>
+      {/* 접근성·테스트용 elapsed 텍스트 (시각적 숨김) */}
+      <span style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', opacity: 0, pointerEvents: 'none' }}>
+        {(elapsedMs / 1000).toFixed(2)}
+      </span>
       {/* 트랙 */}
       <div
         data-testid="combo-timer-track"
