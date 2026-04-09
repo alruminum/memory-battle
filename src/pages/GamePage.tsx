@@ -299,6 +299,18 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
         flexShrink: 0,
         minHeight: 60,
       }}>
+        {/* [#95] ComboTimer 고정 높이 anchor 래퍼
+          height: 28 — ComboTimer 활성화 시 실제 DOM 높이(~24px)와 일치, 여유 4px 포함
+          overflow: visible — 글로우 헤드 점(right: -3, height 8px)이 트랙 영역 밖에 위치하므로 clip 방지
+          ComboTimer return null 시에도 28px 공간이 유지되어 ComboIndicator Y 좌표 고정됨
+      */}
+      <div style={{
+        height: 28,
+        overflow: 'visible',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}>
         <ComboTimer
           computerShowTime={computerShowTime}
           inputStartTime={sequenceStartTime}
@@ -306,6 +318,7 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
           isBreaking={status === 'RESULT' && gameOverReason !== null}
           isShowing={status === 'SHOWING'}
         />
+      </div>
         <ComboIndicator comboStreak={comboStreak} />
       </div>
 

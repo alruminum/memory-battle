@@ -5,8 +5,7 @@ interface ComboIndicatorProps {
 }
 
 export function ComboIndicator({ comboStreak }: ComboIndicatorProps) {
-  if (comboStreak === 0) return null
-
+  // [#95] streak=0 early return 제거 — 5칸 빈 블록 + x1 항상 표시 (docs/ui-spec.md ComboIndicator 표시 규칙)
   const multiplier = Math.floor(comboStreak / 5) + 1
   const filledCount = comboStreak % 5   // 0: 막 배율 상승 직후(빈 상태), 1~4: 진행 중
 
