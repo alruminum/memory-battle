@@ -1,13 +1,17 @@
 import { useState, useEffect, useRef } from 'react'
 
+type CollapsePhase = 'none' | 'breaking' | 'done'
+
 interface ComboTimerProps {
   computerShowTime: number   // 컴퓨터 시연 총 시간 (ms). flashDuration × sequenceLength
-  inputStartTime: number     // INPUT 페이즈 시작 시각 (timestamp). store.sequenceStartTime
-  isActive: boolean          // INPUT 상태 여부. true일 때만 렌더링
+  inputStartTime: number     // INPUT 페이즈 시작 시각 (timestamp). store.sequenceStartTime. 0 = 미설정
+  isActive: boolean          // INPUT 상태 여부. true일 때 바 게이지가 줄어들기 시작
+  isBreaking?: boolean       // 콤보 깨짐 상태. true 시 collapse 애니메이션 후 숨김 (optional, defaults false)
 }
 
-export function ComboTimer({ computerShowTime, inputStartTime, isActive }: ComboTimerProps) {
+export function ComboTimer({ computerShowTime, inputStartTime, isActive, isBreaking = false }: ComboTimerProps) {
   const [elapsedMs, setElapsedMs] = useState(0)
+  const [collapsePhase, setCollapsePhase] = useState<CollapsePhase>('none')
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const computerShowTimeRef = useRef(computerShowTime)
 
@@ -15,6 +19,20 @@ export function ComboTimer({ computerShowTime, inputStartTime, isActive }: Combo
   useEffect(() => {
     computerShowTimeRef.current = computerShowTime
   }, [computerShowTime])
+
+  // isBreaking 상태 머신: false→none 리셋 / true→breaking(즉시)+done(600ms)
+  // [isBreaking]만 dep: collapsePhase를 dep에 포함하면 'none'→'breaking' 전환 시
+  // cleanup이 재실행되어 setTimeout이 취소되는 버그 발생
+  useEffect(() => {
+    if (!isBreaking) {
+      setCollapsePhase('none')
+      return
+    }
+    // isBreaking=true → collapse 시작
+    setCollapsePhase('breaking')
+    const tid = setTimeout(() => setCollapsePhase('done'), 600)
+    return () => clearTimeout(tid)
+  }, [isBreaking])
 
   useEffect(() => {
     if (!isActive || inputStartTime === 0) {
@@ -76,74 +94,80 @@ export function ComboTimer({ computerShowTime, inputStartTime, isActive }: Combo
     }
   }, [isActive, inputStartTime])
 
-  if (!isActive) return null
+  // 렌더링 조건
+  // · isActive=false && collapsePhase='none' → null (INPUT 아닐 때 숨김)
+  // · collapsePhase='done'                   → null (붕괴 완료 후 숨김)
+  if (!isActive && collapsePhase === 'none') return null
+  if (collapsePhase === 'done') return null
 
-  const isOverTime = elapsedMs >= computerShowTime
-  const displaySeconds = (elapsedMs / 1000).toFixed(2)
-  const targetSeconds = (computerShowTime / 1000).toFixed(2)
+  // 게이지 수치
+  const ratio = Math.max(0, 1 - elapsedMs / computerShowTime)
+  const fillWidth = `${ratio * 100}%`
 
-  // 색상: 기준 시간 이내 = 초록 계열, 초과 = 빨강 계열
-  const colorVar = isOverTime ? 'var(--vb-combo-over)' : 'var(--vb-combo-ok)'
-  const glowVar = isOverTime
-    ? 'color-mix(in srgb, var(--vb-combo-over) 30%, transparent)'
-    : 'color-mix(in srgb, var(--vb-combo-ok) 30%, transparent)'
+  // 상태별 색상
+  const isOver = elapsedMs >= computerShowTime
+  const fillColor = isOver ? 'var(--vb-combo-over)' : 'var(--vb-accent)'
+  const glowColor = isOver
+    ? 'rgba(248,113,113,0.7)'
+    : 'rgba(212,168,67,0.7)'
+
+  // CSS class 조합
+  const fillClass = [
+    'combo-timer-fill',
+    isOver ? 'over' : '',
+    collapsePhase === 'breaking' ? 'collapse' : '',
+  ].filter(Boolean).join(' ')
 
   return (
-    <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: 8,
-      padding: '6px 0',
-    }}>
-      {/* 경과 시간 */}
-      <span style={{
-        fontFamily: 'var(--vb-font-score)',
-        fontSize: 20,
-        fontWeight: 900,
-        color: colorVar,
-        textShadow: `0 0 12px ${glowVar}`,
-        transition: 'color 200ms ease, text-shadow 200ms ease',
-        letterSpacing: 1,
-        minWidth: 52,
-        textAlign: 'right',
-      }}>
-        {displaySeconds}
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 0 4px' }}>
+      {/* 접근성·테스트용 elapsed 텍스트 (시각적 숨김) */}
+      <span style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', opacity: 0, pointerEvents: 'none' }}>
+        {(elapsedMs / 1000).toFixed(2)}
       </span>
-
-      {/* 구분 텍스트 */}
-      <span style={{
-        fontFamily: 'var(--vb-font-score)',
-        fontSize: 11,
-        fontWeight: 600,
-        color: 'var(--vb-text-dim)',
-        letterSpacing: 1,
-      }}>
-        /
-      </span>
-
-      {/* 목표 시간 */}
-      <span style={{
-        fontFamily: 'var(--vb-font-score)',
-        fontSize: 14,
-        fontWeight: 700,
-        color: 'var(--vb-text-dim)',
-        letterSpacing: 1,
-        minWidth: 40,
-      }}>
-        {targetSeconds}
-      </span>
-
-      {/* 단위 */}
-      <span style={{
-        fontFamily: 'var(--vb-font-score)',
-        fontSize: 9,
-        fontWeight: 600,
-        color: 'var(--vb-text-dim)',
-        letterSpacing: 2,
-      }}>
-        SEC
-      </span>
+      {/* 트랙 */}
+      <div
+        data-testid="combo-timer-track"
+        className={`combo-timer-track${collapsePhase === 'breaking' ? ' collapse' : ''}`}
+        style={{
+          position: 'relative',
+          height: 4,
+          width: 200,
+          background: 'var(--timer-track)',
+          borderRadius: 2,
+          overflow: 'visible',
+        }}
+      >
+        {/* 채우는 바 */}
+        <div
+          data-testid="combo-timer-fill"
+          className={fillClass}
+          style={{
+            height: '100%',
+            width: fillWidth,
+            borderRadius: 2,
+            background: fillColor,
+            position: 'relative',
+            transition: 'width 80ms linear, background 200ms ease',
+            transformOrigin: 'left center',
+          }}
+        >
+          {/* 글로우 헤드 — collapse 시 숨김 */}
+          {collapsePhase !== 'breaking' && (
+            <div style={{
+              position: 'absolute',
+              right: -3,
+              top: '50%',
+              transform: 'translateY(-50%)',
+              width: 8,
+              height: 8,
+              borderRadius: '50%',
+              background: fillColor,
+              boxShadow: `0 0 10px 3px ${glowColor}`,
+              transition: 'background 200ms ease, box-shadow 200ms ease',
+            }} />
+          )}
+        </div>
+      </div>
     </div>
   )
 }

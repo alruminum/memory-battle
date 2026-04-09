@@ -138,7 +138,8 @@ describe('B-4. stageClear() — streak 누적', () => {
     expect(useGameStore.getState().comboStreak).toBe(1)
   })
 
-  it('B-4-2: 풀콤보 미달성 → comboStreak 0 리셋', () => {
+  it('B-4-2: 풀콤보 미달성, comboStreak=4(x1구간) → floor(4/5)*5=0 리셋', () => {
+    // x1 구간(streak 0~4)에서 실패 시 floor(4/5)*5=0 → x1 유지 (기존 동일)
     useGameStore.setState({ sequence: [...SEQ_1], sequenceStartTime: 0, comboStreak: 4 })
     useGameStore.getState().stageClear(NO_COMBO_TIME, FLASH_DURATION)
     expect(useGameStore.getState().comboStreak).toBe(0)
@@ -173,6 +174,26 @@ describe('B-4. stageClear() — streak 누적', () => {
   it('B-4-7: comboStreak 상한 없음 (4 → 5)', () => {
     useGameStore.setState({ sequence: [...SEQ_1], sequenceStartTime: 0, comboStreak: 4 })
     useGameStore.getState().stageClear(FULL_COMBO_TIME, FLASH_DURATION)
+    expect(useGameStore.getState().comboStreak).toBe(5)
+  })
+
+  // ── 배율 유지: 실패 시 floor(prev/5)*5 리셋 (Issue #90) ──────────────────
+
+  it('B-4-8: comboStreak=8(x2), 풀콤보 미달성 → floor(8/5)*5=5(x2 유지)', () => {
+    useGameStore.setState({ sequence: [...SEQ_1], sequenceStartTime: 0, comboStreak: 8 })
+    useGameStore.getState().stageClear(NO_COMBO_TIME, FLASH_DURATION)
+    expect(useGameStore.getState().comboStreak).toBe(5)
+  })
+
+  it('B-4-9: comboStreak=13(x3), 풀콤보 미달성 → floor(13/5)*5=10(x3 유지)', () => {
+    useGameStore.setState({ sequence: [...SEQ_1], sequenceStartTime: 0, comboStreak: 13 })
+    useGameStore.getState().stageClear(NO_COMBO_TIME, FLASH_DURATION)
+    expect(useGameStore.getState().comboStreak).toBe(10)
+  })
+
+  it('B-4-10: comboStreak=5(x2 하한), 풀콤보 미달성 → floor(5/5)*5=5(x2 유지)', () => {
+    useGameStore.setState({ sequence: [...SEQ_1], sequenceStartTime: 0, comboStreak: 5 })
+    useGameStore.getState().stageClear(NO_COMBO_TIME, FLASH_DURATION)
     expect(useGameStore.getState().comboStreak).toBe(5)
   })
 })

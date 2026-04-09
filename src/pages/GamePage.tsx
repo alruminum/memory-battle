@@ -11,6 +11,7 @@ import { BannerAd } from '../components/ads/BannerAd'
 import { MultiplierBurst } from '../components/game/MultiplierBurst'
 import { GameOverOverlay } from '../components/game/GameOverOverlay'
 import { FloatingScore, type FloatingItem } from '../components/game/FloatingScore'
+import type { ButtonColor } from '../types'
 
 // 타이틀·HUD strip을 GameOverOverlay(z-index 200) 위에 렌더링하여 backdrop-filter blur 영향에서 제외
 const Z_ABOVE_OVERLAY = 201
@@ -290,14 +291,20 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
         <StageArea countdown={countdown} clearingStage={clearingStage} isPlaying={isPlaying} stage={stage} />
       </div>
 
-      {/* 콤보 인디케이터 */}
+      {/* 콤보 묶음: ComboTimer 게이지(위) + ComboIndicator 블록(아래) */}
       <div style={{
         display: 'flex',
+        flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: 56,
         flexShrink: 0,
+        minHeight: 60,
       }}>
+        <ComboTimer
+          computerShowTime={computerShowTime}
+          inputStartTime={sequenceStartTime}
+          isActive={status === 'INPUT'}
+          isBreaking={status === 'RESULT' && gameOverReason !== null}
+        />
         <ComboIndicator comboStreak={comboStreak} />
       </div>
 
@@ -321,15 +328,6 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
           onPress={handleInputWithFloat}
           onStart={handleStart}
           onRetry={() => retryGame()}
-        />
-      </div>
-
-      {/* 타임워치 */}
-      <div style={{ flexShrink: 0, minHeight: 40 }}>
-        <ComboTimer
-          computerShowTime={computerShowTime}
-          inputStartTime={sequenceStartTime}
-          isActive={status === 'INPUT'}
         />
       </div>
 

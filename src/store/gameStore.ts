@@ -96,7 +96,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
       const isFullCombo = userInputTime < computerShowTime  // 스트릭 판정용 (점수 무관)
 
       const prevComboStreak = state.comboStreak
-      const newComboStreak = isFullCombo ? prevComboStreak + 1 : 0  // 상한 없음
+      // 배율 유지: 실패 시 스택만 초기화, 배율 하한(floor(prev/5)*5)으로 리셋
+      // floor(4/5)*5=0(x1 유지), floor(8/5)*5=5(x2 유지), floor(13/5)*5=10(x3 유지)
+      const prevMultiplierBase = Math.floor(prevComboStreak / 5) * 5
+      const newComboStreak = isFullCombo ? prevComboStreak + 1 : prevMultiplierBase
 
       const prevMultiplier = getComboMultiplier(prevComboStreak)
       const newMultiplier = getComboMultiplier(newComboStreak)
