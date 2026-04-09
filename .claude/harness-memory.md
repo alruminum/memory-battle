@@ -25,3 +25,4 @@
 - 2026-04-07 | 10-floating-score | validator_fail |    - 현상: `ButtonPad onPress`로 전달되는 함수 참조가 매 렌더마다 교체
 - 2026-04-08 | 03-color-scheme-fix | autocheck_fail | no_changes: engineer가 아무 파일도 수정하지 않음
 - 2026-04-09 | 16-combo-timer-gauge | test_fail | 
+- 2026-04-09 | 17-block-pop-animation | success | attempt 1
