@@ -304,6 +304,7 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
           inputStartTime={sequenceStartTime}
           isActive={status === 'INPUT' && clearingStage === null}
           isBreaking={status === 'RESULT' && gameOverReason !== null}
+          isShowing={status === 'SHOWING'}
         />
         <ComboIndicator comboStreak={comboStreak} />
       </div>
