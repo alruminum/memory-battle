@@ -138,7 +138,7 @@ interface GamePageProps {
 
 export function GamePage({ onGameOver, onRanking }: GamePageProps) {
   const { status, score, stage, comboStreak, userId, setUserId, sequenceStartTime } = useGameStore()
-  const { flashingButton, clearingStage, countdown, handleInput, startGame, retryGame, multiplierIncreased, comboBreaking, gameOverReason } = useGameEngine()
+  const { flashingButton, clearingStage, countdown, handleInput, startGame, retryGame, multiplierIncreased, gameOverReason } = useGameEngine()
   const ranking = useRanking(userId || null)
 
   useEffect(() => {
@@ -321,7 +321,7 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
           isShowing={status === 'SHOWING'}
         />
       </div>
-        <ComboIndicator comboStreak={comboStreak} isBreaking={comboBreaking} />
+        <ComboIndicator comboStreak={comboStreak} />
       </div>
 
       {/* 버튼 패드 */}
