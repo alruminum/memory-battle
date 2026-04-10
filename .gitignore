@@ -15,6 +15,9 @@ screen-*.png
 
 # 디자인 작업 임시 파일
 assets/variants/
+design/
+design-variants/
+mobile-before-tap.png
 
 # 스크린샷
 screenshots/
