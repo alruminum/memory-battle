@@ -36,3 +36,4 @@
 - 2026-04-10 | 18-combo-break-shake | pr_fail | pr-reviewer agent produced no output (exit=142)
 - 2026-04-10 | 18-combo-break-shake | pr_fail | pr-reviewer CHANGES_REQUESTED (see /tmp/mb_history/impl/attempt-2/pr.log)
 - 2026-04-10 | 18-combo-break-shake | autocheck_fail | engineer agent produced no output (exit=142)
+- 2026-04-10 | 18-combo-break-shake | success | attempt 2
