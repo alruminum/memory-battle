@@ -11,6 +11,7 @@ const BUTTONS: ButtonColor[] = ['orange', 'blue', 'green', 'yellow']
 const CLEAR_PAUSE_MS = 1100
 const MILESTONE_PAUSE_MS = 1900
 const COUNTDOWN_INTERVAL = 750  // ms per tick (사양: 750ms per tick → 총 2250ms)
+const COMBO_BREAK_MS = 600      // 콤보 브레이크 쉐이크 애니메이션 노출 시간
 
 const randomButton = () => BUTTONS[Math.floor(Math.random() * BUTTONS.length)]
 
@@ -31,6 +32,8 @@ export function useGameEngine() {
   const [clearingStage, setClearingStage] = useState<number | null>(null)
   const [countdown, setCountdown] = useState<number | null>(null)
   const [multiplierIncreased, setMultiplierIncreased] = useState(false)
+  const [comboBreaking, setComboBreaking] = useState(false)
+  const comboBreakTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const showingRef = useRef(false)
   const clearingRef = useRef(false)
   const startingRef = useRef(false)
@@ -144,10 +147,17 @@ export function useGameEngine() {
         const flash = getFlashDuration(clearedStage)
 
         // stageClear에 inputCompleteTime과 flashDuration 전달
-        const { multiplierIncreased: increased } =
+        const { multiplierIncreased: increased, isFullCombo } =
           useGameStore.getState().stageClear(now, flash)
 
         setMultiplierIncreased(increased)
+
+        // 콤보 브레이크 감지: 풀콤보가 아닐 때 COMBO_BREAK_MS 동안 comboBreaking=true
+        if (!isFullCombo) {
+          if (comboBreakTimerRef.current) clearTimeout(comboBreakTimerRef.current)
+          setComboBreaking(true)
+          comboBreakTimerRef.current = setTimeout(() => setComboBreaking(false), COMBO_BREAK_MS)
+        }
 
         const isMilestone = clearedStage % 5 === 0
         if (isMilestone) playApplause()
@@ -172,6 +182,13 @@ export function useGameEngine() {
     [sequence, addInput, gameOver, setSequence, timer]
   )
 
+  // 클린업: comboBreakTimerRef 타이머 해제 (comboBreakTimerRef는 ref이므로 deps에 포함 불필요)
+  useEffect(() => {
+    return () => {
+      if (comboBreakTimerRef.current) clearTimeout(comboBreakTimerRef.current)
+    }
+  }, [])
+
   return {
     flashingButton,
     clearingStage,
@@ -180,6 +197,7 @@ export function useGameEngine() {
     startGame,
     retryGame,
     multiplierIncreased,
+    comboBreaking,
     gameOverReason,
   }
 }

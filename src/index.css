@@ -122,6 +122,39 @@
   100% { transform: scaleY(1);    filter: brightness(1);   }
 }
 
+/* 콤보 브레이크 쉐이크: ±8px × 6 half-cycles, 0.4s */
+@keyframes comboShake {
+  0%, 100% { transform: translateX(0); }
+  16.7%    { transform: translateX(-8px); }
+  33.3%    { transform: translateX(8px); }
+  50.0%    { transform: translateX(-8px); }
+  66.7%    { transform: translateX(8px); }
+  83.3%    { transform: translateX(-8px); }
+}
+
+.combo-breaking {
+  animation: comboShake 0.4s ease-in-out;
+}
+
+/* 블록 붕괴: 색상 → #F87171, scaleY(0), 0.3s ease-in */
+@keyframes blockBreak {
+  0%   { transform: scaleY(1); }
+  20%  { background: #F87171; }
+  100% { transform: scaleY(0); background: #F87171; }
+}
+
+/* 배율 숫자 플래시 후 재등장, 0.45s */
+@keyframes multBreak {
+  0%   { opacity: 1; color: var(--vb-accent); }
+  44%  { opacity: 1; color: #F87171; }
+  55%  { opacity: 0; color: #F87171; }
+  100% { opacity: 1; color: var(--vb-accent); }
+}
+
+.combo-mult-break {
+  animation: multBreak 0.45s ease forwards;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
