@@ -73,7 +73,7 @@ describe('ComboTimer', () => {
       expect(fill.style.width).not.toBe('')
     })
 
-    it('CT-2-2: elapsed >= computerShowTime → fill에 .over 클래스', () => {
+    it('CT-2-2: elapsed >= computerShowTime → fill에 .danger 클래스', () => {
       const inputStartTime = Date.now()
       const { getByTestId } = render(
         <ComboTimer
@@ -84,11 +84,11 @@ describe('ComboTimer', () => {
         />
       )
 
-      // 1500ms 경과 → clamped to 1000 → isOver=true → 'over' 클래스
+      // 1500ms 경과 → clamped to 1000 → ratio=0 → danger phase → 'danger' 클래스
       act(() => { vi.advanceTimersByTime(1500) })
 
       const fill = getByTestId('combo-timer-fill')
-      expect(fill.className).toContain('over')
+      expect(fill.className).toContain('danger')
     })
 
     it('CT-2-3: elapsed >= computerShowTime 후 추가 시간 경과 → width 0%에서 고정', () => {
