@@ -199,4 +199,122 @@ describe('ComboTimer', () => {
       expect(fill.style.width).toBe('0%')
     })
   })
+
+  // ── CT-6. onComboTimerExpired 콜백 ────────────────────────────────────────
+
+  describe('CT-6. onComboTimerExpired 콜백', () => {
+    it('CT-6-1: onComboTimerExpired 미전달, elapsed >= computerShowTime 도달 — 에러 없이 동작', () => {
+      const inputStartTime = Date.now()
+      expect(() => {
+        const { unmount } = render(
+          <ComboTimer
+            computerShowTime={500}
+            inputStartTime={inputStartTime}
+            isActive={true}
+            isBreaking={false}
+          />
+        )
+        act(() => { vi.advanceTimersByTime(600) })
+        unmount()
+      }).not.toThrow()
+    })
+
+    it('CT-6-2: isActive=true, elapsed >= computerShowTime → onComboTimerExpired 정확히 1회 호출', () => {
+      const callback = vi.fn()
+      const inputStartTime = Date.now()
+
+      render(
+        <ComboTimer
+          computerShowTime={1000}
+          inputStartTime={inputStartTime}
+          isActive={true}
+          isBreaking={false}
+          onComboTimerExpired={callback}
+        />
+      )
+
+      act(() => { vi.advanceTimersByTime(1200) })
+
+      expect(callback).toHaveBeenCalledTimes(1)
+    })
+
+    it('CT-6-3: isActive=false→true 전환 후 elapsed >= computerShowTime — 콜백 다시 1회 호출 (hasExpiredFiredRef 리셋)', () => {
+      const callback = vi.fn()
+      const inputStartTime = Date.now()
+
+      const { rerender } = render(
+        <ComboTimer
+          computerShowTime={500}
+          inputStartTime={inputStartTime}
+          isActive={true}
+          isBreaking={false}
+          onComboTimerExpired={callback}
+        />
+      )
+
+      act(() => { vi.advanceTimersByTime(600) })
+      expect(callback).toHaveBeenCalledTimes(1)
+
+      act(() => {
+        rerender(
+          <ComboTimer
+            computerShowTime={500}
+            inputStartTime={Date.now()}
+            isActive={false}
+            isBreaking={false}
+            onComboTimerExpired={callback}
+          />
+        )
+      })
+
+      act(() => {
+        rerender(
+          <ComboTimer
+            computerShowTime={500}
+            inputStartTime={Date.now()}
+            isActive={true}
+            isBreaking={false}
+            onComboTimerExpired={callback}
+          />
+        )
+      })
+
+      act(() => { vi.advanceTimersByTime(600) })
+      expect(callback).toHaveBeenCalledTimes(2)
+    })
+
+    it('CT-6-4: elapsed >= computerShowTime 상태에서 추가 렌더 발생 — 콜백 1회 초과 호출 안 됨', () => {
+      const callback = vi.fn()
+      const inputStartTime = Date.now()
+
+      const { rerender } = render(
+        <ComboTimer
+          computerShowTime={500}
+          inputStartTime={inputStartTime}
+          isActive={true}
+          isBreaking={false}
+          onComboTimerExpired={callback}
+        />
+      )
+
+      act(() => { vi.advanceTimersByTime(600) })
+      expect(callback).toHaveBeenCalledTimes(1)
+
+      act(() => {
+        rerender(
+          <ComboTimer
+            computerShowTime={500}
+            inputStartTime={inputStartTime}
+            isActive={true}
+            isBreaking={false}
+            onComboTimerExpired={callback}
+          />
+        )
+      })
+
+      act(() => { vi.advanceTimersByTime(300) })
+
+      expect(callback).toHaveBeenCalledTimes(1)
+    })
+  })
 })

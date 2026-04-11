@@ -377,3 +377,31 @@ describe('B-6. gameOver(reason) — reason 파라미터 + gameOverReason 필드'
     expect(useGameStore.getState().gameOverReason).toBeNull()
   })
 })
+
+// ── GS-1. breakCombo() ────────────────────────────────────────────────────
+
+describe('GS-1. breakCombo() — 콤보 타이머 만료 시 즉시 리셋', () => {
+  it('GS-1-1: status=INPUT, comboStreak=3 → comboStreak=0 (x1 구간 floor=0)', () => {
+    useGameStore.setState({ status: 'INPUT', comboStreak: 3 })
+    useGameStore.getState().breakCombo()
+    expect(useGameStore.getState().comboStreak).toBe(0)
+  })
+
+  it('GS-1-2: status=INPUT, comboStreak=7 → comboStreak=5 (x2 구간 floor=5)', () => {
+    useGameStore.setState({ status: 'INPUT', comboStreak: 7 })
+    useGameStore.getState().breakCombo()
+    expect(useGameStore.getState().comboStreak).toBe(5)
+  })
+
+  it('GS-1-3: status=INPUT, comboStreak=5 → comboStreak=5 (이미 floor값, 변화 없음)', () => {
+    useGameStore.setState({ status: 'INPUT', comboStreak: 5 })
+    useGameStore.getState().breakCombo()
+    expect(useGameStore.getState().comboStreak).toBe(5)
+  })
+
+  it('GS-1-4: status=SHOWING, comboStreak=3 → comboStreak=3 (INPUT 외 가드, 변화 없음)', () => {
+    useGameStore.setState({ status: 'SHOWING', comboStreak: 3 })
+    useGameStore.getState().breakCombo()
+    expect(useGameStore.getState().comboStreak).toBe(3)
+  })
+})
