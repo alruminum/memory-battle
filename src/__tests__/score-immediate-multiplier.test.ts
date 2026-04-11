@@ -237,3 +237,70 @@ describe('통합: addInput + stageClear 시퀀스', () => {
     expect(getState().score).toBe(12)
   })
 })
+
+describe('#103: gameOver — baseScore 부분 라운드 보정', () => {
+  beforeEach(() => {
+    useGameStore.getState().resetGame()
+  })
+
+  it('G-1: x1 배율 + 버튼 2개 정답 후 gameOver → comboBonus = 0', () => {
+    // 2버튼 정답 누적 (addInput 직접 호출 대신 setState로 결과 상태 재현)
+    setState({
+      sequence: ['orange', 'blue', 'green'],
+      currentIndex: 2,   // 2개 정답 완료 상태
+      score: 2,           // x1 * 2버튼
+      baseScore: 0,       // stageClear 미호출
+      comboStreak: 0,
+      status: 'INPUT',
+    })
+    useGameStore.getState().gameOver('wrong')
+    const { score, baseScore } = useGameStore.getState()
+    expect(score - baseScore).toBe(0)  // comboBonus = 0
+  })
+
+  it('G-2: x1 배율 + 타임아웃 (currentIndex=0) → comboBonus = 0', () => {
+    setState({
+      sequence: ['orange', 'blue', 'green'],
+      currentIndex: 0,
+      score: 0,
+      baseScore: 0,
+      comboStreak: 0,
+      status: 'INPUT',
+    })
+    useGameStore.getState().gameOver('timeout')
+    const { score, baseScore } = useGameStore.getState()
+    expect(score - baseScore).toBe(0)
+  })
+
+  it('G-3: x2 배율 + 버튼 2개 정답 후 gameOver → comboBonus = 배율 프리미엄만', () => {
+    // x2 배율: 2버튼 → score=4, 베이스=2
+    setState({
+      sequence: ['orange', 'blue', 'green'],
+      currentIndex: 2,
+      score: 4,           // x2 * 2버튼
+      baseScore: 0,
+      comboStreak: 5,    // x2 배율
+      status: 'INPUT',
+    })
+    useGameStore.getState().gameOver('wrong')
+    const { score, baseScore } = useGameStore.getState()
+    // comboBonus = 4 - 2 = 2 (배율 프리미엄 2점, 정상)
+    expect(score - baseScore).toBe(2)
+  })
+
+  it('G-4: 완료된 스테이지 있는 상태에서 미드라운드 gameOver → 기존 baseScore 보전', () => {
+    // 이전 스테이지(2버튼) 완료 후 baseScore=2, 현재 라운드 1버튼 정답 후 오답
+    setState({
+      sequence: ['orange', 'blue', 'green'],
+      currentIndex: 1,
+      score: 3,           // 이전 스테이지 2점 + 현재 1점
+      baseScore: 2,       // 이전 stageClear 결과
+      comboStreak: 0,
+      status: 'INPUT',
+    })
+    useGameStore.getState().gameOver('wrong')
+    const { score, baseScore } = useGameStore.getState()
+    // baseScore = 2 + 1 = 3, comboBonus = 3 - 3 = 0
+    expect(score - baseScore).toBe(0)
+  })
+})
