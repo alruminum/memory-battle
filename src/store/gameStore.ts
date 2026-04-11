@@ -29,6 +29,7 @@ interface GameStore {
     isFullCombo: boolean
     multiplierIncreased: boolean
   }
+  breakCombo: () => void
   gameOver: (reason: GameOverReason) => void
   resetGame: () => void
 }
@@ -128,6 +129,14 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
     return result
   },
+
+  breakCombo: () =>
+    set((state) => {
+      if (state.status !== 'INPUT') return {}
+      const prevMultiplierBase = Math.floor(state.comboStreak / 5) * 5
+      if (state.comboStreak === prevMultiplierBase) return {}  // 이미 floor값이면 변화 없음
+      return { comboStreak: prevMultiplierBase }
+    }),
 
   gameOver: (reason) =>
     set((state) => ({
