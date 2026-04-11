@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useGameStore } from '../store/gameStore'
 import { useGameEngine } from '../hooks/useGameEngine'
 import { useRanking } from '../hooks/useRanking'
@@ -137,7 +137,7 @@ interface GamePageProps {
 }
 
 export function GamePage({ onGameOver, onRanking }: GamePageProps) {
-  const { status, score, stage, comboStreak, userId, setUserId, sequenceStartTime } = useGameStore()
+  const { status, score, stage, comboStreak, userId, setUserId, sequenceStartTime, breakCombo } = useGameStore()
   const { flashingButton, clearingStage, countdown, handleInput, startGame, retryGame, multiplierIncreased, gameOverReason } = useGameEngine()
   const ranking = useRanking(userId || null)
 
@@ -168,6 +168,22 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
       return () => clearTimeout(tid)
     }
   }, [status])
+
+  // [신규] 게임 중 콤보 타이머 만료 상태
+  const [isComboBreaking, setIsComboBreaking] = useState(false)
+
+  // [신규] 새 스테이지 시작 / 게임 재시작 시 isComboBreaking 리셋
+  useEffect(() => {
+    if (status === 'SHOWING' || status === 'IDLE') {
+      setIsComboBreaking(false)
+    }
+  }, [status])
+
+  // [신규] ComboTimer 만료 콜백 핸들러
+  const handleComboTimerExpired = useCallback(() => {
+    breakCombo()            // store comboStreak 즉시 리셋
+    setIsComboBreaking(true)  // ComboIndicator shake 트리거
+  }, [breakCombo])
 
   const [showBurst, setShowBurst] = useState(false)
   useEffect(() => {
@@ -319,11 +335,15 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
           isActive={status === 'INPUT' && clearingStage === null}
           isBreaking={status === 'RESULT' && gameOverReason !== null}
           isShowing={status === 'SHOWING'}
+          onComboTimerExpired={handleComboTimerExpired}
         />
       </div>
         <ComboIndicator
           comboStreak={comboStreak}
-          isBreaking={status === 'RESULT' && gameOverReason === 'timeout'}
+          isBreaking={
+            isComboBreaking ||                                      // [신규] 게임 중 콤보 타이머 만료
+            (status === 'RESULT' && gameOverReason === 'timeout')   // 기존 유지: 게임오버(timeout)
+          }
         />
       </div>
 

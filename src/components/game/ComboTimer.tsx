@@ -29,9 +29,10 @@ interface ComboTimerProps {
   isActive: boolean          // INPUT 상태 여부. true일 때 바 게이지가 줄어들기 시작
   isBreaking?: boolean       // 콤보 깨짐 상태. true 시 collapse 애니메이션 후 숨김 (optional, defaults false)
   isShowing?: boolean        // SHOWING 페이즈 여부. true 시 풀 바(100%) 정적 렌더링 (DOM 유지, 레이아웃 안정화)
+  onComboTimerExpired?: () => void  // [신규] bar가 0에 도달 시 1회 호출. isActive=true 구간에서만 발화.
 }
 
-export function ComboTimer({ computerShowTime, inputStartTime, isActive, isBreaking = false, isShowing = false }: ComboTimerProps) {
+export function ComboTimer({ computerShowTime, inputStartTime, isActive, isBreaking = false, isShowing = false, onComboTimerExpired }: ComboTimerProps) {
   const [elapsedMs, setElapsedMs] = useState(0)
   const [collapsePhase, setCollapsePhase] = useState<CollapsePhase>('none')
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -41,6 +42,25 @@ export function ComboTimer({ computerShowTime, inputStartTime, isActive, isBreak
   useEffect(() => {
     computerShowTimeRef.current = computerShowTime
   }, [computerShowTime])
+
+  // [신규] onComboTimerExpired 발화 — bar 0 도달 시 1회 호출
+  // useEffect 방식: interval 경로 + VisibilityAPI 복귀 경로 모두 자동 커버
+  const hasExpiredFiredRef = useRef(false)
+  const onComboTimerExpiredRef = useRef(onComboTimerExpired)
+  useEffect(() => {
+    onComboTimerExpiredRef.current = onComboTimerExpired
+  }, [onComboTimerExpired])
+
+  useEffect(() => {
+    if (!isActive) {
+      hasExpiredFiredRef.current = false   // 다음 활성화를 위해 리셋
+      return
+    }
+    if (!hasExpiredFiredRef.current && elapsedMs >= computerShowTime) {
+      hasExpiredFiredRef.current = true
+      onComboTimerExpiredRef.current?.()
+    }
+  }, [isActive, elapsedMs, computerShowTime])
 
   // isBreaking 상태 머신: false→none 리셋 / true→breaking(즉시)+done(600ms)
   useEffect(() => {
