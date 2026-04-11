@@ -34,3 +34,5 @@
 ## bugfix 패턴
 - 2026-04-11 | 18-combo-timer-color-shake | success | attempt 1
 - 2026-04-11 | 99-combo-timer-shake-fix | validator_fail | validator FAIL (see /Users/dc.kim/project/memoryBattle/.claude/harness-state/mb_history/impl/attempt
+- 2026-04-11 | 99-combo-timer-shake-fix | success | attempt 2
+- 2026-04-11 | #100-visibility-timer-fix | validator_fail | validator agent produced no output (exit=142)

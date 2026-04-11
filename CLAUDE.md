@@ -219,6 +219,12 @@ _(impl 없음 — 문서 구조 작업만)_ · Issues: [#19](https://github.com/
 | 17 block-pop-animation | [impl/17-block-pop-animation.md](docs/milestones/v03/epics/epic-11-ui-improvements/impl/17-block-pop-animation.md) | [#93](https://github.com/alruminum/memory-battle/issues/93) |
 | 18 combo-timer-color-shake | [impl/18-combo-timer-color-shake.md](docs/milestones/v03/epics/epic-11-ui-improvements/impl/18-combo-timer-color-shake.md) | [#99](https://github.com/alruminum/memory-battle/issues/99) |
 
+**독립 버그픽스 (에픽 외)**
+
+| bugfix | 계획 파일 | Issue |
+|---|---|---|
+| #100 visibility-timer-fix | [docs/bugfix/#100-visibility-timer-fix.md](docs/bugfix/#100-visibility-timer-fix.md) | [#100](https://github.com/alruminum/memory-battle/issues/100) |
+
 ---
 
 ## 문서 (필요한 것만 열어서 참고)

@@ -250,4 +250,153 @@ describe('useTimer — document.hidden 억제 로직', () => {
 
     expect(onExpire).toHaveBeenCalledTimes(1)
   })
+  // ── visibilitychange 지연 발화 (UV-8 ~ UV-11) ─────────────────────────────
+  // 이슈 #100 신규 동작: hidden=true 중 만료된 타이머가 탭 복귀 시 발화 예약됨
+
+  it('UV-8: hidden=true 만료 후 visibilitychange 복귀 시 onExpire가 정확히 1회 호출된다', () => {
+    const onExpire = vi.fn()
+
+    Object.defineProperty(document, 'hidden', {
+      configurable: true,
+      get: () => true,
+    })
+
+    const { result } = renderHook(() => useTimer(onExpire, 200))
+
+    act(() => {
+      result.current.reset()
+    })
+
+    // 만료 — hidden=true이므로 onExpire 억제, expiredWhileHiddenRef=true 예약
+    act(() => {
+      vi.advanceTimersByTime(200)
+    })
+
+    expect(onExpire).not.toHaveBeenCalled()
+
+    // 탭 복귀: hidden=false 전환 후 visibilitychange 이벤트 발화
+    Object.defineProperty(document, 'hidden', {
+      configurable: true,
+      get: () => false,
+    })
+
+    act(() => {
+      document.dispatchEvent(new Event('visibilitychange'))
+    })
+
+    expect(onExpire).toHaveBeenCalledTimes(1)
+  })
+
+  it('UV-9: hidden=true 만료 후 언마운트 시 visibilitychange에서 onExpire가 호출되지 않는다', () => {
+    const onExpire = vi.fn()
+
+    Object.defineProperty(document, 'hidden', {
+      configurable: true,
+      get: () => true,
+    })
+
+    const { result, unmount } = renderHook(() => useTimer(onExpire, 200))
+
+    act(() => {
+      result.current.reset()
+    })
+
+    act(() => {
+      vi.advanceTimersByTime(200)
+    })
+
+    // 언마운트 — stop() 호출로 플래그 클리어 + visibilitychange 리스너 제거
+    unmount()
+
+    Object.defineProperty(document, 'hidden', {
+      configurable: true,
+      get: () => false,
+    })
+
+    act(() => {
+      document.dispatchEvent(new Event('visibilitychange'))
+    })
+
+    expect(onExpire).not.toHaveBeenCalled()
+  })
+
+  it('UV-10: hidden=true 만료 후 stop() 호출 시 visibilitychange에서 onExpire가 호출되지 않는다', () => {
+    const onExpire = vi.fn()
+
+    Object.defineProperty(document, 'hidden', {
+      configurable: true,
+      get: () => true,
+    })
+
+    const { result } = renderHook(() => useTimer(onExpire, 200))
+
+    act(() => {
+      result.current.reset()
+    })
+
+    act(() => {
+      vi.advanceTimersByTime(200)
+    })
+
+    // 명시적 stop() — expiredWhileHiddenRef 플래그 클리어
+    act(() => {
+      result.current.stop()
+    })
+
+    Object.defineProperty(document, 'hidden', {
+      configurable: true,
+      get: () => false,
+    })
+
+    act(() => {
+      document.dispatchEvent(new Event('visibilitychange'))
+    })
+
+    expect(onExpire).not.toHaveBeenCalled()
+  })
+
+  it('UV-11: hidden=true 만료 복귀(1회) + reset 후 재만료(1회) = onExpire 총 2회', () => {
+    const onExpire = vi.fn()
+
+    Object.defineProperty(document, 'hidden', {
+      configurable: true,
+      get: () => true,
+    })
+
+    const { result } = renderHook(() => useTimer(onExpire, 200))
+
+    act(() => {
+      result.current.reset()
+    })
+
+    // 1차 만료 — 보류
+    act(() => {
+      vi.advanceTimersByTime(200)
+    })
+
+    expect(onExpire).toHaveBeenCalledTimes(0)
+
+    // 복귀 → 보류 발화 (1회차)
+    Object.defineProperty(document, 'hidden', {
+      configurable: true,
+      get: () => false,
+    })
+
+    act(() => {
+      document.dispatchEvent(new Event('visibilitychange'))
+    })
+
+    expect(onExpire).toHaveBeenCalledTimes(1)
+
+    // reset 후 2차 만료 (hidden=false이므로 즉시 발화, 2회차)
+    act(() => {
+      result.current.reset()
+    })
+
+    act(() => {
+      vi.advanceTimersByTime(200)
+    })
+
+    expect(onExpire).toHaveBeenCalledTimes(2)
+  })
 })
