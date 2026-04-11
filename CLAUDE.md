@@ -225,6 +225,7 @@ _(impl 없음 — 문서 구조 작업만)_ · Issues: [#19](https://github.com/
 |---|---|---|
 | #100 visibility-timer-fix | [docs/bugfix/#100-visibility-timer-fix.md](docs/bugfix/#100-visibility-timer-fix.md) | [#100](https://github.com/alruminum/memory-battle/issues/100) |
 | #101 result-friend-ranking-removal | [docs/bugfix/#101-result-friend-ranking-removal.md](docs/bugfix/#101-result-friend-ranking-removal.md) | [#101](https://github.com/alruminum/memory-battle/issues/101) |
+| #102 result-ad-placeholder-monthly-removal | [docs/bugfix/#102-result-ad-placeholder-monthly-removal.md](docs/bugfix/#102-result-ad-placeholder-monthly-removal.md) | [#102](https://github.com/alruminum/memory-battle/issues/102) |
 
 ---
 

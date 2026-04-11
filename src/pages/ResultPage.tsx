@@ -75,8 +75,6 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
   }
 
 
-  const monthName = new Date().getMonth() + 2 > 12 ? 1 : new Date().getMonth() + 2
-
   const rankDisplay = (rank: number) => rank > 0 ? `#${rank}` : '#—'
 
   return (
@@ -217,7 +215,7 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
             label: 'Monthly',
             rank: myRanks.monthly,
             highlight: false,
-            sub: myRanks.monthly > 0 ? `${monthName}월 1일에 포인트 지급 예정` : undefined,
+            sub: undefined,
           },
           { label: 'Season',  rank: myRanks.season,  highlight: false, sub: undefined },
         ].map(({ label, rank, highlight, sub }, i, arr) => (
@@ -253,6 +251,19 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
           </div>
         ))}
       </div>
+
+      {/* 광고 placeholder */}
+      <div
+        data-testid="ad-placeholder"
+        style={{
+          margin: '12px 20px 0',
+          height: 96,
+          backgroundColor: '#1a1a1d',
+          border: '1px solid rgba(255,255,255,0.1)',
+          borderRadius: 8,
+          flexShrink: 0,
+        }}
+      />
 
       {/* 버튼 영역 */}
       <div style={{
