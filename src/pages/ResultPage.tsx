@@ -3,7 +3,6 @@ import { useGameStore } from '../store/gameStore'
 import { useRanking } from '../hooks/useRanking'
 import { useRewardAd } from '../hooks/useRewardAd'
 import { useDailyReward } from '../hooks/useDailyReward'
-import { openLeaderboard } from '../lib/ait'
 
 interface ResultPageProps {
   onPlayAgain: () => void
@@ -75,13 +74,6 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
     toastTimerRef.current = setTimeout(() => setToast(null), 3000)
   }
 
-  async function handleFriendRanking() {
-    try {
-      await openLeaderboard()
-    } catch (e) {
-      console.error('openLeaderboard failed', e)
-    }
-  }
 
   const monthName = new Date().getMonth() + 2 > 12 ? 1 : new Date().getMonth() + 2
 
@@ -303,23 +295,6 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
           }}
         >
           PLAY AGAIN
-        </button>
-        <button
-          onClick={handleFriendRanking}
-          style={{
-            width: '100%',
-            padding: '14px 0',
-            borderRadius: 8,
-            border: '1px solid var(--vb-border)',
-            backgroundColor: 'transparent',
-            color: 'var(--vb-text-mid)',
-            fontFamily: 'var(--vb-font-body)',
-            fontSize: 13,
-            fontWeight: 600,
-            cursor: 'pointer',
-          }}
-        >
-          친구 랭킹 보기
         </button>
         <button
           onClick={onGoRanking}
