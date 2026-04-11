@@ -2,6 +2,27 @@ import { useState, useEffect, useRef } from 'react'
 
 type CollapsePhase = 'none' | 'breaking' | 'done'
 
+// [신규] 3단계 타이머 페이즈
+type TimerPhase = 'normal' | 'warning' | 'danger'
+
+const getTimerPhase = (ratio: number): TimerPhase => {
+  if (ratio <= 0.2) return 'danger'
+  if (ratio <= 0.5) return 'warning'
+  return 'normal'
+}
+
+// [신규] 색상 테이블
+const FILL_COLORS: Record<TimerPhase, string> = {
+  normal:  'var(--vb-accent)',
+  warning: 'var(--vb-combo-warn)',
+  danger:  'var(--vb-combo-danger)',
+}
+const GLOW_COLORS: Record<TimerPhase, string> = {
+  normal:  'rgba(212,168,67,0.7)',
+  warning: 'rgba(251,146,60,0.7)',
+  danger:  'rgba(248,113,113,0.7)',
+}
+
 interface ComboTimerProps {
   computerShowTime: number   // 컴퓨터 시연 총 시간 (ms). flashDuration × sequenceLength
   inputStartTime: number     // INPUT 페이즈 시작 시각 (timestamp). store.sequenceStartTime. 0 = 미설정
@@ -22,14 +43,11 @@ export function ComboTimer({ computerShowTime, inputStartTime, isActive, isBreak
   }, [computerShowTime])
 
   // isBreaking 상태 머신: false→none 리셋 / true→breaking(즉시)+done(600ms)
-  // [isBreaking]만 dep: collapsePhase를 dep에 포함하면 'none'→'breaking' 전환 시
-  // cleanup이 재실행되어 setTimeout이 취소되는 버그 발생
   useEffect(() => {
     if (!isBreaking) {
       setCollapsePhase('none')
       return
     }
-    // isBreaking=true → collapse 시작
     setCollapsePhase('breaking')
     const tid = setTimeout(() => setCollapsePhase('done'), 600)
     return () => clearTimeout(tid)
@@ -37,7 +55,6 @@ export function ComboTimer({ computerShowTime, inputStartTime, isActive, isBreak
 
   useEffect(() => {
     if (!isActive || inputStartTime === 0) {
-      // 비활성: 타이머 정지 + 초기화
       if (intervalRef.current) {
         clearInterval(intervalRef.current)
         intervalRef.current = null
@@ -47,11 +64,10 @@ export function ComboTimer({ computerShowTime, inputStartTime, isActive, isBreak
     }
 
     const startInterval = () => {
-      if (intervalRef.current) return  // 이미 실행 중이면 중복 시작 방지
+      if (intervalRef.current) return
       intervalRef.current = setInterval(() => {
         const next = Date.now() - inputStartTime
         if (next >= computerShowTimeRef.current) {
-          // 상한 도달: interval 정지 + 값 clamp
           clearInterval(intervalRef.current!)
           intervalRef.current = null
           setElapsedMs(computerShowTimeRef.current)
@@ -68,7 +84,6 @@ export function ComboTimer({ computerShowTime, inputStartTime, isActive, isBreak
       }
     }
 
-    // 초기 시작: hidden이 아닐 때만 interval 시작
     if (!document.hidden) {
       startInterval()
     }
@@ -77,13 +92,11 @@ export function ComboTimer({ computerShowTime, inputStartTime, isActive, isBreak
       if (document.hidden) {
         stopInterval()
       } else {
-        // 복귀 시: elapsed 즉시 반영 후 interval 재개
         const next = Date.now() - inputStartTime
         setElapsedMs(Math.min(next, computerShowTimeRef.current))
         if (next < computerShowTimeRef.current) {
           startInterval()
         }
-        // next >= computerShowTimeRef.current이면 clamped 상한값으로 고정된 채 interval 재시작 불필요
       }
     }
 
@@ -95,33 +108,26 @@ export function ComboTimer({ computerShowTime, inputStartTime, isActive, isBreak
     }
   }, [isActive, inputStartTime])
 
-  // 렌더링 조건
-  // · isActive=false && isShowing=false && collapsePhase='none' → null (INPUT/SHOWING 아닐 때 숨김)
-  // · isShowing=true                        → 풀 바(100%) 정적 렌더 (DOM 유지, 레이아웃 안정화)
-  // · collapsePhase='done'                  → null (붕괴 완료 후 숨김)
   if (!isActive && !isShowing && collapsePhase === 'none') return null
   if (collapsePhase === 'done') return null
 
-  // SHOWING 중에는 elapsed를 0으로 취급 → 항상 풀 바(100%) 표시
   const displayElapsedMs = (isShowing && !isActive) ? 0 : elapsedMs
 
-  // 게이지 수치
   const ratio = Math.max(0, 1 - displayElapsedMs / computerShowTime)
   const fillWidth = `${ratio * 100}%`
 
-  // 상태별 색상
-  const isOver = displayElapsedMs >= computerShowTime
-  const fillColor = isOver ? 'var(--vb-combo-over)' : 'var(--vb-accent)'
-  const glowColor = isOver
-    ? 'rgba(248,113,113,0.7)'
-    : 'rgba(212,168,67,0.7)'
+  // [변경] TimerPhase 기반 색상 분기 (isOver 제거)
+  const phase = getTimerPhase(ratio)
+  const fillColor = FILL_COLORS[phase]
+  const glowColor = GLOW_COLORS[phase]
 
-  // CSS class 조합
   const fillClass = [
     'combo-timer-fill',
-    isOver ? 'over' : '',
+    phase !== 'normal' ? phase : '',
     collapsePhase === 'breaking' ? 'collapse' : '',
   ].filter(Boolean).join(' ')
+
+  const glowClass = phase === 'danger' ? 'combo-timer-glow--danger' : ''
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0 0 4px' }}>
@@ -162,24 +168,29 @@ export function ComboTimer({ computerShowTime, inputStartTime, isActive, isBreak
             borderRadius: 2,
             background: fillColor,
             position: 'relative',
-            transition: 'width 80ms linear, background 200ms ease',
+            transition: 'width 80ms linear',
             transformOrigin: 'left center',
           }}
         >
           {/* 글로우 헤드 — collapse 시 숨김 */}
           {collapsePhase !== 'breaking' && (
-            <div style={{
-              position: 'absolute',
-              right: -3,
-              top: '50%',
-              transform: 'translateY(-50%)',
-              width: 8,
-              height: 8,
-              borderRadius: '50%',
-              background: fillColor,
-              boxShadow: `0 0 10px 3px ${glowColor}`,
-              transition: 'background 200ms ease, box-shadow 200ms ease',
-            }} />
+            <div
+              className={glowClass}
+              style={{
+                position: 'absolute',
+                right: -3,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                width: 8,
+                height: 8,
+                borderRadius: '50%',
+                background: fillColor,
+                boxShadow: `0 0 10px 3px ${glowColor}`,
+                transition: phase === 'danger'
+                  ? 'background 200ms ease'
+                  : 'background 200ms ease, box-shadow 200ms ease',
+              }}
+            />
           )}
         </div>
       </div>

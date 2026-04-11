@@ -17,6 +17,8 @@
 
   /* 콤보 타이머 색상 */
   --vb-combo-ok: #34D399;
+  --vb-combo-warn:   #FB923C;   /* WARNING: 타이머 50% 이하 (amber→orange) */
+  --vb-combo-danger: #F87171;   /* DANGER: 타이머 20% 이하 (orange→red) */
   --vb-combo-over: #F87171;
 
   /* 중앙 버튼 / 게임기 바디 장식 색상 */
@@ -251,9 +253,50 @@ body {
 }
 
 .combo-timer-fill.collapse {
+  transition: none;  /* slimFlash animation이 background 직접 제어 — transition 충돌 방지 */
   animation: slimFlash 0.5s ease-in forwards;
 }
 
 .combo-timer-track.collapse {
   animation: slimTrackFlash 0.5s ease-out forwards;
+}
+
+/* ── fill bar background transition (인라인 대체) ── */
+.combo-timer-fill {
+  /* width는 ComboTimer 인라인 style에서 관리 (80ms linear) */
+  transition: background 200ms ease;
+}
+.combo-timer-fill.warning {
+  transition: background 300ms ease-out;
+}
+.combo-timer-fill.danger {
+  transition: background 200ms ease-out;
+}
+
+/* ── 글로우 헤드 DANGER 펄스 ── */
+@keyframes dangerPulse {
+  0%, 100% { box-shadow: 0 0 10px 3px rgba(248,113,113,0.70); }
+  50%      { box-shadow: 0 0 18px 7px rgba(248,113,113,1.00); }
+}
+
+.combo-timer-glow--danger {
+  animation: dangerPulse 1s ease-in-out infinite;
+}
+
+/* ── ComboIndicator 콤보 브레이크 쉐이크 ── */
+/* 3회 왕복 진폭 감쇠: ±4px × 2, ±3px × 1 / 총 0.56s */
+@keyframes comboBreakShake {
+  0%   { transform: translateX(0); }
+  12%  { transform: translateX(-4px); }
+  25%  { transform: translateX(4px); }
+  38%  { transform: translateX(-4px); }
+  50%  { transform: translateX(4px); }
+  63%  { transform: translateX(-3px); }
+  76%  { transform: translateX(3px); }
+  88%  { transform: translateX(-3px); }
+  100% { transform: translateX(0); }
+}
+
+.combo-break-shake {
+  animation: comboBreakShake 0.56s ease-out forwards;
 }

@@ -321,7 +321,10 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
           isShowing={status === 'SHOWING'}
         />
       </div>
-        <ComboIndicator comboStreak={comboStreak} />
+        <ComboIndicator
+          comboStreak={comboStreak}
+          isBreaking={status === 'RESULT' && gameOverReason === 'timeout'}
+        />
       </div>
 
       {/* 버튼 패드 */}

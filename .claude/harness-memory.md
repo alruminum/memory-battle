@@ -26,3 +26,9 @@
 - 2026-04-08 | 03-color-scheme-fix | autocheck_fail | no_changes: engineer가 아무 파일도 수정하지 않음
 - 2026-04-09 | 16-combo-timer-gauge | test_fail | 
 - 2026-04-09 | 17-block-pop-animation | success | attempt 1
+
+## impl 패턴
+
+## design 패턴
+
+## bugfix 패턴
