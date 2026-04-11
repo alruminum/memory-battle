@@ -143,6 +143,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
       status: 'RESULT',
       stage: state.sequence.length,
       gameOverReason: reason,
+      // 부분 라운드 베이스 점수 보정: addInput에서 누적된 score와 stageClear에서만
+      // 갱신되는 baseScore 간 불일치 해소. currentIndex = 현재 라운드에서 맞춘 버튼 수.
+      // 버튼 1개 베이스 = 1점, clearBonus는 라운드 미완료이므로 추가하지 않음.
+      baseScore: state.baseScore + state.currentIndex,
     })),
 
   resetGame: () =>
