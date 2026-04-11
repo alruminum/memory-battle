@@ -76,7 +76,7 @@
           {
             "type": "command",
             "timeout": 5,
-            "command": "python3 -c \"import sys,json,re; d=json.load(sys.stdin); t=d.get('tool_input',{}); a=t.get('subagent_type'); prompt=t.get('prompt',''); has_issue=bool(re.search('#[0-9]+',prompt)); print(json.dumps({'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':f'❌ {a} 호출 전 GitHub 이슈 등록 필요. 프롬프트에 이슈 번호(#NNN)가 없습니다.'}})) if a in ['architect','engineer','designer'] and not has_issue else None\" 2>/dev/null || true"
+            "command": "python3 -c \"import sys,json,re; d=json.load(sys.stdin); t=d.get('tool_input',{}); a=t.get('subagent_type'); prompt=t.get('prompt',''); has_issue=bool(re.search('#[0-9]+',prompt)); print(json.dumps({'hookSpecificOutput':{'hookEventName':'PreToolUse','permissionDecision':'deny','permissionDecisionReason':f'❌ {a} 호출 전 GitHub 이슈 등록 필요. 프롬프트에 이슈 번호(#NNN)가 없습니다.'}})) if a in ['architect','engineer'] and not has_issue else None\" 2>/dev/null || true"
           },
           {
             "type": "command",
