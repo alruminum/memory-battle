@@ -227,6 +227,7 @@ _(impl 없음 — 문서 구조 작업만)_ · Issues: [#19](https://github.com/
 | #101 result-friend-ranking-removal | [docs/bugfix/#101-result-friend-ranking-removal.md](docs/bugfix/#101-result-friend-ranking-removal.md) | [#101](https://github.com/alruminum/memory-battle/issues/101) |
 | #102 result-ad-placeholder-monthly-removal | [docs/bugfix/#102-result-ad-placeholder-monthly-removal.md](docs/bugfix/#102-result-ad-placeholder-monthly-removal.md) | [#102](https://github.com/alruminum/memory-battle/issues/102) |
 | #103 gameover-basescore-fix | [docs/bugfix/#103-gameover-basescore-fix.md](docs/bugfix/#103-gameover-basescore-fix.md) | [#103](https://github.com/alruminum/memory-battle/issues/103) |
+| #104 ranking-back-fix | [docs/bugfix/#104-ranking-back-fix.md](docs/bugfix/#104-ranking-back-fix.md) | [#104](https://github.com/alruminum/memory-battle/issues/104) |
 
 ---
 
