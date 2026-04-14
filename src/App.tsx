@@ -12,6 +12,7 @@ function App() {
   const scheme = useColorScheme()
   const { resetGame } = useGameStore()
   const [page, setPage] = useState<Page>('game')
+  const [previousPage, setPreviousPage] = useState<Page>('game')
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', scheme)
@@ -47,7 +48,7 @@ function App() {
       {page === 'game' && (
         <GamePage
           onGameOver={() => setPage('result')}
-          onRanking={() => setPage('ranking')}
+          onRanking={() => { setPreviousPage('game'); setPage('ranking') }}
         />
       )}
       {page === 'result' && (
@@ -56,12 +57,12 @@ function App() {
             resetGame()
             setPage('game')
           }}
-          onGoRanking={() => setPage('ranking')}
+          onGoRanking={() => { setPreviousPage('result'); setPage('ranking') }}
         />
       )}
       {page === 'ranking' && (
         <RankingPage
-          onBack={() => setPage('game')}
+          onBack={() => setPage(previousPage)}
         />
       )}
     </div>
