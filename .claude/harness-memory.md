@@ -39,3 +39,4 @@
 - 2026-04-11 | #100-visibility-timer-fix | success | attempt 2
 - 2026-04-11 | #101-result-friend-ranking-removal | success | attempt 1
 - 2026-04-11 | #102-result-ad-placeholder-monthly-removal | success | attempt 1
+- 2026-04-11 | #103-gameover-basescore-fix | success | attempt 1
