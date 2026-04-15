@@ -10,7 +10,7 @@ interface ResultPageProps {
 }
 
 export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
-  const { score, stage, userId, baseScore, fullComboCount, maxComboStreak } = useGameStore()
+  const { score, stage, userId, baseScore, maxComboStreak } = useGameStore()
 
   const comboBonus = score - baseScore
   const { daily, myRanks, isLoading, submitScore } = useRanking(userId)
@@ -157,7 +157,7 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
       </div>
 
       {/* COMBO STATS 카드 */}
-      {(fullComboCount > 0 || maxComboStreak > 0) && (
+      {maxComboStreak > 0 && (
         <div style={{
           margin: '12px 20px 0',
           padding: '16px',
@@ -176,8 +176,7 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
 
           <div style={{ display: 'flex', justifyContent: 'space-between' }}>
             {[
-              { label: 'FULL COMBO',  value: `${fullComboCount}x` },
-              { label: 'MAX STREAK',  value: `x${Math.floor(maxComboStreak / 5) + 1}` },
+              { label: 'PEAK MULT',   value: `${Math.floor(maxComboStreak / 5) + 1}x` },
               { label: 'COMBO BONUS', value: `+${comboBonus.toLocaleString()}` },
             ].map(({ label, value }) => (
               <div key={label} style={{ textAlign: 'center', flex: 1 }}>
