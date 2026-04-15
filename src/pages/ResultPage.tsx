@@ -10,7 +10,7 @@ interface ResultPageProps {
 }
 
 export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
-  const { score, stage, userId, baseScore, maxComboStreak } = useGameStore()
+  const { score, stage, userId, baseScore, fullComboCount, maxComboStreak } = useGameStore()
 
   const comboBonus = score - baseScore
   const { daily, myRanks, isLoading, submitScore } = useRanking(userId)
@@ -157,47 +157,46 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
       </div>
 
       {/* COMBO STATS 카드 */}
-      {maxComboStreak > 0 && (
+      <div style={{
+        margin: '12px 20px 0',
+        padding: '16px',
+        backgroundColor: 'var(--vb-surface)',
+        borderRadius: 12,
+        border: '1px solid var(--vb-border)',
+        flexShrink: 0,
+      }}>
         <div style={{
-          margin: '12px 20px 0',
-          padding: '16px',
-          backgroundColor: 'var(--vb-surface)',
-          borderRadius: 12,
-          border: '1px solid var(--vb-border)',
-          flexShrink: 0,
-        }}>
-          <div style={{
-            fontFamily: 'var(--vb-font-score)',
-            fontSize: 10,
-            color: 'var(--vb-text-dim)',
-            letterSpacing: 3,
-            marginBottom: 12,
-          }}>COMBO STATS</div>
+          fontFamily: 'var(--vb-font-score)',
+          fontSize: 10,
+          color: 'var(--vb-text-dim)',
+          letterSpacing: 3,
+          marginBottom: 12,
+        }}>COMBO STATS</div>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-            {[
-              { label: 'PEAK MULT',   value: `${Math.floor(maxComboStreak / 5) + 1}x` },
-              { label: 'COMBO BONUS', value: `+${comboBonus.toLocaleString()}` },
-            ].map(({ label, value }) => (
-              <div key={label} style={{ textAlign: 'center', flex: 1 }}>
-                <div style={{
-                  fontFamily: 'var(--vb-font-body)',
-                  fontSize: 9,
-                  color: 'var(--vb-text-dim)',
-                  letterSpacing: 1.5,
-                  marginBottom: 4,
-                }}>{label}</div>
-                <div style={{
-                  fontFamily: 'var(--vb-font-score)',
-                  fontSize: 18,
-                  fontWeight: 900,
-                  color: 'var(--vb-accent)',
-                }}>{value}</div>
-              </div>
-            ))}
-          </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          {[
+            { label: 'BEST COMBO',  value: `${fullComboCount}` },
+            { label: 'MULTIPLIER',  value: `${Math.floor(maxComboStreak / 5) + 1}` },
+            { label: 'COMBO BONUS', value: `+${comboBonus.toLocaleString()}` },
+          ].map(({ label, value }) => (
+            <div key={label} style={{ textAlign: 'center', flex: 1 }}>
+              <div style={{
+                fontFamily: 'var(--vb-font-body)',
+                fontSize: 9,
+                color: 'var(--vb-text-dim)',
+                letterSpacing: 1.5,
+                marginBottom: 4,
+              }}>{label}</div>
+              <div style={{
+                fontFamily: 'var(--vb-font-score)',
+                fontSize: 18,
+                fontWeight: 900,
+                color: 'var(--vb-accent)',
+              }}>{value}</div>
+            </div>
+          ))}
         </div>
-      )}
+      </div>
 
       {/* 랭킹 리스트 */}
       <div style={{
