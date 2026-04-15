@@ -47,3 +47,4 @@
 - 2026-04-15 | #105-safe-area-fix | success | attempt 1
 - 2026-04-15 | #106-result-combo-text-fix | pr_fail | pr-reviewer CHANGES_REQUESTED (see /Users/dc.kim/project/memoryBattle/.claude/harness-state/mb_histo
 - 2026-04-15 | #106-result-combo-text-fix | success | attempt 2
+- 2026-04-15 | #106-result-combo-text-fix | success | attempt 1

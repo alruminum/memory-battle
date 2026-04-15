@@ -176,7 +176,7 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           {[
             { label: 'BEST COMBO',  value: `${fullComboCount}` },
-            { label: 'MULTIPLIER',  value: `${Math.floor(maxComboStreak / 5) + 1}` },
+            { label: 'MULTIPLIER',  value: `${Math.floor(maxComboStreak / 5) + 1}x` },
             { label: 'COMBO BONUS', value: `+${comboBonus.toLocaleString()}` },
           ].map(({ label, value }) => (
             <div key={label} style={{ textAlign: 'center', flex: 1 }}>
