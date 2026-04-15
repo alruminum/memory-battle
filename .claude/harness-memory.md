@@ -42,3 +42,4 @@
 - 2026-04-11 | #103-gameover-basescore-fix | success | attempt 1
 - 2026-04-14 | #104-ranking-back-fix | success | attempt 1
 - 2026-04-14 | #104-ranking-back-fix | success | attempt 1
+- 2026-04-15 | dead-code-removal | pr_fail | pr-reviewer CHANGES_REQUESTED (see /Users/dc.kim/project/memoryBattle/.claude/harness-state/mb_histo

@@ -8,7 +8,7 @@ export function RankingRow({ rank, score, isMe }: RankingRowProps) {
   const displayName = isMe ? '나' : `익명 ${rank}`
 
   const rankText = rank > 0 ? `${rank}` : '-'
-  const rankBadgeColor = rank === 1 ? '#FFD700' : rank === 2 ? '#C0C0C0' : rank === 3 ? '#CD7F32' : 'var(--text-muted)'
+  const rankBadgeColor = rank === 1 ? 'var(--vb-rank-gold)' : rank === 2 ? 'var(--vb-rank-silver)' : rank === 3 ? 'var(--vb-rank-bronze)' : 'var(--vb-text-dim)'
 
   return (
     <div
@@ -17,8 +17,8 @@ export function RankingRow({ rank, score, isMe }: RankingRowProps) {
         alignItems: 'center',
         padding: '10px 16px',
         borderRadius: 10,
-        backgroundColor: isMe ? 'rgba(212,168,67,0.15)' : 'transparent',
-        border: isMe ? '1px solid rgba(212,168,67,0.3)' : '1px solid transparent',
+        backgroundColor: isMe ? 'var(--vb-highlight-bg)' : 'transparent',
+        border: isMe ? '1px solid var(--vb-highlight-border)' : '1px solid transparent',
         gap: 12,
       }}
     >
@@ -56,7 +56,7 @@ export function RankingRow({ rank, score, isMe }: RankingRowProps) {
         style={{
           fontSize: 15,
           fontWeight: 800,
-          color: isMe ? '#D4A843' : 'var(--vb-text)',
+          color: isMe ? 'var(--vb-accent)' : 'var(--vb-text)',
           flexShrink: 0,
         }}
       >

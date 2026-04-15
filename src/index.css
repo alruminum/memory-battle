@@ -47,6 +47,13 @@
   --vb-yellow-base: #F5C000;
   --vb-yellow-light: #FFD740;
   --vb-yellow-dark: #A07C00;
+
+  /* 랭킹 행 색상 */
+  --vb-rank-gold: #FFD700;
+  --vb-rank-silver: #C0C0C0;
+  --vb-rank-bronze: #CD7F32;
+  --vb-highlight-bg: rgba(212,168,67,0.15);
+  --vb-highlight-border: rgba(212,168,67,0.3);
 }
 
 @keyframes slide-up { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
