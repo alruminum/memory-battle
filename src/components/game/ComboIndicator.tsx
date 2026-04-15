@@ -74,7 +74,7 @@ export function ComboIndicator({ comboStreak, isBreaking = false }: ComboIndicat
         color: 'var(--vb-accent)',
         lineHeight: 1,
       }}>
-        {multiplier}
+        {multiplier}x
       </div>
     </div>
   )
