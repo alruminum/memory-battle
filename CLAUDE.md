@@ -229,6 +229,7 @@ _(impl 없음 — 문서 구조 작업만)_ · Issues: [#19](https://github.com/
 | #103 gameover-basescore-fix | [docs/bugfix/#103-gameover-basescore-fix.md](docs/bugfix/#103-gameover-basescore-fix.md) | [#103](https://github.com/alruminum/memory-battle/issues/103) |
 | #104 ranking-back-fix | [docs/bugfix/#104-ranking-back-fix.md](docs/bugfix/#104-ranking-back-fix.md) | [#104](https://github.com/alruminum/memory-battle/issues/104) |
 | #105 safe-area-fix | [docs/bugfix/#105-safe-area-fix.md](docs/bugfix/#105-safe-area-fix.md) | [#105](https://github.com/alruminum/memory-battle/issues/105) |
+| #106 result-combo-text-fix | [docs/bugfix/#106-result-combo-text-fix.md](docs/bugfix/#106-result-combo-text-fix.md) | [#106](https://github.com/alruminum/memory-battle/issues/106) |
 
 ---
 
