@@ -89,8 +89,11 @@
 | Prop | 타입 | 설명 |
 |---|---|---|
 | `computerShowTime` | `number` (ms) | 컴퓨터 시연 총 시간 (`flashDuration × sequenceLength`) |
-| `inputStartTime` | `number` | 유저 입력 시작 시각 (timestamp) |
-| `isActive` | `boolean` | INPUT 상태 여부 |
+| `inputStartTime` | `number` | 유저 입력 시작 시각 (timestamp). `store.sequenceStartTime`. 0 = 미설정 |
+| `isActive` | `boolean` | INPUT 상태 여부. true일 때 바 게이지 감소 시작 |
+| `isBreaking?` | `boolean` | 콤보 깨짐 상태. true 시 collapse 애니메이션 후 숨김. 기본값 `false` |
+| `isShowing?` | `boolean` | SHOWING 페이즈 여부. true 시 풀 바(100%) 정적 렌더링 (DOM 유지, 레이아웃 안정화). 기본값 `false` |
+| `onComboTimerExpired?` | `() => void` | bar가 0에 도달 시 1회 호출. isActive=true 구간에서만 발화. optional |
 
 ### 스테이지 클리어 오버레이 (clearingStage 시퀀스)
 
@@ -198,6 +201,17 @@
 ## RankingPage
 
 - **탭**: 일간 / 월간 / 시즌
-- **리스트**: 순위 + 유저 식별자 + 점수 (내 항목 하이라이트)
+- **리스트**: 순위 + 유저명 + 점수 (내 항목 하이라이트)
+  - `isMe === true`: "나" 표시 + 하이라이트 스타일
+  - `isMe === false`: "익명 {rank}" 표시
+  - `userId` prop 없음 — `isMe` flag 기반으로만 표시
 - **하단 고정**: 내 순위 항상 표시 (50위 밖이어도 노출)
 - **TOP 50**까지만 표시
+
+**RankingRow Props**
+
+| Prop | 타입 | 설명 |
+|---|---|---|
+| `rank` | `number` | 순위 |
+| `score` | `number` | 점수 |
+| `isMe` | `boolean` | 현재 유저 여부. true이면 "나" 표시 + 하이라이트 |

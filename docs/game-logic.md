@@ -185,6 +185,8 @@ const onStageClear = (
 ```typescript
 // Difficulty 타입 제거 (v0.3)
 
+export type GameOverReason = 'timeout' | 'wrong' | null
+
 interface GameStore {
   // 게임 상태
   status: 'IDLE' | 'SHOWING' | 'INPUT' | 'RESULT'
@@ -196,21 +198,26 @@ interface GameStore {
   comboStreak: number        // 현재 연속 풀콤보 스트릭 (상한 없음, v0.3.1)
   fullComboCount: number     // 이번 게임 풀콤보 달성 횟수
   maxComboStreak: number     // 이번 게임 최고 콤보 스택
+  gameOverReason: GameOverReason  // 게임오버 이유 ('timeout' | 'wrong' | null)
 
   // 콤보 판정용 타임스탬프 (v0.3.1)
-  sequenceStartTime: number  // INPUT 페이즈 시작 시각 (ms)
+  sequenceStartTime: number  // INPUT 페이즈 시작 시각 (ms). 0 = 미설정
 
   // 유저
   userId: string
+  hasTodayReward: boolean    // 오늘 보상 수령 여부
 
   // 액션
+  setUserId: (id: string) => void
+  setTodayReward: (value: boolean) => void
   startGame: () => void
-  addInput: (color: string) => void
+  addInput: (color: string) => 'correct' | 'wrong' | 'round-clear'
   stageClear: (inputCompleteTime: number, flashDuration: number) => {
     isFullCombo: boolean
     multiplierIncreased: boolean
   }
-  gameOver: () => void
+  breakCombo: () => void     // 콤보 타이머 만료 시 배율 하한으로 리셋
+  gameOver: (reason: GameOverReason) => void
   resetGame: () => void
 }
 ```
