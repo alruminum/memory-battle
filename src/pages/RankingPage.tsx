@@ -159,7 +159,6 @@ export function RankingPage({ onBack }: RankingPageProps) {
             <RankingRow
               key={entry.user_id}
               rank={entry.rank}
-              userId={entry.user_id}
               score={entry.best_score}
               isMe={entry.user_id === userId}
             />
@@ -179,7 +178,6 @@ export function RankingPage({ onBack }: RankingPageProps) {
         >
           <RankingRow
             rank={myRank}
-            userId={userId}
             score={myScore}
             isMe={true}
           />

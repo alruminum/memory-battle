@@ -1,6 +1,5 @@
 interface RankingRowProps {
   rank: number
-  userId: string
   score: number
   isMe: boolean
 }
