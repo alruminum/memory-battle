@@ -54,6 +54,12 @@
   --vb-rank-bronze: #CD7F32;
   --vb-highlight-bg: rgba(212,168,67,0.15);
   --vb-highlight-border: rgba(212,168,67,0.3);
+
+  /* safe area 인셋 변수 — 노치/펀치홀/다이나믹 아일랜드 */
+  --safe-area-top:    env(safe-area-inset-top,    0px);
+  --safe-area-right:  env(safe-area-inset-right,  0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-left:   env(safe-area-inset-left,   0px);
 }
 
 @keyframes slide-up { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -199,6 +205,11 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  /* safe area padding */
+  padding-top:    var(--safe-area-top);
+  padding-right:  var(--safe-area-right);
+  padding-bottom: var(--safe-area-bottom);
+  padding-left:   var(--safe-area-left);
 }
 
 /* MultiplierBurst 강화 이펙트 (Issue #77) */

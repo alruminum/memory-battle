@@ -44,7 +44,7 @@ function App() {
   }, [])
 
   return (
-    <div style={{ height: '100dvh', overflow: 'hidden' }}>
+    <div style={{ height: '100%', overflow: 'hidden' }}>
       {page === 'game' && (
         <GamePage
           onGameOver={() => setPage('result')}
