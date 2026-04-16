@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useGameStore } from '../store/gameStore'
 import { useRanking } from '../hooks/useRanking'
 import { getUserId } from '../lib/ait'
+import { useCoin } from '../hooks/useCoin'
 
 interface MainPageProps {
   onStart: () => void
@@ -25,6 +26,8 @@ const CORNER_POS: { color: keyof typeof BTN_COLORS; top?: number; bottom?: numbe
 export function MainPage({ onStart, onRanking }: MainPageProps) {
   const { userId, setUserId, score, stage } = useGameStore()
   const ranking = useRanking(userId || null)
+  const { getBalance } = useCoin()
+  const coinBalance = useGameStore((s) => s.coinBalance)
   const [isInitializing, setIsInitializing] = useState(true)
   const [toast, setToast] = useState<string | null>(null)
 
@@ -40,6 +43,8 @@ export function MainPage({ onStart, onRanking }: MainPageProps) {
         const uid = await getUserId()
         setUserId(uid)
         ranking.refetch()
+        // [v0.4] 코인 잔액 초기 로드
+        await getBalance()
       } catch {
         showToast('랭킹 연동 실패. 오프라인 모드로 진행됩니다')
       } finally {
@@ -122,6 +127,32 @@ export function MainPage({ onStart, onRanking }: MainPageProps) {
             {rankLabel(ranking.myRanks.daily, ranking.isLoading)} ›
           </span>
         </button>
+      </div>
+
+      {/* [v0.4] 코인 잔액 표시 */}
+      <div style={{
+        padding: '8px 20px',
+        display: 'flex',
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+        gap: 4,
+        backgroundColor: 'var(--vb-surface)',
+        borderBottom: '1px solid var(--vb-border)',
+        flexShrink: 0,
+      }}>
+        <span style={{
+          fontFamily: 'var(--vb-font-body)',
+          fontSize: 12,
+          color: 'var(--vb-text-dim)',
+        }}>보유 코인</span>
+        <span style={{
+          fontFamily: 'var(--vb-font-score)',
+          fontSize: 16,
+          fontWeight: 900,
+          color: 'var(--vb-accent)',
+        }}>
+          {isInitializing ? '-' : `🪙 ${coinBalance}`}
+        </span>
       </div>
 
       {/* 버튼 패드 — 292x292, 중앙 START */}
