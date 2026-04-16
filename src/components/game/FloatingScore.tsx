@@ -25,7 +25,7 @@ const BUTTON_COLORS: Record<ButtonColor, string> = {
   yellow: '#F5C000',
 }
 
-export function getLabelColor(color: ButtonColor, multiplier: number): string {
+export function getLabelColor(color: ButtonColor, _multiplier?: number): string {
   return BUTTON_COLORS[color]
 }
 

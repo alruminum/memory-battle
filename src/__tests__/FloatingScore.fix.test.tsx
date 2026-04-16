@@ -8,7 +8,6 @@
  *   4. getLabelColor — multiplier > 1 시 hex 색상 반환 (BUTTON_COLORS)
  *   5. FloatingScore 렌더 — animation 스타일에 '1200ms' 포함
  */
-import React from 'react'
 import { describe, it, expect } from 'vitest'
 import { render } from '@testing-library/react'
 import { getLabelColor, getLabelGlow, FloatingScore } from '../components/game/FloatingScore'

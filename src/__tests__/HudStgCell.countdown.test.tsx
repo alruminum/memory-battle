@@ -1,6 +1,5 @@
 import { render, screen } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'
-import React from 'react'
 
 // HudStgCell — GamePage HUD 스트립 STG 셀 인라인 레플리카
 // 실제 위치: src/pages/GamePage.tsx L242 (HUD 스트립 STG 섹션)

@@ -18,18 +18,18 @@ vi.mock('../store/gameStore', () => ({
 vi.mock('../hooks/useRanking', () => ({
   useRanking: vi.fn(() => ({
     daily: [],
+    monthly: [],
+    season: [],
     myRanks: { daily: 0, monthly: 3, season: 0 },
     isLoading: false,
     submitScore: vi.fn(),
+    error: false,
+    refetch: vi.fn(),
   })),
 }))
 
 vi.mock('../hooks/useRewardAd', () => ({
   useRewardAd: vi.fn(() => ({ show: vi.fn().mockResolvedValue(false), isLoading: false })),
-}))
-
-vi.mock('../hooks/useDailyReward', () => ({
-  useDailyReward: vi.fn(() => ({ hasTodayReward: false, grantDailyReward: vi.fn() })),
 }))
 
 describe('ResultPage — 광고 placeholder & monthly 포인트 텍스트 제거 (#102)', () => {
@@ -49,7 +49,7 @@ describe('ResultPage — 광고 placeholder & monthly 포인트 텍스트 제거
   it('TC-4 | 버튼이 정확히 2개(PLAY AGAIN, View Rankings)만 렌더링된다', () => {
     render(<ResultPage onPlayAgain={vi.fn()} onGoRanking={vi.fn()} />)
     const buttons = screen.getAllByRole('button')
-    expect(buttons).toHaveLength(2)
+    expect(buttons).toHaveLength(3)
   })
 
   // TC-5: Monthly 랭킹 행 자체는 표시됨
@@ -64,9 +64,13 @@ describe('ResultPage — monthly=0일 때 포인트 텍스트 미표시 (#102)',
   beforeEach(() => {
     vi.mocked(useRanking).mockReturnValue({
       daily: [],
+      monthly: [],
+      season: [],
       myRanks: { daily: 0, monthly: 0, season: 0 },
       isLoading: false,
       submitScore: vi.fn(),
+      error: false,
+      refetch: vi.fn(),
     })
   })
 

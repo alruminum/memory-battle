@@ -4,7 +4,6 @@
  */
 import { describe, it, expect, beforeEach } from 'vitest'
 import { useGameStore } from '../store/gameStore'
-import { getComboMultiplier, calcClearBonus } from '../lib/gameLogic'
 
 // Helper: store를 직접 조작해 원하는 상태로 설정
 const setState = (partial: Record<string, unknown>) => {

@@ -2,7 +2,13 @@ import { useEffect, useRef, useState } from 'react'
 import { useGameStore } from '../store/gameStore'
 import { useRanking } from '../hooks/useRanking'
 import { useRewardAd } from '../hooks/useRewardAd'
-import { useDailyReward } from '../hooks/useDailyReward'
+import { useCoin } from '../hooks/useCoin'
+import { randomCoinReward } from '../lib/gameLogic'
+import { grantCoinExchange } from '../lib/ait'
+import { CoinRewardBadge } from '../components/result/CoinRewardBadge'
+import { PointExchangeButton } from '../components/result/PointExchangeButton'
+
+const IS_SANDBOX = import.meta.env.DEV || import.meta.env.VITE_SANDBOX === 'true'
 
 interface ResultPageProps {
   onPlayAgain: () => void
@@ -10,16 +16,18 @@ interface ResultPageProps {
 }
 
 export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
-  const { score, stage, userId, baseScore, fullComboCount, maxComboStreak } = useGameStore()
+  const { score, stage, userId, baseScore, fullComboCount, maxComboStreak,
+    coinBalance  // [v0.4 F5] PointExchangeButton에 전달
+  } = useGameStore()
 
   const comboBonus = score - baseScore
   const { daily, myRanks, isLoading, submitScore } = useRanking(userId)
   const { show: showAd, isLoading: adLoading } = useRewardAd()
-  const { hasTodayReward, grantDailyReward } = useDailyReward()
-
+  const { addCoins } = useCoin()
   const submitted = useRef(false)
   const [adDone, setAdDone] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
+  const [coinReward, setCoinReward] = useState<number | null>(null)
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // 점수 제출 (마운트 1회, isLoading 완료 후 isNewBest 판단)
@@ -32,7 +40,16 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
 
     const prevBest = daily.find((e) => e.user_id === userId)?.best_score ?? 0
     prevBestRef.current = prevBest
-    if (score > prevBest) setIsNewBest(true)
+
+    const isNewRecord = score > prevBest
+    if (isNewRecord) {
+      setIsNewBest(true)
+      // [v0.4 F3] 최고기록 코인 보상 — 첫 플레이(prevBest=0)도 포함, 동점 미처리
+      addCoins(1, 'record_bonus').catch(() => {
+        // 코인 적립 실패는 게임 흐름에 영향 없음 — 조용히 처리
+        console.warn('[record-coin] addCoins failed — non-blocking')
+      })
+    }
 
     submitScore(score, stage, userId)
   }, [userId, isLoading]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -45,12 +62,14 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
       try {
         const earned = await showAd()
         if (cancelled) return
-        if (earned && !hasTodayReward) {
+
+        if (earned) {
           try {
-            await grantDailyReward()
-            showToastMsg('오늘의 10포인트 지급!')
+            const rewardAmount = IS_SANDBOX ? 2 : randomCoinReward()
+            await addCoins(rewardAmount, 'ad_reward')
+            setCoinReward(rewardAmount)  // CoinRewardBadge 표시 트리거
           } catch {
-            showToastMsg('포인트 지급 중 오류가 발생했습니다')
+            showToastMsg('코인 지급 중 오류가 발생했습니다')
           }
         }
       } catch {
@@ -72,6 +91,21 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
     if (toastTimerRef.current) clearTimeout(toastTimerRef.current)
     setToast(msg)
     toastTimerRef.current = setTimeout(() => setToast(null), 3000)
+  }
+
+  async function handleExchange() {
+    try {
+      // 1. SDK 호출 — 성공 시에만 DB 차감
+      await grantCoinExchange()
+      // 2. 코인 차감 (DB 원자 처리)
+      await addCoins(-10, 'toss_points_exchange')
+      showToastMsg('🎉 10포인트 지급됐어요!')
+    } catch (err) {
+      console.error('[exchange] failed:', err)
+      showToastMsg('교환 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요')
+      // ⚠️ SDK 성공 후 addCoins 실패 시: 포인트 지급 완료 + 코인 미차감 상태
+      // → 로그 기록 + "잠시 후 다시 시도" 안내. 완전한 롤백 불가 (SDK 비가역)
+    }
   }
 
 
@@ -152,10 +186,44 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
               color: 'var(--vb-accent)',
               letterSpacing: 2,
             }}>NEW PERSONAL BEST</span>
+            {/* [v0.4 F3] 최고기록 코인 보상 표시 */}
+            <div style={{
+              fontSize: 11,
+              color: 'var(--vb-accent)',
+              fontFamily: 'var(--vb-font-body)',
+              fontWeight: 600,
+              marginTop: 2,
+              letterSpacing: 0,
+            }}>🏆 최고기록! 🪙 +1</div>
           </div>
         )}
       </div>
 
+
+      {/* [v0.4] 코인 잔액 표시 */}
+      <div style={{
+        margin: '12px 20px 0',
+        padding: '12px 16px',
+        backgroundColor: 'var(--vb-surface)',
+        borderRadius: 12,
+        border: '1px solid var(--vb-border)',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        flexShrink: 0,
+      }}>
+        <span style={{
+          fontFamily: 'var(--vb-font-body)',
+          fontSize: 12,
+          color: 'var(--vb-text-dim)',
+        }}>보유 코인</span>
+        <span style={{
+          fontFamily: 'var(--vb-font-score)',
+          fontSize: 20,
+          fontWeight: 900,
+          color: 'var(--vb-accent)',
+        }}>🪙 {coinBalance}</span>
+      </div>
       {/* COMBO STATS 카드 */}
       <div style={{
         margin: '12px 20px 0',
@@ -271,6 +339,12 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
         flexDirection: 'column',
         gap: 10,
       }}>
+        {/* [v0.4 F5] 포인트 교환 버튼 — RevivalButton 없음 (F4는 GameOverOverlay 전용) */}
+        <PointExchangeButton
+          coinBalance={coinBalance}
+          onExchange={handleExchange}
+        />
+
         {/* 광고 로딩 중 표시 */}
         {adLoading && !adDone && (
           <div style={{
@@ -324,6 +398,35 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
         </button>
       </div>
 
+      {/* [v0.4] 코인 획득 float-up 애니메이션 */}
+      {coinReward !== null && (
+        <div
+          className="coin-float-up"
+          style={{
+            position: 'fixed',
+            bottom: 120,
+            left: '50%',
+            pointerEvents: 'none',
+            fontFamily: 'var(--vb-font-score)',
+            fontSize: 22,
+            fontWeight: 900,
+            color: 'var(--vb-accent)',
+            whiteSpace: 'nowrap',
+            zIndex: 201,
+          }}
+        >
+          +{coinReward} 🪙
+        </div>
+      )}
+
+      {/* 코인 적립 배지 */}
+      {coinReward !== null && (
+        <CoinRewardBadge
+          amount={coinReward}
+          onDismiss={() => setCoinReward(null)}
+        />
+      )}
+
       {/* 토스트 */}
       {toast && (
         <div style={{
@@ -331,7 +434,7 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
           bottom: 80,
           left: '50%',
           transform: 'translateX(-50%)',
-          backgroundColor: 'rgba(20,20,20,0.92)',
+          backgroundColor: 'var(--vb-toast-bg)',
           color: 'var(--vb-text)',
           padding: '10px 20px',
           borderRadius: 24,
