@@ -10,21 +10,54 @@
 - 콘솔 설정 불필요, 유저 동의 불필요 (토스 로그인과 다른 점)
 
 ```typescript
-import { getUserKeyForGame, getDeviceId, getOperationalEnvironment } from '@apps-in-toss/web-framework'
+import { getUserKeyForGame, getDeviceId } from '@apps-in-toss/web-framework'
 
-export const getUserId = async (): Promise<string> => {
-  // 샌드박스에서는 mock 데이터 반환 (실제 hash 아님)
-  const env = await getOperationalEnvironment()
-  if (env !== 'toss') {
-    return 'dev-user-' + Math.random().toString(36).slice(2, 8)
+// 샌드박스 분기 상수 — DEV 서버 또는 VITE_SANDBOX=true 세팅 시 true
+const IS_SANDBOX = import.meta.env.DEV || import.meta.env.VITE_SANDBOX === 'true'
+
+// 세션 내 동일 userId 유지 (모듈 로드 시 1회 생성)
+// Math.random() 대신 crypto.randomUUID() 사용 — 매 호출 시 새 ID 생성으로 인한 Supabase 기록 분산 버그 방지
+const DEV_USER_ID = 'dev-user-' + crypto.randomUUID()
+
+export async function getUserId(): Promise<string> {
+  if (IS_SANDBOX) return DEV_USER_ID  // 샌드박스: 세션 고정 mock ID
+
+  try {
+    const result = await getUserKeyForGame()
+    if (result && typeof result === 'object' && result.type === 'HASH') {
+      return result.hash
+    }
+  } catch {
+    // 폴백
   }
-  const result = await getUserKeyForGame()
-  if (result && typeof result === 'object' && result.type === 'HASH') {
-    return result.hash
+
+  try {
+    return await getDeviceId()
+  } catch {
+    return DEV_USER_ID
   }
-  return getDeviceId()  // 구버전 앱 폴백
 }
 ```
+
+---
+
+## 샌드박스 분기 전략
+
+**모든 SDK 호출은 `IS_SANDBOX` 플래그로 환경 분기한다.**
+
+```typescript
+// lib/ait.ts 최상단에 선언
+const IS_SANDBOX = import.meta.env.DEV || import.meta.env.VITE_SANDBOX === 'true'
+```
+
+| 조건 | IS_SANDBOX 값 |
+|---|---|
+| `npm run dev` (vite dev server) | `true` |
+| `VITE_SANDBOX=true` 환경변수 세팅 | `true` |
+| 실제 토스앱 (라이브/검수 빌드) | `false` |
+
+> **`import.meta.env.DEV`만으로 분기하지 않는 이유**: 빌드 후(`npm run build`) 라이브 토스앱에서
+> 테스트할 때 DEV는 `false`가 되므로, `VITE_SANDBOX=true` 플래그를 병행해야 한다.
 
 ---
 
@@ -41,8 +74,9 @@ export const getUserId = async (): Promise<string> => {
 
 env 변수로 환경별 분기 권장:
 ```typescript
-const REWARD_AD_ID = import.meta.env.VITE_REWARD_AD_ID ?? 'ait-ad-test-rewarded-id'
-const BANNER_AD_ID = import.meta.env.VITE_BANNER_AD_ID ?? 'ait-ad-test-banner-id'
+// ⚠️ 변수명: VITE_REWARD_AD_GROUP_ID / VITE_BANNER_AD_GROUP_ID  (_ID가 아닌 _GROUP_ID)
+const REWARD_AD_GROUP_ID = import.meta.env.VITE_REWARD_AD_GROUP_ID ?? 'ait-ad-test-rewarded-id'
+const BANNER_AD_GROUP_ID = import.meta.env.VITE_BANNER_AD_GROUP_ID ?? 'ait-ad-test-banner-id'
 ```
 
 ---
@@ -52,7 +86,7 @@ const BANNER_AD_ID = import.meta.env.VITE_BANNER_AD_ID ?? 'ait-ad-test-banner-id
 **배너 광고 / 리워드 광고 모두 샌드박스에서 동작하지 않음.**
 
 개발 시 대응 방법:
-- `import.meta.env.DEV` 또는 별도 env 플래그로 광고 mock 분기 처리
+- `IS_SANDBOX` 플래그로 광고 mock 분기 처리 (`import.meta.env.DEV` 단독 사용 금지)
 - 배너: 샌드박스에서 placeholder div로 대체 (레이아웃 확인용)
 - 리워드: 샌드박스에서 `showRewardAd()` → 즉시 `resolve(true)` 반환하는 mock 함수 사용
 - 실제 광고 동작은 검수 환경(라이브 빌드 + 실제 토스앱)에서만 확인 가능
@@ -71,7 +105,7 @@ const BANNER_AD_ID = import.meta.env.VITE_BANNER_AD_ID ?? 'ait-ad-test-banner-id
 import { loadFullScreenAd, showFullScreenAd } from '@apps-in-toss/web-framework'
 
 export function showRewardAd(): Promise<boolean> {
-  if (import.meta.env.DEV) return Promise.resolve(true)  // 샌드박스 mock
+  if (IS_SANDBOX) return Promise.resolve(true)  // 샌드박스 mock
 
   return new Promise((resolve) => {
     let loaded = false
@@ -112,7 +146,7 @@ export function showRewardAd(): Promise<boolean> {
 import { TossAds } from '@apps-in-toss/web-framework'
 
 export function attachBannerAd(container: HTMLElement): () => void {
-  if (import.meta.env.DEV) return () => {}  // 샌드박스 mock — placeholder만 표시
+  if (IS_SANDBOX) return () => {}  // 샌드박스 mock — placeholder만 표시
 
   let bannerSlot: { destroy: () => void } | null = null
 
@@ -144,6 +178,47 @@ return <div ref={containerRef} style={{ width: '100%', height: 96 }} />
 
 ---
 
+## 프로모션 리워드 지급 (`grantPromotionReward`) ⚠️ v0.4 변경
+
+- API: `grantPromotionReward({ params: { promotionCode, amount } })` — 토스포인트 지급
+- **v0.4: 코인 10개 소모 시 수동 교환** (기존 게임오버 자동 지급 방식 폐지)
+- 신규 promotionCode: `VITE_COIN_EXCHANGE_CODE` 환경변수 (운영에서 사전 등록 필수)
+- ⚠️ **샌드박스에서 호출 금지** — `IS_SANDBOX` 분기 필수
+
+```typescript
+import { grantPromotionReward } from '@apps-in-toss/web-framework'
+
+// ⚠️ 운영에서 프로모션 코드 사전 등록 필요 — 등록 전 호출 시 SDK 에러
+const COIN_EXCHANGE_CODE   = import.meta.env.VITE_COIN_EXCHANGE_CODE ?? 'COIN_EXCHANGE'
+const COIN_EXCHANGE_AMOUNT = 10  // 10포인트 = 10원
+
+// [v0.4] 코인 10개 → 토스포인트 10포인트 교환
+// ⚠️ [구현 예정 — Epic 12 impl-06 완료 후 ait.ts에 추가, 현재 미구현]
+// SDK 성공 시에만 DB balance 차감 (ResultPage에서 호출, 실패 시 DB 차감 없음)
+export async function grantCoinExchange(): Promise<void> {
+  if (IS_SANDBOX) return  // 샌드박스: no-op
+  await grantPromotionReward({
+    params: { promotionCode: COIN_EXCHANGE_CODE, amount: COIN_EXCHANGE_AMOUNT }
+  })
+}
+
+// [예정 — Epic 12 완료 후 삭제] grantDailyReward — daily_reward 로직 제거 예정, 현재 ait.ts에 현역 존재
+// export async function grantDailyReward(): Promise<void> { ... }
+```
+
+**호출 흐름 (v0.4)**:
+```
+ResultPage (게임오버 화면)
+  └── [교환 버튼 클릭] → grantCoinExchange()  ← lib/ait.ts
+        ├── SDK 성공 → useCoin.deductCoins(10, 'toss_points_exchange')
+        │     └── Supabase: user_coins balance-=10 + coin_transactions INSERT
+        └── SDK 실패 → throw → ResultPage catch → "잠시 후 다시 시도해주세요" 표시
+```
+
+> SDK 실패 시 DB 차감 없음 — 토스포인트 미지급 상태 + 코인 잔액 유지.
+
+---
+
 ## `granite.config.ts` (v2.x 실제 포맷)
 
 ```typescript
@@ -154,7 +229,7 @@ export default defineConfig({
   brand: {
     displayName: '기억력배틀',
     primaryColor: '#ff6900',
-    icon: null,               // 콘솔 아이콘 URL 또는 null
+    icon: 'https://static.toss.im/icons/png/4x/icon-person-man.png', // 임시 아이콘, 콘솔 등록 후 실제 URL로 교체
   },
   web: {
     host: 'localhost',
@@ -166,6 +241,9 @@ export default defineConfig({
   },
   permissions: [],
   outdir: 'dist',
+  webViewProps: {
+    type: 'game',
+  },
 });
 ```
 
@@ -191,14 +269,16 @@ import {
   getOperationalEnvironment,
 } from '@apps-in-toss/web-framework'
 
+// ⚠️ getOperationalEnvironment()는 동기 함수 — await 불필요, async 컨텍스트 불필요
 // 게임 오버 시 호출 — Toss 환경에서만 실행 (샌드박스/개발환경 방지)
-const env = await getOperationalEnvironment()
-if (env === 'toss') {
+if (getOperationalEnvironment() === 'toss') {
   await submitGameCenterLeaderBoardScore({ score: String(finalScore) })
 }
 
 // ResultPage "친구 랭킹 보기" 버튼
-await openGameCenterLeaderboard()
+if (getOperationalEnvironment() === 'toss') {
+  await openGameCenterLeaderboard()
+}
 ```
 
 ---
@@ -220,15 +300,13 @@ await openGameCenterLeaderboard()
 
 ```
 □ 게임 기본 흐름: IDLE → SHOWING → INPUT → RESULT
-□ 타이머 2초 경과 시 게임 오버
-□ 콤보 점수 계산 (300ms 이내 연속 입력 시 x2)
-□ 난이도별 점수 배율 (Easy x1 / Medium x2 / Hard x3)
-□ 일간 기회 4회 제한 (mock userId + Supabase 연결 시)
-□ 리워드광고 mock → 기회 1회 증가 확인 (DEV에서 즉시 resolve(true))
+□ 스테이지 진행에 따른 입력 타이머 감소 확인 (1~9: 2000ms / 10~19: 1800ms / 20~29: 1600ms / 30+: 1400ms)
+□ 스택형 콤보 계산 (streak 0~4: x1 / 5~9: x2 / 10~14: x3 / 15~19: x4 / 20+: x5)
+□ 게임오버 오버레이 노출 → 리워드광고 mock → IS_SANDBOX에서 즉시 resolve(true)
+□ 코인 mock (IS_SANDBOX → showRewardAd 즉시 resolve(true), 코인 2개 고정 지급 + Supabase 기록 동작)
 □ 배너광고 placeholder 레이아웃 (높이 96px 확인)
 □ 메인 → 게임 → 결과 → 랭킹 페이지 전환
 □ 뒤로가기(popstate) → main 이동 + 게임 리셋
-□ 기회 0회 시 시작 버튼 비활성화 확인
 □ isNewBest 표시 (첫 게임 vs 기록 갱신 vs 기록 미갱신)
 ```
 
@@ -236,7 +314,8 @@ await openGameCenterLeaderboard()
 
 ```
 □ 실제 배너 광고 노출 및 레이아웃
-□ 리워드 광고 노출 → 시청 완료 시 기회 증가
+□ 리워드 광고 완시청 → 코인 1~5개 랜덤 지급 + user_coins/coin_transactions DB 업데이트 확인
+□ [교환 버튼] 10코인 → grantCoinExchange() → 10포인트 지급 + DB balance-=10 확인
 □ getUserKeyForGame() 실제 hash 반환 확인
 □ 게임센터 리더보드 점수 제출 (submitScore)
 □ openGameCenterLeaderboard() 친구/전체 랭킹 내장 UI

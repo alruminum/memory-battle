@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useGameStore } from '../store/gameStore'
 import { useRanking } from '../hooks/useRanking'
-import { useDailyReward } from '../hooks/useDailyReward'
 import { getUserId } from '../lib/ait'
 
 interface MainPageProps {
@@ -26,8 +25,6 @@ const CORNER_POS: { color: keyof typeof BTN_COLORS; top?: number; bottom?: numbe
 export function MainPage({ onStart, onRanking }: MainPageProps) {
   const { userId, setUserId, score, stage } = useGameStore()
   const ranking = useRanking(userId || null)
-  const { hasTodayReward } = useDailyReward()
-
   const [isInitializing, setIsInitializing] = useState(true)
   const [toast, setToast] = useState<string | null>(null)
 
@@ -126,23 +123,6 @@ export function MainPage({ onStart, onRanking }: MainPageProps) {
           </span>
         </button>
       </div>
-
-      {hasTodayReward && (
-        <div style={{
-          margin: '12px 20px 0',
-          textAlign: 'center',
-          flexShrink: 0,
-        }}>
-          <span style={{
-            fontSize: 12,
-            color: 'var(--vb-accent)',
-            fontFamily: 'var(--vb-font-body)',
-            fontWeight: 600,
-          }}>
-            오늘 포인트 수령 완료 ✓
-          </span>
-        </div>
-      )}
 
       {/* 버튼 패드 — 292x292, 중앙 START */}
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

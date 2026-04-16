@@ -17,5 +17,10 @@
     "mcp__stitch__scaffold_project_files",
     "mcp__stitch__extract_design_context",
     "mcp__stitch__generate_and_fetch_code"
-  ]
+  ],
+  "statusLine": {
+    "type": "command",
+    "command": "bash ~/.claude/scripts/hud-statusline.sh",
+    "refreshInterval": 3
+  }
 }
