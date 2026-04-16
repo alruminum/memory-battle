@@ -84,7 +84,7 @@ describe('revive()', () => {
 
     const state = useGameStore.getState()
     expect(state.status).toBe('SHOWING')
-    expect(state.sequence).toEqual([])
+    expect(state.sequence).toEqual(['orange', 'blue', 'green'])
     expect(state.revivalUsed).toBe(true)
   })
 
