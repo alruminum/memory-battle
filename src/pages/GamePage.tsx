@@ -27,7 +27,7 @@ interface StageAreaProps {
   stage: number
 }
 
-function StageArea({ countdown, clearingStage, isPlaying, stage }: StageAreaProps): JSX.Element {
+function StageArea({ countdown, clearingStage, isPlaying, stage }: StageAreaProps): React.ReactElement {
   if (countdown !== null) {
     return (
       <div style={{
@@ -137,7 +137,9 @@ interface GamePageProps {
 }
 
 export function GamePage({ onGameOver, onRanking }: GamePageProps) {
-  const { status, score, stage, comboStreak, userId, setUserId, sequenceStartTime, breakCombo } = useGameStore()
+  const { status, score, stage, comboStreak, userId, setUserId, sequenceStartTime, breakCombo,
+    coinBalance, revivalUsed  // [v0.4 F4]
+  } = useGameStore()
   const { flashingButton, clearingStage, countdown, handleInput, startGame, retryGame, multiplierIncreased, gameOverReason } = useGameEngine()
   const ranking = useRanking(userId || null)
 
@@ -389,6 +391,8 @@ export function GamePage({ onGameOver, onRanking }: GamePageProps) {
       {status === 'RESULT' && gameOverReason !== null && (
         <GameOverOverlay
           reason={gameOverReason}
+          coinBalance={coinBalance}
+          revivalUsed={revivalUsed}
           onConfirm={onGameOver}
         />
       )}
