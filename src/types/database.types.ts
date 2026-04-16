@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      coin_transactions: {
+        Row: {
+          amount: number
+          created_at: string | null
+          id: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string | null
+          id?: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string | null
+          id?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       daily_reward: {
         Row: {
           reward_date: string
@@ -53,11 +77,30 @@ export type Database = {
         }
         Relationships: []
       }
+      user_coins: {
+        Row: {
+          balance: number
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      add_coins: {
+        Args: { p_amount: number; p_type: string; p_user_id: string }
+        Returns: number
+      }
       ranking_daily: {
         Args: never
         Returns: {
@@ -212,8 +255,12 @@ export const Constants = {
   },
 } as const
 
-// 편의 타입 별칭 — gen:types 재실행 시 재추가 필요
-export type ScoreRow = Database['public']['Tables']['scores']['Row']
+// Convenience type aliases (re-add after gen:types)
+export type ScoreRow    = Database['public']['Tables']['scores']['Row']
 export type ScoreInsert = Database['public']['Tables']['scores']['Insert']
-export type DailyRewardRow = Database['public']['Tables']['daily_reward']['Row']
-export type DailyRewardInsert = Database['public']['Tables']['daily_reward']['Insert']
+
+// [v0.4] 코인 테이블 타입
+export type UserCoinsRow          = Database['public']['Tables']['user_coins']['Row']
+export type UserCoinsInsert       = Database['public']['Tables']['user_coins']['Insert']
+export type CoinTransactionRow    = Database['public']['Tables']['coin_transactions']['Row']
+export type CoinTransactionInsert = Database['public']['Tables']['coin_transactions']['Insert']
