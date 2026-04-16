@@ -121,7 +121,7 @@ export async function grantDailyReward(): Promise<void> {
 // ⚠️ 운영에서 promotionCode 사전 등록 필요 — 등록 전 호출 시 SDK 에러
 // ⚠️ 샌드박스: no-op (실제 포인트 지급 없음)
 const COIN_EXCHANGE_CODE   = import.meta.env.VITE_COIN_EXCHANGE_CODE ?? 'COIN_EXCHANGE'
-const COIN_EXCHANGE_AMOUNT = 10  // 10포인트 = 10원
+export const COIN_EXCHANGE_AMOUNT = 10  // 10포인트 = 10원
 
 export async function grantCoinExchange(): Promise<void> {
   if (IS_SANDBOX) return  // 샌드박스: no-op

@@ -33,8 +33,13 @@ vi.mock('../hooks/useRewardAd', () => ({
 }))
 
 // ait.ts mock — openLeaderboard가 호출되지 않음을 검증
-const mockOpenLeaderboard = vi.fn()
+const { mockOpenLeaderboard } = vi.hoisted(() => ({
+  mockOpenLeaderboard: vi.fn(),
+}))
 vi.mock('../lib/ait', () => ({
+  COIN_EXCHANGE_AMOUNT: 10,
+  IS_SANDBOX: false,
+  grantCoinExchange: vi.fn(),
   openLeaderboard: mockOpenLeaderboard,
 }))
 
@@ -92,7 +97,7 @@ describe('ResultPage — 친구 랭킹 보기 버튼 제거 (#101)', () => {
   it('TC-7 | 버튼이 정확히 2개(PLAY AGAIN, View Rankings)만 렌더링된다', () => {
     render(<ResultPage onPlayAgain={vi.fn()} onGoRanking={vi.fn()} />)
     const buttons = screen.getAllByRole('button')
-    expect(buttons).toHaveLength(2)
+    expect(buttons).toHaveLength(3)
   })
 
   // ── 에러 처리 ─────────────────────────────────────────────────────────────
