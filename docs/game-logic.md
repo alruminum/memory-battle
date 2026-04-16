@@ -180,10 +180,11 @@ const onStageClear = (
 
 ---
 
-## Zustand Store 구조 (`store/gameStore.ts`) ⚠️ v0.3.1 변경
+## Zustand Store 구조 (`store/gameStore.ts`) ⚠️ v0.4 업데이트
 
 ```typescript
 // Difficulty 타입 제거 (v0.3)
+// hasTodayReward / setTodayReward 제거 (v0.4 — daily_reward 폐기)
 
 export type GameOverReason = 'timeout' | 'wrong' | null
 
@@ -205,11 +206,13 @@ interface GameStore {
 
   // 유저
   userId: string
-  hasTodayReward: boolean    // 오늘 보상 수령 여부
+
+  // [v0.4] 코인
+  coinBalance: number   // Supabase user_coins.balance (앱 진입 시 로드, 이벤트마다 갱신)
+  revivalUsed: boolean  // 이 판 부활 사용 여부 (startGame/resetGame 시 false로 초기화)
 
   // 액션
   setUserId: (id: string) => void
-  setTodayReward: (value: boolean) => void
   startGame: () => void
   addInput: (color: string) => 'correct' | 'wrong' | 'round-clear'
   stageClear: (inputCompleteTime: number, flashDuration: number) => {
@@ -219,6 +222,8 @@ interface GameStore {
   breakCombo: () => void     // 콤보 타이머 만료 시 배율 하한으로 리셋
   gameOver: (reason: GameOverReason) => void
   resetGame: () => void
+  revive: () => void         // [v0.4] RESULT→SHOWING 전환 (5코인 차감 후 호출, 시퀀스 초기화, stage/score/combo 유지)
+  setCoinBalance: (balance: number) => void  // [v0.4] useCoin에서 잔액 동기화
 }
 ```
 
@@ -233,3 +238,112 @@ interface GameStore {
 | 10 | 57 | 100 | 211 |
 | 15 | 133 | 269 | 591 |
 | 20 | 239 | 461 | 1,121 |
+
+---
+
+## 코인 시스템 ⚠️ v0.4 신설
+
+### 획득 경로
+
+| 이벤트 | 지급량 | type |
+|---|---|---|
+| 광고 완시청 | 1~5개 (가중치 랜덤) | `ad_reward` |
+| 최고기록 갱신 | 1개 | `record_bonus` |
+
+```typescript
+// 가중치 랜덤 — 누적 확률
+export function rollAdRewardCoins(): number {
+  const r = Math.random()
+  if (r < 0.30) return 1  // 30%
+  if (r < 0.60) return 2  // 30%
+  if (r < 0.85) return 3  // 25%
+  if (r < 0.95) return 4  // 10%
+  return 5                // 5%
+}
+
+// 샌드박스 mock: 항상 2개
+export const SANDBOX_AD_COIN_REWARD = 2
+```
+
+### 소비 경로
+
+| 소비 | 비용 | type |
+|---|---|---|
+| 부활 아이템 | 5코인 | `revival` |
+| 토스포인트 교환 | 10코인 → 10포인트 | `toss_points_exchange` |
+
+### 부활 상태머신 ⚠️ v0.4 추가
+
+기존: `IDLE → SHOWING → INPUT → RESULT`
+
+```
+IDLE → SHOWING → INPUT → RESULT
+                            │ revive() [balance≥5, revivalUsed=false]
+                            └→ SHOWING (현 스테이지, 시퀀스 초기화, score/combo 유지)
+                                         → INPUT → RESULT (revivalUsed=true → 부활 버튼 미표시)
+```
+
+**revive() 동작**:
+1. balance -= 5 + DB 기록 (type='revival', amount=-5)
+2. `revivalUsed = true` (판당 1회 제한)
+3. `sequence = []` 초기화 (같은 stage 길이로 새 시퀀스)
+4. `status = 'SHOWING'`
+5. score / comboStreak / stage 유지
+
+**부활 표시 조건**:
+- `balance < 5`: RevivalButton 비활성 + "코인이 부족합니다 (현재 N개)"
+- `revivalUsed === true`: RevivalButton **미표시** (disabled 아님 — architecture.md §설계결정 참조)
+
+### 최고기록 갱신 판정
+
+게임오버 시 호출. `useRanking`의 기존 allTimeBest 조회 결과를 재활용.
+
+```typescript
+// ResultPage에서 scores INSERT 완료 후 isNewBest 판정
+// isNewBest: currentScore > prevBest (동점 미포함)
+if (isNewBest) {
+  await useCoin.addCoins(1, 'record_bonus')
+}
+```
+
+### Supabase 코인 연산
+
+**잔액 원자 증감 (add_coins RPC)** ⚠️ v0.4.1 수정:
+
+> 단순 upsert는 경쟁 조건에서 balance 덮어쓰기 위험 → 3-param RPC로 user_coins + coin_transactions 단일 트랜잭션 처리.
+
+```sql
+-- Supabase SQL Editor에서 생성 — architecture.md § add_coins 기준
+CREATE OR REPLACE FUNCTION add_coins(
+  p_user_id TEXT,
+  p_amount  INTEGER,  -- 양수=적립, 음수=차감
+  p_type    TEXT      -- 'ad_reward'|'record_bonus'|'revival'|'toss_points_exchange'
+)
+RETURNS INTEGER        -- 업데이트 후 최종 balance 반환
+LANGUAGE plpgsql SECURITY DEFINER AS $$
+DECLARE
+  v_balance INTEGER;
+BEGIN
+  INSERT INTO user_coins (user_id, balance)
+  VALUES (p_user_id, GREATEST(0, p_amount))
+  ON CONFLICT (user_id) DO UPDATE
+    SET balance = GREATEST(0, user_coins.balance + p_amount)
+  RETURNING balance INTO v_balance;
+
+  INSERT INTO coin_transactions (user_id, type, amount)
+  VALUES (p_user_id, p_type, p_amount);
+
+  RETURN v_balance;
+END;
+$$;
+```
+
+호출:
+```typescript
+const { data } = await supabase.rpc('add_coins', {
+  p_user_id: userId,
+  p_amount: amount,   // ⚠️ 파라미터명 p_amount (p_delta 아님)
+  p_type: type        // 'ad_reward' | 'record_bonus' | 'revival' | 'toss_points_exchange'
+})
+// data: 업데이트된 balance (INTEGER)
+```
