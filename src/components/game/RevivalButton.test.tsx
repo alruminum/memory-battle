@@ -54,6 +54,38 @@ describe('RevivalButton — 정상 흐름', () => {
   })
 })
 
+// ── canRevive=false → null 반환 ───────────────────────────────────────────────
+
+describe('RevivalButton — canRevive=false → null', () => {
+  it('coinBalance=4 → renders nothing', () => {
+    const { queryByRole } = render(
+      <RevivalButton {...defaultProps} coinBalance={4} />
+    )
+    expect(queryByRole('button')).toBeNull()
+  })
+
+  it('coinBalance=0 → renders nothing', () => {
+    const { queryByRole } = render(
+      <RevivalButton {...defaultProps} coinBalance={0} />
+    )
+    expect(queryByRole('button')).toBeNull()
+  })
+
+  it('revivalUsed=true → renders nothing', () => {
+    const { queryByRole } = render(
+      <RevivalButton {...defaultProps} revivalUsed={true} />
+    )
+    expect(queryByRole('button')).toBeNull()
+  })
+
+  it('revivalUsed=true && coinBalance>=5 → renders nothing', () => {
+    const { queryByRole } = render(
+      <RevivalButton {...defaultProps} revivalUsed={true} coinBalance={10} />
+    )
+    expect(queryByRole('button')).toBeNull()
+  })
+})
+
 // ── 엣지 케이스 ───────────────────────────────────────────────────────────────
 
 describe('RevivalButton — 엣지 케이스', () => {
@@ -64,60 +96,17 @@ describe('RevivalButton — 엣지 케이스', () => {
     expect(getByRole('button')).not.toBeDisabled()
   })
 
-  it('경계값: coinBalance=4 (1 부족) → disabled + "코인이 부족합니다 (현재 4개)"', () => {
-    const { getByRole, getByText } = render(
+  it('경계값: coinBalance=4 (1 부족) → 렌더링 없음', () => {
+    const { queryByRole } = render(
       <RevivalButton {...defaultProps} coinBalance={4} />
     )
-    expect(getByRole('button')).toBeDisabled()
-    expect(getByText('코인이 부족합니다 (현재 4개)')).toBeTruthy()
-  })
-
-  it('경계값: coinBalance=0 → disabled + "코인이 부족합니다 (현재 0개)"', () => {
-    const { getByRole, getByText } = render(
-      <RevivalButton {...defaultProps} coinBalance={0} />
-    )
-    expect(getByRole('button')).toBeDisabled()
-    expect(getByText('코인이 부족합니다 (현재 0개)')).toBeTruthy()
-  })
-
-  it('revivalUsed=true && coinBalance>=5 → revivalUsed 우선 ("이미 부활을 사용했습니다")', () => {
-    const { getByText, queryByText } = render(
-      <RevivalButton {...defaultProps} revivalUsed={true} coinBalance={10} />
-    )
-    expect(getByText('이미 부활을 사용했습니다')).toBeTruthy()
-    expect(queryByText(/코인이 부족합니다/)).toBeNull()
+    expect(queryByRole('button')).toBeNull()
   })
 })
 
 // ── 에러 처리 ─────────────────────────────────────────────────────────────────
 
 describe('RevivalButton — 에러 처리', () => {
-  it('revivalUsed=true → disabled + "이미 부활을 사용했습니다"', () => {
-    const { getByRole, getByText } = render(
-      <RevivalButton {...defaultProps} revivalUsed={true} />
-    )
-    expect(getByRole('button')).toBeDisabled()
-    expect(getByText('이미 부활을 사용했습니다')).toBeTruthy()
-  })
-
-  it('disabled 상태(revivalUsed=true)에서 pointerDown → onRevive 미호출', () => {
-    const onRevive = vi.fn()
-    const { getByRole } = render(
-      <RevivalButton {...defaultProps} revivalUsed={true} onRevive={onRevive} />
-    )
-    fireEvent.pointerDown(getByRole('button'))
-    expect(onRevive).not.toHaveBeenCalled()
-  })
-
-  it('disabled 상태(coinBalance<5)에서 pointerDown → onRevive 미호출', () => {
-    const onRevive = vi.fn()
-    const { getByRole } = render(
-      <RevivalButton {...defaultProps} coinBalance={4} onRevive={onRevive} />
-    )
-    fireEvent.pointerDown(getByRole('button'))
-    expect(onRevive).not.toHaveBeenCalled()
-  })
-
   it('isProcessing=true 상태에서 pointerDown → onRevive 미호출', () => {
     const onRevive = vi.fn()
     const { getByRole } = render(
