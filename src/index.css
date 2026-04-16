@@ -321,3 +321,13 @@ body {
 .combo-break-shake {
   animation: comboBreakShake 0.56s ease-out forwards;
 }
+/* [v0.4] 코인 획득 float-up 애니메이션 */
+@keyframes coinFloatUp {
+  0%   { transform: translateX(-50%) translateY(0) scale(1);        opacity: 1; }
+  20%  { transform: translateX(-50%) translateY(-12px) scale(1.15); opacity: 1; }
+  100% { transform: translateX(-50%) translateY(-60px) scale(0.9);  opacity: 0; }
+}
+
+.coin-float-up {
+  animation: coinFloatUp 1.2s ease-out forwards;
+}

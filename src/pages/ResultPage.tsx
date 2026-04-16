@@ -199,6 +199,31 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
         )}
       </div>
 
+
+      {/* [v0.4] 코인 잔액 표시 */}
+      <div style={{
+        margin: '12px 20px 0',
+        padding: '12px 16px',
+        backgroundColor: 'var(--vb-surface)',
+        borderRadius: 12,
+        border: '1px solid var(--vb-border)',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        flexShrink: 0,
+      }}>
+        <span style={{
+          fontFamily: 'var(--vb-font-body)',
+          fontSize: 12,
+          color: 'var(--vb-text-dim)',
+        }}>보유 코인</span>
+        <span style={{
+          fontFamily: 'var(--vb-font-score)',
+          fontSize: 20,
+          fontWeight: 900,
+          color: 'var(--vb-accent)',
+        }}>🪙 {coinBalance}</span>
+      </div>
       {/* COMBO STATS 카드 */}
       <div style={{
         margin: '12px 20px 0',
@@ -372,6 +397,27 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
           View Rankings
         </button>
       </div>
+
+      {/* [v0.4] 코인 획득 float-up 애니메이션 */}
+      {coinReward !== null && (
+        <div
+          className="coin-float-up"
+          style={{
+            position: 'fixed',
+            bottom: 120,
+            left: '50%',
+            pointerEvents: 'none',
+            fontFamily: 'var(--vb-font-score)',
+            fontSize: 22,
+            fontWeight: 900,
+            color: 'var(--vb-accent)',
+            whiteSpace: 'nowrap',
+            zIndex: 201,
+          }}
+        >
+          +{coinReward} 🪙
+        </div>
+      )}
 
       {/* 코인 적립 배지 */}
       {coinReward !== null && (
