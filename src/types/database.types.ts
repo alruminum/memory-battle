@@ -16,40 +16,25 @@ export type Database = {
     Tables: {
       coin_transactions: {
         Row: {
-          id: string
-          user_id: string
-          type: string
           amount: number
           created_at: string | null
+          id: string
+          type: string
+          user_id: string
         }
         Insert: {
-          id?: string
-          user_id: string
-          type: string
           amount: number
           created_at?: string | null
+          id?: string
+          type: string
+          user_id: string
         }
         Update: {
-          id?: string
-          user_id?: string
-          type?: string
           amount?: number
           created_at?: string | null
-        }
-        Relationships: []
-      }
-      user_coins: {
-        Row: {
-          user_id: string
-          balance: number
-        }
-        Insert: {
-          user_id: string
-          balance?: number
-        }
-        Update: {
+          id?: string
+          type?: string
           user_id?: string
-          balance?: number
         }
         Relationships: []
       }
@@ -92,17 +77,28 @@ export type Database = {
         }
         Relationships: []
       }
+      user_coins: {
+        Row: {
+          balance: number
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
       add_coins: {
-        Args: {
-          p_user_id: string
-          p_amount: number
-          p_type: string
-        }
+        Args: { p_amount: number; p_type: string; p_user_id: string }
         Returns: number
       }
       ranking_daily: {
@@ -259,6 +255,7 @@ export const Constants = {
   },
 } as const
 
+// Convenience type aliases (re-add after gen:types)
 export type ScoreRow    = Database['public']['Tables']['scores']['Row']
 export type ScoreInsert = Database['public']['Tables']['scores']['Insert']
 
@@ -267,7 +264,3 @@ export type UserCoinsRow          = Database['public']['Tables']['user_coins']['
 export type UserCoinsInsert       = Database['public']['Tables']['user_coins']['Insert']
 export type CoinTransactionRow    = Database['public']['Tables']['coin_transactions']['Row']
 export type CoinTransactionInsert = Database['public']['Tables']['coin_transactions']['Insert']
-
-// [DEPRECATED v0.4] daily_reward — 코드에서 사용 제거, 타입만 보존 참조용
-// export type DailyRewardRow    = Database['public']['Tables']['daily_reward']['Row']
-// export type DailyRewardInsert = Database['public']['Tables']['daily_reward']['Insert']
