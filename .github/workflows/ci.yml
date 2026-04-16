@@ -21,3 +21,6 @@ jobs:
       - run: npm ci
 
       - run: npm run test
+        env:
+          VITE_SUPABASE_URL: http://localhost:54321
+          VITE_SUPABASE_ANON_KEY: ci-dummy-key
