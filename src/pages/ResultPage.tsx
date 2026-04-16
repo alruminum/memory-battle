@@ -4,7 +4,9 @@ import { useRanking } from '../hooks/useRanking'
 import { useRewardAd } from '../hooks/useRewardAd'
 import { useCoin } from '../hooks/useCoin'
 import { randomCoinReward } from '../lib/gameLogic'
+import { grantCoinExchange } from '../lib/ait'
 import { CoinRewardBadge } from '../components/result/CoinRewardBadge'
+import { PointExchangeButton } from '../components/result/PointExchangeButton'
 
 const IS_SANDBOX = import.meta.env.DEV || import.meta.env.VITE_SANDBOX === 'true'
 
@@ -14,7 +16,9 @@ interface ResultPageProps {
 }
 
 export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
-  const { score, stage, userId, baseScore, fullComboCount, maxComboStreak } = useGameStore()
+  const { score, stage, userId, baseScore, fullComboCount, maxComboStreak,
+    coinBalance  // [v0.4 F5] PointExchangeButton에 전달
+  } = useGameStore()
 
   const comboBonus = score - baseScore
   const { daily, myRanks, isLoading, submitScore } = useRanking(userId)
@@ -87,6 +91,21 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
     if (toastTimerRef.current) clearTimeout(toastTimerRef.current)
     setToast(msg)
     toastTimerRef.current = setTimeout(() => setToast(null), 3000)
+  }
+
+  async function handleExchange() {
+    try {
+      // 1. SDK 호출 — 성공 시에만 DB 차감
+      await grantCoinExchange()
+      // 2. 코인 차감 (DB 원자 처리)
+      await addCoins(-10, 'toss_points_exchange')
+      showToastMsg('🎉 10포인트 지급됐어요!')
+    } catch (err) {
+      console.error('[exchange] failed:', err)
+      showToastMsg('교환 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요')
+      // ⚠️ SDK 성공 후 addCoins 실패 시: 포인트 지급 완료 + 코인 미차감 상태
+      // → 로그 기록 + "잠시 후 다시 시도" 안내. 완전한 롤백 불가 (SDK 비가역)
+    }
   }
 
 
@@ -295,6 +314,12 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
         flexDirection: 'column',
         gap: 10,
       }}>
+        {/* [v0.4 F5] 포인트 교환 버튼 — RevivalButton 없음 (F4는 GameOverOverlay 전용) */}
+        <PointExchangeButton
+          coinBalance={coinBalance}
+          onExchange={handleExchange}
+        />
+
         {/* 광고 로딩 중 표시 */}
         {adLoading && !adDone && (
           <div style={{
