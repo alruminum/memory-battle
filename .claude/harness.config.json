@@ -2,6 +2,7 @@
   "prefix": "mb",
   "test_command": "npx vitest run",
   "lint_command": "npx eslint . --max-warnings 0",
+  "build_command": "npx tsc --noEmit",
   "second_reviewer": "gemini",
   "second_reviewer_model": "gemini-2.5-flash"
 }

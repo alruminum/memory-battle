@@ -65,6 +65,9 @@ export function ComboTimer({ computerShowTime, inputStartTime, isActive, isBreak
   // isBreaking 상태 머신: false→none 리셋 / true→breaking(즉시)+done(600ms)
   useEffect(() => {
     if (!isBreaking) {
+      // isBreaking prop→state 동기화: interval+VisibilityAPI 로직과 얽혀 있어
+      // 인라인 파생 상태 분리 시 타이밍 부작용 우려 — 의도적 suppression
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCollapsePhase('none')
       return
     }
@@ -79,6 +82,8 @@ export function ComboTimer({ computerShowTime, inputStartTime, isActive, isBreak
         clearInterval(intervalRef.current)
         intervalRef.current = null
       }
+      // interval 정지와 elapsedMs 초기화를 동일 effect에서 처리 — 의도적 suppression
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setElapsedMs(0)
       return
     }

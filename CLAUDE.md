@@ -47,26 +47,20 @@ VITE_COIN_EXCHANGE_CODE=    # [v0.4] 코인→토스포인트 교환 promotionCo
 
 ## GitHub Issues 마일스톤 (현재)
 
-| 용도 | 마일스톤 |
-|---|---|
-| 버그 (동작 오류) | `Bugs` |
-| 기능 추가·개선 | `Feature` |
-| 스토리 이슈 | `Story` |
-| 에픽 | `Epics` |
-| 현재 버전 레이블 | `v04` |
+| 용도 | 마일스톤 | 번호 |
+|---|---|---|
+| 버그 (동작 오류) | `Bugs` | 5 |
+| 기능 추가·개선 | `Feature` | 7 |
+| 스토리 이슈 | `Story` | 3 |
+| 에픽 | `Epics` | 6 |
+| 현재 버전 레이블 | `v04` | — |
 
 > 버전이 올라가면 "현재 버전 레이블" 항목만 업데이트하면 된다. 에이전트는 이 표를 참조한다.
 
 ### 이슈 생성 시 마일스톤 처리 규칙
 
-`mcp__github__create_issue`의 `milestone` 파라미터는 **이름이 아닌 숫자(number)**를 요구한다.  
-이슈 생성 전 반드시 아래 명령으로 마일스톤 이름 → 번호를 조회한다:
-
-```bash
-gh api repos/alruminum/memory-battle/milestones --jq '.[] | {number: .number, title: .title}'
-```
-
-조회 결과에서 위 표의 마일스톤 이름에 해당하는 `number`를 `milestone` 파라미터에 전달한다.
+`mcp__github__create_issue`의 `milestone` 파라미터는 위 표의 **번호**를 사용한다.
+마일스톤이 추가/변경되면 이 표를 업데이트한다.
 
 ### 이슈 등록 필수 항목
 
@@ -233,6 +227,7 @@ _(impl 없음 — 문서 구조 작업만)_ · Issues: [#19](https://github.com/
 | #104 ranking-back-fix | [docs/bugfix/#104-ranking-back-fix.md](docs/bugfix/#104-ranking-back-fix.md) | [#104](https://github.com/alruminum/memory-battle/issues/104) |
 | #105 safe-area-fix | [docs/bugfix/#105-safe-area-fix.md](docs/bugfix/#105-safe-area-fix.md) | [#105](https://github.com/alruminum/memory-battle/issues/105) |
 | #106 result-combo-text-fix | [docs/bugfix/#106-result-combo-text-fix.md](docs/bugfix/#106-result-combo-text-fix.md) | [#106](https://github.com/alruminum/memory-battle/issues/106) |
+| #119 eslint-cleanup | [docs/bugfix/#119-eslint-cleanup.md](docs/bugfix/#119-eslint-cleanup.md) | [#119](https://github.com/alruminum/memory-battle/issues/119) |
 
 ### v04
 

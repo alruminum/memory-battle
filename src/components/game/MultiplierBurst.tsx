@@ -30,7 +30,11 @@ export function MultiplierBurst({ multiplier, isVisible, onComplete }: Multiplie
     return Array.from({ length: PARTICLE_COUNT }, (_, i) => {
       const angle = (360 / PARTICLE_COUNT) * i
       const rad = (angle * Math.PI) / 180
+      // 파티클 좌표는 isVisible 변경마다 의도적으로 다른 값이어야 함 (시각적 랜덤성)
+      // useEffect로 이전 시 set-state-in-effect 위반이 새로 발생 — useMemo 유지
+      // eslint-disable-next-line react-hooks/purity
       const dist = 80 + Math.random() * 40
+      // eslint-disable-next-line react-hooks/purity
       const size = 8 + Math.random() * 6
       return {
         px: Math.cos(rad) * dist,

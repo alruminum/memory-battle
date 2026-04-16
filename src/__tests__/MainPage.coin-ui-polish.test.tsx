@@ -24,10 +24,18 @@ vi.mock('../store/gameStore', () => ({ useGameStore: vi.fn() }))
 
 const mockGetBalance = vi.fn()
 
+interface MockStoreState {
+  userId: string
+  setUserId: ReturnType<typeof vi.fn>
+  score: number
+  stage: number
+  coinBalance: number
+}
+
 /** MainPage는 useGameStore()와 useGameStore((s)=>s.coinBalance) 두 패턴 모두 사용 */
 function makeStoreMock(coinBalance: number) {
-  return (selector?: (s: any) => any) => {
-    const state = {
+  return (selector?: (s: MockStoreState) => unknown) => {
+    const state: MockStoreState = {
       userId: '',
       setUserId: vi.fn(),
       score: 0,
