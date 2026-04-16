@@ -39,7 +39,7 @@ interface GameStore {
 
   // [v0.4] 코인 액션
   setCoinBalance: (balance: number) => void  // useCoin에서 잔액 동기화
-  revive: () => void   // RESULT→SHOWING 전환 (코인 차감은 호출자 책임, 시퀀스 초기화)
+  revive: () => void   // RESULT→SHOWING 전환 (코인 차감은 호출자 책임, sequence 유지 — 실패 스테이지 시퀀스 재점등)
 }
 
 export const useGameStore = create<GameStore>((set, get) => ({
@@ -182,7 +182,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   // RESULT → SHOWING 전환
   // ⚠️ 코인 차감(addCoins(-5,'revival'))은 호출 전 이미 완료되어야 한다
-  // ⚠️ sequence=[] → useGameEngine useEffect가 현재 stage 길이의 새 시퀀스를 생성
   revive: () =>
     set((state) => {
       // 가드: RESULT 상태가 아니거나 이미 부활 사용 시 무시
@@ -190,7 +189,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       if (state.revivalUsed) return {}
       return {
         status: 'SHOWING',
-        sequence: [],       // useGameEngine이 감지해 stage 길이 새 시퀀스 생성
+        // sequence 유지 — 실패한 스테이지의 시퀀스를 SHOWING에서 다시 점등
         currentIndex: 0,
         revivalUsed: true,
         // score, stage, comboStreak, fullComboCount, maxComboStreak 유지
