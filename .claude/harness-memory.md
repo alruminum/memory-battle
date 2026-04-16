@@ -57,3 +57,5 @@
 - 2026-04-16 | 06-toss-points-exchange | test_fail | 
 - 2026-04-16 | 07-coin-ui-polish | pr_fail | pr-reviewer agent produced no output (exit=124)
 - 2026-04-16 | 07-coin-ui-polish | pr_fail | pr-reviewer agent produced no output (exit=143)
+- 2026-04-16 | #117-revival-button-hide-on-no-coins | autocheck_fail | lint_fail: npx eslint . --max-warnings 0 실패
+- 2026-04-16 | #117-revival-button-hide-on-no-coins | autocheck_fail | lint_fail: npx eslint . --max-warnings 0 실패

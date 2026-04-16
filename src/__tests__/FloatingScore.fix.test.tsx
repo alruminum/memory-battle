@@ -10,8 +10,9 @@
  */
 import { describe, it, expect } from 'vitest'
 import { render } from '@testing-library/react'
-import { getLabelColor, getLabelGlow, FloatingScore } from '../components/game/FloatingScore'
+import { FloatingScore } from '../components/game/FloatingScore'
 import type { FloatingItem } from '../components/game/FloatingScore'
+import { getLabelColor, getLabelGlow } from '../components/game/floatingScoreUtils'
 
 // ── TC-1 / TC-2: getLabelGlow ─────────────────────────────────────────────────
 

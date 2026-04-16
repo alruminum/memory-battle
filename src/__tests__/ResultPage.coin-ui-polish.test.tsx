@@ -48,24 +48,24 @@ function makeDefaultMocks(coinBalance = 25) {
     fullComboCount: 2,
     maxComboStreak: 10,
     coinBalance,
-  } as any)
+  } as unknown as ReturnType<typeof useGameStore>)
 
   vi.mocked(useRanking).mockReturnValue({
     daily: [],
     myRanks: { daily: 0, monthly: 0, season: 0 },
     isLoading: false,
     submitScore: vi.fn(),
-  } as any)
+  } as unknown as ReturnType<typeof useRanking>)
 
   vi.mocked(useRewardAd).mockReturnValue({
     show: mockShowAd,
     isLoading: false,
-  } as any)
+  } as unknown as ReturnType<typeof useRewardAd>)
 
   vi.mocked(useCoin).mockReturnValue({
     getBalance: vi.fn().mockResolvedValue(coinBalance),
     addCoins: mockAddCoins,
-  } as any)
+  } as unknown as ReturnType<typeof useCoin>)
 }
 
 // ── 셋업 ──────────────────────────────────────────────

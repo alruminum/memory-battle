@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { getLabelColor, getLabelSize, getLabelGlow } from '../components/game/FloatingScore'
+import { getLabelColor, getLabelSize, getLabelGlow } from '../components/game/floatingScoreUtils'
 
 // ── F-1. getLabelColor ──────────────────────────────────────────────────────
 // 근거: impl/15-floating-score-threshold.md — x1부터 버튼 고유 hex 색상 반환 (흰색 분기 제거)

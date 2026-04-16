@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useRef, useCallback } from 'react'
 
 const BLOCK_HEIGHTS = [8, 10, 12, 14, 16]  // px, 인덱스 0(좌)→4(우), 높이 차등
 
@@ -10,14 +10,16 @@ interface ComboIndicatorProps {
 export function ComboIndicator({ comboStreak, isBreaking = false }: ComboIndicatorProps) {
   const [isShaking, setIsShaking] = useState(false)
 
-  // isBreaking 상태 머신: false → 즉시 리셋 / true → 쉐이크 시작
-  useEffect(() => {
-    if (isBreaking) {
-      setIsShaking(true)
-    } else {
-      setIsShaking(false)  // 게임 재시작 시 즉시 정지
-    }
-  }, [isBreaking])
+  // isBreaking prop→state 동기화: React 파생 상태 패턴 (useEffect 없이 렌더 중 처리)
+  // ref.current ≠ isBreaking 일 때만 setState → 렌더 루프 방지
+  // React docs "Adjusting state when prop changes" 공식 패턴 — react-hooks/refs 의도적 억제
+  const prevIsBreaking = useRef(isBreaking)
+  // eslint-disable-next-line react-hooks/refs
+  if (prevIsBreaking.current !== isBreaking) {
+    // eslint-disable-next-line react-hooks/refs
+    prevIsBreaking.current = isBreaking
+    setIsShaking(isBreaking)
+  }
 
   const handleAnimationEnd = useCallback((e: React.AnimationEvent<HTMLDivElement>) => {
     if (e.animationName === 'comboBreakShake') {
