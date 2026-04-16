@@ -1,9 +1,6 @@
 # 기억력배틀 TRD v0.4
 
 > 변경 이력
-> - v0.4.3 (2026-04-16): architecture.md DESIGN_REVIEW_FAIL 수정 — useCoin.addCoins 2-param 확정(userId 내부 조회), GameOverOverlay 즉시 부활 경로 addCoins(-5,'revival') 명시.
-> - v0.4.2 (2026-04-16): 설계 문서 불일치 수정 — docs/game-logic.md: add_coins RPC 2-param→3-param atomic 버전 통일, revivalUsed=true 시 RevivalButton 미표시로 수정. docs/db-schema.md: add_coins RPC 정의 누락 추가.
-> - v0.4.1 (2026-04-16): docs/sdk.md 현행화 — grantCoinExchange 미구현 명시, grantDailyReward 삭제 예정 표기, granite.config icon/webViewProps 불일치 수정, 환경변수명 VITE_REWARD_AD_ID→VITE_REWARD_AD_GROUP_ID, VITE_BANNER_AD_ID→VITE_BANNER_AD_GROUP_ID 수정.
 > - v0.4 (2026-04-15): 코인 시스템 도입 — user_coins + coin_transactions 테이블, 광고 코인 지급(daily_reward 제거), 부활 아이템, 토스포인트 교환, coinBalance·revivalUsed·revive() Zustand 추가, grantCoinExchange() SDK 래퍼 신설.
 > - v0.3.2-hotfix (2026-04-03): 점수 배율 즉시 적용 버그픽스 (#59) — §3-5 `calcScore` → `calcButtonScore(comboStreak)` 변경, addInput 배율 즉시 적용, stageClear clearBonus만 추가, isFullCombo는 스트릭 판정에만 사용.
 > - v0.3.2-fix (2026-04-03): GameOverOverlay 버그픽스 (Epic 10 #48) — §7 GamePage: `position: fixed` → `position: absolute` 변경(컨테이너 기준 배치), 루트 div `position: relative` 추가, 패널 상단 핸들바·경고 아이콘·"GAME OVER" 타이틀 추가.
@@ -320,12 +317,12 @@ export const getUserId = async (): Promise<string> => {
 export const showRewardAd = (): Promise<boolean> => {
   return new Promise((resolve, reject) => {
     const unsubLoad = loadFullScreenAd({
-      options: { adGroupId: import.meta.env.VITE_REWARD_AD_GROUP_ID ?? 'ait-ad-test-rewarded-id' },
+      options: { adGroupId: import.meta.env.VITE_REWARD_AD_ID ?? 'ait-ad-test-rewarded-id' },
       onEvent: (e) => {
         if (e.type === 'loaded') {
           unsubLoad()
           showFullScreenAd({
-            options: { adGroupId: import.meta.env.VITE_REWARD_AD_GROUP_ID ?? 'ait-ad-test-rewarded-id' },
+            options: { adGroupId: import.meta.env.VITE_REWARD_AD_ID ?? 'ait-ad-test-rewarded-id' },
             onEvent: (ev) => {
               if (ev.type === 'userEarnedReward') resolve(true)
               if (ev.type === 'dismissed')        resolve(false)
@@ -417,10 +414,6 @@ interface GameStore {
   gameOver: (reason: 'timeout' | 'wrong') => void
   resetGame: () => void
   revive: () => void  // [v0.4] RESULT→SHOWING 전환 (5코인 차감 후 호출, 시퀀스 초기화, stage/score/combo 유지)
-  // useCoin 훅 시그니처 (확정 v0.4.3):
-  //   addCoins(amount: number, type: CoinTxType): Promise<number>
-  //   getBalance(): Promise<number>
-  //   ※ userId는 내부에서 useGameStore.getState().userId 조회 (2-param, 3-param 아님)
   setCoinBalance: (balance: number) => void  // [v0.4] useCoin에서 잔액 동기화
   // ⚠️ v0.3.1 추가
   stageClear: (inputCompleteTime: number, flashDuration: number) => {
@@ -450,7 +443,6 @@ interface GameStore {
 - 배너광고: 하단 고정
 - GameOverlay 루트 div: `position: relative` (v0.3.2-fix 추가 — absolute 자식 기준점)
 - GameOverOverlay (v0.3.2): 게임오버 시 backdrop blur + 바텀 패널 슬라이드업. shake 애니메이션. 탭으로 결과 화면 전환 (자동 전환 X). `position: absolute`(v0.3.2-fix: fixed→absolute). 패널 상단: 핸들바(32×4px) + 경고 아이콘(⚠ 48×48px 원형) + "GAME OVER" 타이틀(Barlow Condensed 13px, letter-spacing 3px)
-- **[v0.4] GameOverOverlay 즉시 부활**: balance≥5 AND !revivalUsed 조건에서 즉시 부활 버튼 표시. 탭 시 `addCoins(-5, 'revival')` → `store.revive()` 호출 → SHOWING 복귀 (ResultPage 미진입). revivalUsed=true 설정으로 판당 1회 보장.
 
 ### ResultPage ⚠️ v0.4 변경
 - 이번 점수 + 최고 기록 갱신 여부
@@ -478,8 +470,8 @@ interface GameStore {
 VITE_SUPABASE_URL=
 VITE_SUPABASE_ANON_KEY=
 VITE_APP_NAME=memory-battle
-VITE_REWARD_AD_GROUP_ID=        # 미설정 시 테스트 ID 사용
-VITE_BANNER_AD_GROUP_ID=        # 미설정 시 테스트 ID 사용
+VITE_REWARD_AD_ID=              # 미설정 시 테스트 ID 사용
+VITE_BANNER_AD_ID=              # 미설정 시 테스트 ID 사용
 VITE_COIN_EXCHANGE_CODE=        # [v0.4] 코인→토스포인트 교환 promotionCode (운영 사전 등록 필수)
 ```
 

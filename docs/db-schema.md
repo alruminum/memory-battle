@@ -15,12 +15,27 @@ CREATE TABLE scores (
 CREATE INDEX idx_scores_played_at ON scores(played_at DESC);
 CREATE INDEX idx_scores_user_id   ON scores(user_id);
 
--- 일일 리워드 수령 기록
-CREATE TABLE daily_reward (
-  user_id      TEXT NOT NULL,
-  reward_date  DATE NOT NULL,
-  PRIMARY KEY (user_id, reward_date)
+-- [v0.4 DEPRECATED] daily_reward — 코드/훅 제거됨, 테이블 물리 삭제는 v2
+-- CREATE TABLE daily_reward ( ... );
+
+-- [v0.4] 유저 코인 잔액
+CREATE TABLE user_coins (
+  user_id   TEXT PRIMARY KEY,   -- getUserKeyForGame().hash
+  balance   INTEGER NOT NULL DEFAULT 0 CHECK (balance >= 0)
 );
+
+-- [v0.4] 코인 거래 내역
+-- type: 'ad_reward' | 'record_bonus' | 'revival' | 'toss_points_exchange'
+-- amount: 양수=적립, 음수=차감
+CREATE TABLE coin_transactions (
+  id          UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id     TEXT NOT NULL,
+  type        TEXT NOT NULL,
+  amount      INTEGER NOT NULL,
+  created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_coin_tx_user_id ON coin_transactions(user_id, created_at DESC);
 ```
 
 ---
@@ -69,8 +84,14 @@ CREATE POLICY "scores_select_all"   ON scores FOR SELECT USING (true);
 CREATE POLICY "scores_insert_anon"  ON scores FOR INSERT WITH CHECK (true);
 -- UPDATE/DELETE 정책 없음 → 자동 차단
 
--- daily_reward: anon key로 전체 허용 (user_id 기반 RLS 불가 — 토스 hash는 auth.uid()와 무관)
-CREATE POLICY "daily_reward_all_anon" ON daily_reward FOR ALL USING (true) WITH CHECK (true);
+-- [v0.4] user_coins / coin_transactions
+ALTER TABLE user_coins ENABLE ROW LEVEL SECURITY;
+ALTER TABLE coin_transactions ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "user_coins_all_anon"  ON user_coins        FOR ALL USING (true) WITH CHECK (true);
+CREATE POLICY "coin_tx_all_anon"     ON coin_transactions FOR ALL USING (true) WITH CHECK (true);
+
+-- [DEPRECATED v0.4] daily_reward — 코드 제거, 테이블만 보존
+-- CREATE POLICY "daily_reward_all_anon" ON daily_reward FOR ALL USING (true) WITH CHECK (true);
 ```
 
 > ⚠️ anon key가 클라이언트에 노출되는 구조에서는 user-level RLS 불가.
@@ -78,7 +99,53 @@ CREATE POLICY "daily_reward_all_anon" ON daily_reward FOR ALL USING (true) WITH 
 
 ---
 
-## Supabase RPC 함수 (KST 타임존 적용)
+
+## [v0.4] 코인 RPC 함수
+
+코인 잔액·거래 내역을 단일 트랜잭션으로 원자 처리. Supabase SQL Editor에서 생성.
+
+```sql
+-- add_coins: user_coins balance 원자 증감 + coin_transactions INSERT
+-- p_amount: 양수=적립, 음수=차감 / GREATEST(0,...) 로 음수 차단
+CREATE OR REPLACE FUNCTION add_coins(
+  p_user_id TEXT,
+  p_amount  INTEGER,
+  p_type    TEXT      -- 'ad_reward'|'record_bonus'|'revival'|'toss_points_exchange'
+)
+RETURNS INTEGER        -- 업데이트 후 최종 balance 반환
+LANGUAGE plpgsql SECURITY DEFINER AS $$
+DECLARE
+  v_balance INTEGER;
+BEGIN
+  INSERT INTO user_coins (user_id, balance)
+  VALUES (p_user_id, GREATEST(0, p_amount))
+  ON CONFLICT (user_id) DO UPDATE
+    SET balance = GREATEST(0, user_coins.balance + p_amount)
+  RETURNING balance INTO v_balance;
+
+  INSERT INTO coin_transactions (user_id, type, amount)
+  VALUES (p_user_id, p_type, p_amount);
+
+  RETURN v_balance;
+END;
+$$;
+```
+
+> **선택 근거**: 클라이언트 SELECT→UPDATE 2-step은 race condition 가능. RPC 단일 트랜잭션으로 atomic 처리. `GREATEST(0, ...)` 로 음수 차단.
+
+클라이언트 호출:
+```typescript
+const { data, error } = await supabase.rpc('add_coins', {
+  p_user_id: userId,
+  p_amount: amount,   // ⚠️ p_delta 아님 — p_amount 사용
+  p_type: type
+})
+// data: 업데이트된 balance (INTEGER)
+```
+
+---
+
+## Supabase RPC 함수 (KST 타임존 적용, 랭킹용)
 
 랭킹 조회 쿼리는 `AT TIME ZONE 'Asia/Seoul'`을 적용해 한국 기준 날짜 경계를 사용.
 Supabase SQL Editor에서 생성.
@@ -162,8 +229,13 @@ npm run gen:types
 ```typescript
 export type ScoreRow = Database['public']['Tables']['scores']['Row']
 export type ScoreInsert = Database['public']['Tables']['scores']['Insert']
-export type DailyRewardRow = Database['public']['Tables']['daily_reward']['Row']
-export type DailyRewardInsert = Database['public']['Tables']['daily_reward']['Insert']
+// [v0.4] 코인 테이블 타입
+export type UserCoinsRow    = Database['public']['Tables']['user_coins']['Row']
+export type UserCoinsInsert = Database['public']['Tables']['user_coins']['Insert']
+export type CoinTransactionRow    = Database['public']['Tables']['coin_transactions']['Row']
+export type CoinTransactionInsert = Database['public']['Tables']['coin_transactions']['Insert']
+// [DEPRECATED v0.4] daily_reward — 코드에서 사용 제거, 타입만 보존 참조용
+// export type DailyRewardRow = Database['public']['Tables']['daily_reward']['Row']
 ```
 
 `src/types/index.ts`에서 re-export하므로 다른 모듈에서는 `../types`로 import 가능.

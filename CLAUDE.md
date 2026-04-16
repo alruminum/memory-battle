@@ -36,6 +36,9 @@ npm run build       # ait build
 VITE_SUPABASE_URL=
 VITE_SUPABASE_ANON_KEY=
 VITE_APP_NAME=memory-battle
+VITE_REWARD_AD_GROUP_ID=    # 미설정 시 테스트 ID 사용 (ait-ad-test-rewarded-id)
+VITE_BANNER_AD_GROUP_ID=    # 미설정 시 테스트 ID 사용 (ait-ad-test-banner-id)
+VITE_COIN_EXCHANGE_CODE=    # [v0.4] 코인→토스포인트 교환 promotionCode (운영 사전 등록 필수)
 ```
 
 > SDK: `@apps-in-toss/web-framework` 2.x 이상 필수. TDS 적용 면제 (게임 앱).
@@ -50,7 +53,7 @@ VITE_APP_NAME=memory-battle
 | 기능 추가·개선 | `Feature` |
 | 스토리 이슈 | `Story` |
 | 에픽 | `Epics` |
-| 현재 버전 레이블 | `v03` |
+| 현재 버전 레이블 | `v04` |
 
 > 버전이 올라가면 "현재 버전 레이블" 항목만 업데이트하면 된다. 에이전트는 이 표를 참조한다.
 
@@ -231,6 +234,20 @@ _(impl 없음 — 문서 구조 작업만)_ · Issues: [#19](https://github.com/
 | #105 safe-area-fix | [docs/bugfix/#105-safe-area-fix.md](docs/bugfix/#105-safe-area-fix.md) | [#105](https://github.com/alruminum/memory-battle/issues/105) |
 | #106 result-combo-text-fix | [docs/bugfix/#106-result-combo-text-fix.md](docs/bugfix/#106-result-combo-text-fix.md) | [#106](https://github.com/alruminum/memory-battle/issues/106) |
 
+### v04
+
+**Epic 12 — 코인 시스템 (PRD v0.4)** · [stories](docs/milestones/v04/epics/epic-12-coin-v04/stories.md)
+
+| impl | 계획 파일 | Issue |
+|---|---|---|
+| 01 usecoin-infra | [impl/01-usecoin-infra.md](docs/milestones/v04/epics/epic-12-coin-v04/impl/01-usecoin-infra.md) | [#107](https://github.com/alruminum/memory-battle/issues/107) |
+| 02 daily-reward-removal | [impl/02-daily-reward-removal.md](docs/milestones/v04/epics/epic-12-coin-v04/impl/02-daily-reward-removal.md) | [#108](https://github.com/alruminum/memory-battle/issues/108) |
+| 03 ad-coin-reward | [impl/03-ad-coin-reward.md](docs/milestones/v04/epics/epic-12-coin-v04/impl/03-ad-coin-reward.md) | [#109](https://github.com/alruminum/memory-battle/issues/109) |
+| 04 record-coin | [impl/04-record-coin.md](docs/milestones/v04/epics/epic-12-coin-v04/impl/04-record-coin.md) | [#110](https://github.com/alruminum/memory-battle/issues/110) |
+| 05 revival-item | [impl/05-revival-item.md](docs/milestones/v04/epics/epic-12-coin-v04/impl/05-revival-item.md) | [#111](https://github.com/alruminum/memory-battle/issues/111) |
+| 06 toss-points-exchange | [impl/06-toss-points-exchange.md](docs/milestones/v04/epics/epic-12-coin-v04/impl/06-toss-points-exchange.md) | [#112](https://github.com/alruminum/memory-battle/issues/112) |
+| 07 coin-ui-polish | [impl/07-coin-ui-polish.md](docs/milestones/v04/epics/epic-12-coin-v04/impl/07-coin-ui-polish.md) | [#113](https://github.com/alruminum/memory-battle/issues/113) |
+
 ---
 
 ## 문서 (필요한 것만 열어서 참고)
@@ -252,13 +269,14 @@ _(impl 없음 — 문서 구조 작업만)_ · Issues: [#19](https://github.com/
 
 ## 현재 마일스톤
 
-`v03` — Epic 05 기준 (PRD v0.3). 버전별 문서는 현재 `docs/` 루트에 위치.
+`v04` — Epic 12 기준 (PRD v0.4 코인 시스템). 버전별 문서는 현재 `docs/` 루트에 위치.
 - PRD: `prd.md`
+- TRD: `trd.md`
 - UI 스펙: `docs/ui-spec.md`
 - 게임 로직: `docs/game-logic.md`
 
 > **마일스톤 구조 (B안)**: 루트 = 항상 현재 최신. 과거 버전은 `docs/milestones/vNN/`에 스냅샷.
-> 과거 버전 참조 시: `docs/milestones/v01/` (Epic 01~04), `docs/milestones/v03/` (Epic 05~06)
+> 과거 버전 참조 시: `docs/milestones/v01/` (Epic 01~04), `docs/milestones/v03/` (Epic 05~11), `docs/milestones/v04/` (Epic 12~)
 
 ### 새 마일스톤 시작 전 체크리스트
 
