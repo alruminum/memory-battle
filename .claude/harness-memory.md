@@ -50,3 +50,4 @@
 - 2026-04-15 | #106-result-combo-text-fix | success | attempt 1
 - 2026-04-15 | #106-result-combo-text-fix | success | attempt 1
 - 2026-04-16 | 02-daily-reward-removal | success | attempt 1
+- 2026-04-16 | 03-ad-coin-reward | autocheck_fail | no_changes: engineer가 아무 파일도 수정하지 않음
