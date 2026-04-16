@@ -36,7 +36,16 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
 
     const prevBest = daily.find((e) => e.user_id === userId)?.best_score ?? 0
     prevBestRef.current = prevBest
-    if (score > prevBest) setIsNewBest(true)
+
+    const isNewRecord = score > prevBest
+    if (isNewRecord) {
+      setIsNewBest(true)
+      // [v0.4 F3] 최고기록 코인 보상 — 첫 플레이(prevBest=0)도 포함, 동점 미처리
+      addCoins(1, 'record_bonus').catch(() => {
+        // 코인 적립 실패는 게임 흐름에 영향 없음 — 조용히 처리
+        console.warn('[record-coin] addCoins failed — non-blocking')
+      })
+    }
 
     submitScore(score, stage, userId)
   }, [userId, isLoading]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -158,6 +167,15 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
               color: 'var(--vb-accent)',
               letterSpacing: 2,
             }}>NEW PERSONAL BEST</span>
+            {/* [v0.4 F3] 최고기록 코인 보상 표시 */}
+            <div style={{
+              fontSize: 11,
+              color: 'var(--vb-accent)',
+              fontFamily: 'var(--vb-font-body)',
+              fontWeight: 600,
+              marginTop: 2,
+              letterSpacing: 0,
+            }}>🏆 최고기록! 🪙 +1</div>
           </div>
         )}
       </div>

@@ -52,3 +52,4 @@
 - 2026-04-16 | 02-daily-reward-removal | success | attempt 1
 - 2026-04-16 | 03-ad-coin-reward | autocheck_fail | no_changes: engineer가 아무 파일도 수정하지 않음
 - 2026-04-16 | 03-ad-coin-reward | pr_fail | pr-reviewer CHANGES_REQUESTED (see /Users/dc.kim/project/memoryBattle/.claude/harness-state/mb_histo
+- 2026-04-16 | 04-record-coin | autocheck_fail | no_changes: engineer가 아무 파일도 수정하지 않음
