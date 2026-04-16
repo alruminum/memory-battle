@@ -32,14 +32,6 @@ vi.mock('../hooks/useRewardAd', () => ({
   })),
 }))
 
-const mockGrantDailyReward = vi.fn()
-vi.mock('../hooks/useDailyReward', () => ({
-  useDailyReward: vi.fn(() => ({
-    hasTodayReward: false,
-    grantDailyReward: mockGrantDailyReward,
-  })),
-}))
-
 // ait.ts mock — openLeaderboard가 호출되지 않음을 검증
 const mockOpenLeaderboard = vi.fn()
 vi.mock('../lib/ait', () => ({
@@ -51,7 +43,6 @@ describe('ResultPage — 친구 랭킹 보기 버튼 제거 (#101)', () => {
     vi.clearAllMocks()
     mockShowAd.mockResolvedValue(false)
     mockSubmitScore.mockResolvedValue(undefined)
-    mockGrantDailyReward.mockResolvedValue(undefined)
   })
 
   // ── 정상 흐름 ──────────────────────────────────────────────────────────────

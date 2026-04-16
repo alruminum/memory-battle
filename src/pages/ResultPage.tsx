@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import { useGameStore } from '../store/gameStore'
 import { useRanking } from '../hooks/useRanking'
 import { useRewardAd } from '../hooks/useRewardAd'
-import { useDailyReward } from '../hooks/useDailyReward'
 
 interface ResultPageProps {
   onPlayAgain: () => void
@@ -15,8 +14,6 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
   const comboBonus = score - baseScore
   const { daily, myRanks, isLoading, submitScore } = useRanking(userId)
   const { show: showAd, isLoading: adLoading } = useRewardAd()
-  const { hasTodayReward, grantDailyReward } = useDailyReward()
-
   const submitted = useRef(false)
   const [adDone, setAdDone] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
@@ -45,14 +42,8 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
       try {
         const earned = await showAd()
         if (cancelled) return
-        if (earned && !hasTodayReward) {
-          try {
-            await grantDailyReward()
-            showToastMsg('오늘의 10포인트 지급!')
-          } catch {
-            showToastMsg('포인트 지급 중 오류가 발생했습니다')
-          }
-        }
+        // [v0.4] userEarnedReward → 코인 적립으로 전환 (impl 03에서 구현)
+        void earned
       } catch {
         // 광고 실패 — 버튼 활성화만 진행
       } finally {
