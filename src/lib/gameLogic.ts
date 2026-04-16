@@ -55,3 +55,24 @@ export const getInputTimeout = (stage: number): number => {
   if (stage >= 10) return 1800
   return 2000
 }
+
+// 가중치 랜덤 코인 지급량 (PRD v0.4 F2)
+// 확률: 1→30% / 2→30% / 3→25% / 4→10% / 5→5%
+// IS_SANDBOX=true 시 고정 2개 반환 (호출자 책임)
+const COIN_REWARD_TABLE: { amount: number; weight: number }[] = [
+  { amount: 1, weight: 30 },
+  { amount: 2, weight: 30 },
+  { amount: 3, weight: 25 },
+  { amount: 4, weight: 10 },
+  { amount: 5, weight: 5  },
+]
+
+export function randomCoinReward(): number {
+  const roll = Math.random() * 100
+  let cumulative = 0
+  for (const { amount, weight } of COIN_REWARD_TABLE) {
+    cumulative += weight
+    if (roll < cumulative) return amount
+  }
+  return 1  // fallback (이론상 도달 불가)
+}

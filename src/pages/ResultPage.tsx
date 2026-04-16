@@ -2,6 +2,11 @@ import { useEffect, useRef, useState } from 'react'
 import { useGameStore } from '../store/gameStore'
 import { useRanking } from '../hooks/useRanking'
 import { useRewardAd } from '../hooks/useRewardAd'
+import { useCoin } from '../hooks/useCoin'
+import { randomCoinReward } from '../lib/gameLogic'
+import { CoinRewardBadge } from '../components/result/CoinRewardBadge'
+
+const IS_SANDBOX = import.meta.env.DEV || import.meta.env.VITE_SANDBOX === 'true'
 
 interface ResultPageProps {
   onPlayAgain: () => void
@@ -14,9 +19,11 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
   const comboBonus = score - baseScore
   const { daily, myRanks, isLoading, submitScore } = useRanking(userId)
   const { show: showAd, isLoading: adLoading } = useRewardAd()
+  const { addCoins } = useCoin()
   const submitted = useRef(false)
   const [adDone, setAdDone] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
+  const [coinReward, setCoinReward] = useState<number | null>(null)
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // 점수 제출 (마운트 1회, isLoading 완료 후 isNewBest 판단)
@@ -42,8 +49,16 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
       try {
         const earned = await showAd()
         if (cancelled) return
-        // [v0.4] userEarnedReward → 코인 적립으로 전환 (impl 03에서 구현)
-        void earned
+
+        if (earned) {
+          try {
+            const rewardAmount = IS_SANDBOX ? 2 : randomCoinReward()
+            await addCoins(rewardAmount, 'ad_reward')
+            setCoinReward(rewardAmount)  // CoinRewardBadge 표시 트리거
+          } catch {
+            showToastMsg('코인 지급 중 오류가 발생했습니다')
+          }
+        }
       } catch {
         // 광고 실패 — 버튼 활성화만 진행
       } finally {
@@ -315,6 +330,14 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
         </button>
       </div>
 
+      {/* 코인 적립 배지 */}
+      {coinReward !== null && (
+        <CoinRewardBadge
+          amount={coinReward}
+          onDismiss={() => setCoinReward(null)}
+        />
+      )}
+
       {/* 토스트 */}
       {toast && (
         <div style={{
@@ -322,7 +345,7 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
           bottom: 80,
           left: '50%',
           transform: 'translateX(-50%)',
-          backgroundColor: 'rgba(20,20,20,0.92)',
+          backgroundColor: 'var(--vb-toast-bg)',
           color: 'var(--vb-text)',
           padding: '10px 20px',
           borderRadius: 24,

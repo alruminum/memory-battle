@@ -44,8 +44,7 @@ export function useCoin(): UseCoinReturn {
 
     if (error) {
       console.error('[useCoin] addCoins error:', error)
-      // 오류 시 getBalance로 정확한 잔액 재조회
-      return await getBalance()
+      throw error  // PostgrestError를 그대로 throw → 호출자 catch 블록 도달
     }
 
     const newBalance = (data as number) ?? 0

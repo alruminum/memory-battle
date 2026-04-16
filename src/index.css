@@ -60,6 +60,9 @@
   --safe-area-right:  env(safe-area-inset-right,  0px);
   --safe-area-bottom: env(safe-area-inset-bottom, 0px);
   --safe-area-left:   env(safe-area-inset-left,   0px);
+
+  /* Toast / Badge 배경 */
+  --vb-toast-bg: rgba(20, 20, 20, 0.92);
 }
 
 @keyframes slide-up { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
