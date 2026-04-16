@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      coin_transactions: {
+        Row: {
+          id: string
+          user_id: string
+          type: string
+          amount: number
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          type: string
+          amount: number
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          type?: string
+          amount?: number
+          created_at?: string | null
+        }
+        Relationships: []
+      }
+      user_coins: {
+        Row: {
+          user_id: string
+          balance: number
+        }
+        Insert: {
+          user_id: string
+          balance?: number
+        }
+        Update: {
+          user_id?: string
+          balance?: number
+        }
+        Relationships: []
+      }
       daily_reward: {
         Row: {
           reward_date: string
@@ -58,6 +97,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_coins: {
+        Args: {
+          p_user_id: string
+          p_amount: number
+          p_type: string
+        }
+        Returns: number
+      }
       ranking_daily: {
         Args: never
         Returns: {
@@ -212,8 +259,15 @@ export const Constants = {
   },
 } as const
 
-// 편의 타입 별칭 — gen:types 재실행 시 재추가 필요
-export type ScoreRow = Database['public']['Tables']['scores']['Row']
+export type ScoreRow    = Database['public']['Tables']['scores']['Row']
 export type ScoreInsert = Database['public']['Tables']['scores']['Insert']
-export type DailyRewardRow = Database['public']['Tables']['daily_reward']['Row']
-export type DailyRewardInsert = Database['public']['Tables']['daily_reward']['Insert']
+
+// [v0.4] 코인 테이블 타입
+export type UserCoinsRow          = Database['public']['Tables']['user_coins']['Row']
+export type UserCoinsInsert       = Database['public']['Tables']['user_coins']['Insert']
+export type CoinTransactionRow    = Database['public']['Tables']['coin_transactions']['Row']
+export type CoinTransactionInsert = Database['public']['Tables']['coin_transactions']['Insert']
+
+// [DEPRECATED v0.4] daily_reward — 코드에서 사용 제거, 타입만 보존 참조용
+// export type DailyRewardRow    = Database['public']['Tables']['daily_reward']['Row']
+// export type DailyRewardInsert = Database['public']['Tables']['daily_reward']['Insert']

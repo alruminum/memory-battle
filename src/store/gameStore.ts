@@ -20,6 +20,10 @@ interface GameStore {
   userId: string
   hasTodayReward: boolean
 
+  // [v0.4] 코인
+  coinBalance: number    // Supabase user_coins.balance 미러 (앱 진입·이벤트마다 갱신)
+  revivalUsed: boolean   // 이 판 부활 사용 여부 (startGame/resetGame 시 false 초기화)
+
   setUserId: (id: string) => void
   setTodayReward: (value: boolean) => void
   setSequence: (seq: ButtonColor[]) => void
@@ -32,6 +36,10 @@ interface GameStore {
   breakCombo: () => void
   gameOver: (reason: GameOverReason) => void
   resetGame: () => void
+
+  // [v0.4] 코인 액션
+  setCoinBalance: (balance: number) => void  // useCoin에서 잔액 동기화
+  revive: () => void   // RESULT→SHOWING 전환 (코인 차감은 호출자 책임, 시퀀스 초기화)
 }
 
 export const useGameStore = create<GameStore>((set, get) => ({
@@ -49,6 +57,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   userId: '',
   hasTodayReward: false,
+  coinBalance: 0,
+  revivalUsed: false,
 
   setUserId: (id) => set({ userId: id }),
   setTodayReward: (value) => set({ hasTodayReward: value }),
@@ -67,6 +77,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       maxComboStreak: 0,
       sequenceStartTime: 0,
       gameOverReason: null,
+      revivalUsed: false,
+      // coinBalance는 초기화하지 않는다 (앱 진입 시 getBalance가 세팅, 게임 시작마다 리셋 불필요)
     }),
 
   addInput: (color) => {
@@ -162,5 +174,26 @@ export const useGameStore = create<GameStore>((set, get) => ({
       maxComboStreak: 0,
       sequenceStartTime: 0,
       gameOverReason: null,
+      revivalUsed: false,
+    }),
+
+  // [v0.4] 코인 액션
+  setCoinBalance: (balance) => set({ coinBalance: balance }),
+
+  // RESULT → SHOWING 전환
+  // ⚠️ 코인 차감(addCoins(-5,'revival'))은 호출 전 이미 완료되어야 한다
+  // ⚠️ sequence=[] → useGameEngine useEffect가 현재 stage 길이의 새 시퀀스를 생성
+  revive: () =>
+    set((state) => {
+      // 가드: RESULT 상태가 아니거나 이미 부활 사용 시 무시
+      if (state.status !== 'RESULT') return {}
+      if (state.revivalUsed) return {}
+      return {
+        status: 'SHOWING',
+        sequence: [],       // useGameEngine이 감지해 stage 길이 새 시퀀스 생성
+        currentIndex: 0,
+        revivalUsed: true,
+        // score, stage, comboStreak, fullComboCount, maxComboStreak 유지
+      }
     }),
 }))
