@@ -101,3 +101,37 @@ balance < 10 시 버튼 비활성.
 - [ ] `src/pages/ResultPage.tsx` — 현재 코인 잔액 상시 표시
 - [ ] `src/index.css` — `@keyframes coinFloatUp` (위로 올라가며 페이드아웃)
 - [ ] float-up 트리거: CoinRewardBadge 또는 ResultPage에서 획득 이벤트 시 발동
+
+---
+
+## Story 8: F4-AD — 광고 부활 옵션
+
+> impl: `impl/08-ad-revival.md`
+> 관련 이슈: [#124](https://github.com/alruminum/memory-battle/issues/124)
+
+게임오버 오버레이에 광고 시청 기반 부활 옵션을 추가한다.
+코인 잔액 기준으로 버튼 표시가 분기되며, 부활은 판당 1회 제한 (코인·광고 택1 → revivalUsed=true).
+광고 부활은 코인을 지급하지 않는다 (코인 보상은 결과용 광고에서만).
+
+### 버튼 표시 조건
+
+| 조건 | 표시 |
+|------|------|
+| revivalUsed=false, 잔액<5 | "광고 보고 부활" 버튼 1개 |
+| revivalUsed=false, 잔액≥5 | "광고 보고 부활" + "🪙 5코인으로 부활" 버튼 2개 |
+| revivalUsed=true | 부활 버튼 없음 |
+
+### 광고 부활 플로우
+
+1. "광고 보고 부활" 탭 → 두 버튼 모두 비활성(로딩 상태) → 부활용 리워드광고 시작
+2. 완시청 → 코인 미지급, revivalUsed=true, 현 스테이지 재시작 (score/stage/combo 유지)
+3. 스킵/실패 → 부활 미처리, 버튼 재활성화 (재시도 가능)
+
+### 수용 기준
+
+- [ ] Given revivalUsed=false AND 잔액<5 / When 게임오버 오버레이 진입 / Then "광고 보고 부활" 버튼 1개만 표시
+- [ ] Given revivalUsed=false AND 잔액≥5 / When 게임오버 오버레이 진입 / Then "광고 보고 부활" + "🪙 5코인으로 부활" 버튼 2개 표시
+- [ ] Given "광고 보고 부활" 탭 / When 광고 시작 직후 / Then 두 버튼 모두 비활성(로딩 상태)
+- [ ] Given 부활용 광고 완시청 / When userEarnedReward 콜백 / Then 코인 미지급, revivalUsed=true, 현 스테이지 재시작 (score/stage/combo 유지)
+- [ ] Given 광고 스킵 또는 실패 / When 광고 종료 / Then 부활 미처리, 버튼 재활성화 (재시도 가능)
+- [ ] Given revivalUsed=true / When 게임오버 오버레이 진입 / Then 부활 버튼 없음

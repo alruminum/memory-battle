@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react'
 import { useGameStore } from '../../store/gameStore'
 import { useCoin } from '../../hooks/useCoin'
+import { useRewardAd } from '../../hooks/useRewardAd'
 import { RevivalButton } from './RevivalButton'
 import type { GameOverReason } from '../../store/gameStore'
 
@@ -26,7 +27,9 @@ const TEXTS = {
 export function GameOverOverlay({ reason, coinBalance, revivalUsed, onConfirm }: GameOverOverlayProps): React.ReactElement {
   const { revive } = useGameStore()
   const { addCoins } = useCoin()
+  const { show: showAd } = useRewardAd()               // [F4-AD]
   const [isProcessing, setIsProcessing] = useState(false)
+  const [isAdLoading, setIsAdLoading] = useState(false) // [F4-AD]
   const [toast, setToast] = useState<string | null>(null)
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const { title, desc } = TEXTS[reason]
@@ -37,9 +40,33 @@ export function GameOverOverlay({ reason, coinBalance, revivalUsed, onConfirm }:
     toastTimerRef.current = setTimeout(() => setToast(null), 3000)
   }
 
+  // [F4-AD] 광고 부활 핸들러
+  async function handleAdRevive(e: React.PointerEvent) {
+    e.stopPropagation()
+    if (isAdLoading || isProcessing) return
+    setIsAdLoading(true)
+    try {
+      const earned = await showAd()   // true=완시청, false=스킵/실패
+      if (earned) {
+        // 코인 미지급 — revive()만 호출
+        // revive() → status='SHOWING' → GameOverOverlay 소멸
+        // setIsAdLoading(false) 불필요 (컴포넌트가 소멸)
+        revive()
+      } else {
+        // 스킵/실패 → 버튼 재활성화
+        setIsAdLoading(false)
+      }
+    } catch {
+      showToastMsg('광고를 불러오지 못했습니다')
+      setIsAdLoading(false)
+    }
+  }
+
+  // [F4] 코인 부활 핸들러
   async function handleRevive(e: React.PointerEvent) {
     e.stopPropagation()  // onConfirm 버블링 차단
     if (isProcessing) return
+    if (isAdLoading) return  // [F4-AD] 광고 진행 중 코인 부활 차단
     setIsProcessing(true)
     try {
       // 1. 코인 차감 (DB 원자 처리) — 성공 시에만 revive()
@@ -142,13 +169,15 @@ export function GameOverOverlay({ reason, coinBalance, revivalUsed, onConfirm }:
           {desc}
         </div>
 
-        {/* [v0.4 F4] 부활 버튼 — 힌트 텍스트 위에 배치 */}
+        {/* [v0.4 F4+F4-AD] 부활 버튼 — 힌트 텍스트 위에 배치 */}
         <div style={{ width: '100%', marginTop: 16 }}>
           <RevivalButton
             coinBalance={coinBalance}
             revivalUsed={revivalUsed}
             isProcessing={isProcessing}
+            isAdLoading={isAdLoading}
             onRevive={handleRevive}
+            onAdRevive={handleAdRevive}
           />
         </div>
 
@@ -162,7 +191,7 @@ export function GameOverOverlay({ reason, coinBalance, revivalUsed, onConfirm }:
           화면을 탭하여 결과 보기
         </div>
 
-        {/* 토스트 (addCoins 실패 시) */}
+        {/* 토스트 (addCoins 실패 또는 광고 로딩 실패 시) */}
         {toast && (
           <div style={{
             position: 'fixed',
