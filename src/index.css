@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;800;900&family=Space+Grotesk:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Space+Grotesk:wght@400;600;700&display=swap');
 
 :root {
   color-scheme: dark;
@@ -330,4 +330,20 @@ body {
 
 .coin-float-up {
   animation: coinFloatUp 1.2s ease-out forwards;
+}
+
+/* NewRecordBadge animations */
+@keyframes nr-bar-grow {
+  from { transform: scaleY(0); transform-origin: top center; }
+  to   { transform: scaleY(1); transform-origin: top center; }
+}
+
+@keyframes nr-content-slide-in {
+  from { transform: translateX(-8px); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+
+@keyframes nr-badge-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }

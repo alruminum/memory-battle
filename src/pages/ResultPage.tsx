@@ -6,6 +6,7 @@ import { useCoin } from '../hooks/useCoin'
 import { randomCoinReward } from '../lib/gameLogic'
 import { grantCoinExchange } from '../lib/ait'
 import { CoinRewardBadge } from '../components/result/CoinRewardBadge'
+import { NewRecordBadge } from '../components/result/NewRecordBadge'
 import { PointExchangeButton } from '../components/result/PointExchangeButton'
 
 const IS_SANDBOX = import.meta.env.DEV || import.meta.env.VITE_SANDBOX === 'true'
@@ -171,21 +172,8 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
 
         {/* NEW PERSONAL BEST 배지 */}
         {isNewBest && (
-          <div style={{
-            display: 'inline-block',
-            marginTop: 14,
-            padding: '6px 20px',
-            borderRadius: 20,
-            backgroundColor: 'rgba(200,255,0,0.12)',
-            border: '1px solid var(--vb-accent)',
-          }}>
-            <span style={{
-              fontFamily: 'var(--vb-font-score)',
-              fontSize: 11,
-              fontWeight: 800,
-              color: 'var(--vb-accent)',
-              letterSpacing: 2.5,
-            }}>NEW PERSONAL BEST</span>
+          <div style={{ marginTop: 14 }}>
+            <NewRecordBadge />
           </div>
         )}
       </div>
