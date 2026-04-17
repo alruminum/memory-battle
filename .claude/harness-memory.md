@@ -59,3 +59,6 @@
 - 2026-04-16 | 07-coin-ui-polish | pr_fail | pr-reviewer agent produced no output (exit=143)
 - 2026-04-16 | #117-revival-button-hide-on-no-coins | autocheck_fail | lint_fail: npx eslint . --max-warnings 0 실패
 - 2026-04-16 | #117-revival-button-hide-on-no-coins | autocheck_fail | lint_fail: npx eslint . --max-warnings 0 실패
+- 2026-04-17 | #121-revival-sequence-showing-fix | autocheck_fail | scope_violation: impl에 없는 파일 변경됨: docs/bugfix/#117-revival-button-hide-on-no-coins.md, docs/bugfix/#
+- 2026-04-17 | #121-revival-sequence-showing-fix | pr_fail | pr-reviewer CHANGES_REQUESTED (see /Users/dc.kim/project/memoryBattle/.claude/harness-state/mb_histo
+- 2026-04-17 | #121-revival-sequence-showing-fix | autocheck_fail | scope_violation: impl에 없는 파일 변경됨: src/store/gameStore.coin.test.ts
