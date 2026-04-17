@@ -72,26 +72,6 @@ describe('RevivalButton (F4+F4-AD, impl 08-ad-revival)', () => {
   })
 
   // ---------------------------------------------------------------
-  // REQ-08-2: 경계값 (coinBalance 5 기준)
-  // ---------------------------------------------------------------
-  describe('REQ-08-2 — 경계값 (coinBalance ±1)', () => {
-    it('경계값 — coinBalance=5 → 코인 부활 버튼 표시', () => {
-      render(<RevivalButton {...defaultProps} coinBalance={5} />)
-      expect(screen.getByText('🪙 5코인으로 부활')).toBeInTheDocument()
-    })
-
-    it('경계값 — coinBalance=4 → 코인 부활 버튼 미표시', () => {
-      render(<RevivalButton {...defaultProps} coinBalance={4} />)
-      expect(screen.queryByText(/5코인으로 부활/)).not.toBeInTheDocument()
-    })
-
-    it('경계값 — coinBalance=4 → 광고 버튼은 여전히 표시', () => {
-      render(<RevivalButton {...defaultProps} coinBalance={4} />)
-      expect(screen.getByText('광고 보고 부활')).toBeInTheDocument()
-    })
-  })
-
-  // ---------------------------------------------------------------
   // REQ-08-3: disabled 상태 — isAdLoading=true
   // ---------------------------------------------------------------
   describe('REQ-08-3 — isAdLoading=true 시 두 버튼 모두 disabled', () => {

@@ -22,6 +22,20 @@ export function RevivalButton({
   const canCoinRevive = coinBalance >= 5
   const isAnyProcessing = isProcessing || isAdLoading
 
+  const baseButtonStyle: React.CSSProperties = {
+    width: '100%',
+    padding: '14px 0',
+    borderRadius: 8,
+    backgroundColor: 'transparent',
+    fontFamily: 'var(--vb-font-score)',
+    fontSize: 14,
+    fontWeight: 900,
+    letterSpacing: 2,
+    cursor: 'pointer',
+    opacity: isAnyProcessing ? 0.6 : 1,
+    transition: 'opacity 0.2s',
+  }
+
   return (
     <div
       style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, width: '100%' }}
@@ -31,21 +45,7 @@ export function RevivalButton({
       <button
         onPointerDown={!isAnyProcessing ? onAdRevive : (e) => e.stopPropagation()}
         disabled={isAnyProcessing}
-        style={{
-          width: '100%',
-          padding: '14px 0',
-          borderRadius: 8,
-          border: '1px solid var(--vb-accent)',
-          backgroundColor: 'transparent',
-          color: 'var(--vb-accent)',
-          fontFamily: 'var(--vb-font-score)',
-          fontSize: 14,
-          fontWeight: 900,
-          letterSpacing: 2,
-          cursor: 'pointer',
-          opacity: isAnyProcessing ? 0.6 : 1,
-          transition: 'opacity 0.2s',
-        }}
+        style={{ ...baseButtonStyle, border: '1px solid var(--vb-accent)', color: 'var(--vb-accent)' }}
       >
         {isAdLoading ? '광고 로딩 중...' : '광고 보고 부활'}
       </button>
@@ -55,21 +55,7 @@ export function RevivalButton({
         <button
           onPointerDown={!isAnyProcessing ? onRevive : (e) => e.stopPropagation()}
           disabled={isAnyProcessing}
-          style={{
-            width: '100%',
-            padding: '14px 0',
-            borderRadius: 8,
-            border: '1px solid var(--vb-border)',
-            backgroundColor: 'transparent',
-            color: 'var(--vb-text-dim)',
-            fontFamily: 'var(--vb-font-score)',
-            fontSize: 14,
-            fontWeight: 900,
-            letterSpacing: 2,
-            cursor: 'pointer',
-            opacity: isAnyProcessing ? 0.6 : 1,
-            transition: 'opacity 0.2s',
-          }}
+          style={{ ...baseButtonStyle, border: '1px solid var(--vb-border)', color: 'var(--vb-text-dim)' }}
         >
           {isProcessing ? '처리 중...' : '🪙 5코인으로 부활'}
         </button>
