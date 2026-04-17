@@ -334,8 +334,8 @@ body {
 
 /* NewRecordBadge animations */
 @keyframes nr-bar-grow {
-  from { transform: scaleY(0); transform-origin: top center; }
-  to   { transform: scaleY(1); transform-origin: top center; }
+  from { transform: scaleY(0); }
+  to   { transform: scaleY(1); }
 }
 
 @keyframes nr-content-slide-in {

@@ -28,8 +28,10 @@ screenshots/
 # 에이전트 전략 (프라이빗 — ClaudeCodeAgentPrompt 레포에서 관리)
 .claude/agents/
 
-# 하네스 런타임 상태 플래그 (커밋 불필요)
+# 하네스 런타임 (커밋 불필요)
 .claude/harness-state/
+.claude/harness-memory.md
+.claude/*.lock
 
 # 테스트 커버리지
 coverage/
