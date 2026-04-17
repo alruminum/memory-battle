@@ -62,3 +62,4 @@
 - 2026-04-17 | #121-revival-sequence-showing-fix | autocheck_fail | scope_violation: impl에 없는 파일 변경됨: docs/bugfix/#117-revival-button-hide-on-no-coins.md, docs/bugfix/#
 - 2026-04-17 | #121-revival-sequence-showing-fix | pr_fail | pr-reviewer CHANGES_REQUESTED (see /Users/dc.kim/project/memoryBattle/.claude/harness-state/mb_histo
 - 2026-04-17 | #121-revival-sequence-showing-fix | autocheck_fail | scope_violation: impl에 없는 파일 변경됨: src/store/gameStore.coin.test.ts
+- 2026-04-17 | #126-personal-best-badge-redesign | success | attempt 1
