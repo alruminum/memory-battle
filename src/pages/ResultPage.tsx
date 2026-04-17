@@ -174,27 +174,18 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
           <div style={{
             display: 'inline-block',
             marginTop: 14,
-            padding: '4px 16px',
+            padding: '6px 20px',
             borderRadius: 20,
-            backgroundColor: 'rgba(200,255,0,0.1)',
+            backgroundColor: 'rgba(200,255,0,0.12)',
             border: '1px solid var(--vb-accent)',
           }}>
             <span style={{
               fontFamily: 'var(--vb-font-score)',
-              fontSize: 10,
+              fontSize: 11,
               fontWeight: 800,
               color: 'var(--vb-accent)',
-              letterSpacing: 2,
+              letterSpacing: 2.5,
             }}>NEW PERSONAL BEST</span>
-            {/* [v0.4 F3] 최고기록 코인 보상 표시 */}
-            <div style={{
-              fontSize: 11,
-              color: 'var(--vb-accent)',
-              fontFamily: 'var(--vb-font-body)',
-              fontWeight: 600,
-              marginTop: 2,
-              letterSpacing: 0,
-            }}>🏆 최고기록! 🪙 +1</div>
           </div>
         )}
       </div>
