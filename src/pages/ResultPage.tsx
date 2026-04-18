@@ -141,13 +141,12 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
 
       {/* [B] Hero 카드 (rScoreCard) */}
       <div style={{
-        margin: '0 20px',
+        margin: '0 20px 16px',
         padding: 24,
         backgroundColor: 'var(--vb-surface)',
         borderRadius: 12,
         border: '1px solid var(--vb-border)',
         flexShrink: 0,
-        marginBottom: 16,
       }}>
         <div style={{
           fontFamily: 'var(--vb-font-score)',
@@ -208,12 +207,11 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
 
       {/* [C] Stats 카드 (COMBO STATS + 랭킹 통합) */}
       <div style={{
-        margin: '0 20px',
+        margin: '0 20px 16px',
         backgroundColor: 'var(--vb-surface)',
         borderRadius: 12,
         border: '1px solid var(--vb-border)',
         flexShrink: 0,
-        marginBottom: 16,
         overflow: 'hidden',
       }}>
         {/* COMBO STATS 섹션 */}
@@ -254,10 +252,9 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
           </div>
         </div>
 
-        {/* statsDivider — 카드 전폭 구분선 */}
+        {/* statsDivider — 카드 전폭 구분선 (outer padding 없으므로 margin 불필요) */}
         <div style={{
           borderTop: '1px solid var(--vb-border)',
-          margin: '0 -0px',
         }} />
 
         {/* 랭킹 3행 */}
@@ -293,13 +290,12 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
       <div
         data-testid="ad-placeholder"
         style={{
-          margin: '0 20px',
+          margin: '0 20px 16px',
           height: 96,
           backgroundColor: '#1a1a1d',
           border: '1px solid rgba(255,255,255,0.1)',
           borderRadius: 8,
           flexShrink: 0,
-          marginBottom: 16,
         }}
       />
 
