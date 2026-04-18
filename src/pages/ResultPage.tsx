@@ -4,7 +4,7 @@ import { useRanking } from '../hooks/useRanking'
 import { useRewardAd } from '../hooks/useRewardAd'
 import { useCoin } from '../hooks/useCoin'
 import { randomCoinReward } from '../lib/gameLogic'
-import { grantCoinExchange } from '../lib/ait'
+import { grantCoinExchange, COIN_EXCHANGE_AMOUNT } from '../lib/ait'
 import { CoinIcon } from '../components/result/CoinIcon'
 import { CoinRewardBadge } from '../components/result/CoinRewardBadge'
 import { NewRecordBadge } from '../components/result/NewRecordBadge'
@@ -100,7 +100,7 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
       // 1. SDK 호출 — 성공 시에만 DB 차감
       await grantCoinExchange()
       // 2. 코인 차감 (DB 원자 처리)
-      await addCoins(-10, 'toss_points_exchange')
+      await addCoins(-COIN_EXCHANGE_AMOUNT, 'toss_points_exchange')
       showToastMsg('🎉 10포인트 지급됐어요!')
     } catch (err) {
       console.error('[exchange] failed:', err)
