@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { COIN_EXCHANGE_AMOUNT } from '../../lib/ait'
+import { CoinIcon } from './CoinIcon'
 
 interface PointExchangeButtonProps {
   coinBalance: number              // 현재 잔액
@@ -45,9 +46,18 @@ export function PointExchangeButton({ coinBalance, onExchange }: PointExchangeBu
           cursor: canExchange ? 'pointer' : 'default',
           opacity: isProcessing ? 0.6 : 1,
           transition: 'opacity 0.2s',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 6,
         }}
       >
-        {isProcessing ? '교환 중...' : `🪙 ${COIN_EXCHANGE_AMOUNT}코인 → ${COIN_EXCHANGE_AMOUNT}포인트 교환`}
+        {isProcessing ? '교환 중...' : (
+          <>
+            <CoinIcon size={16} />
+            <span>{COIN_EXCHANGE_AMOUNT}코인 → {COIN_EXCHANGE_AMOUNT}포인트 교환</span>
+          </>
+        )}
       </button>
       {disabledReason && (
         <div style={{

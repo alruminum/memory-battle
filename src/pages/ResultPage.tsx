@@ -5,6 +5,7 @@ import { useRewardAd } from '../hooks/useRewardAd'
 import { useCoin } from '../hooks/useCoin'
 import { randomCoinReward } from '../lib/gameLogic'
 import { grantCoinExchange } from '../lib/ait'
+import { CoinIcon } from '../components/result/CoinIcon'
 import { CoinRewardBadge } from '../components/result/CoinRewardBadge'
 import { NewRecordBadge } from '../components/result/NewRecordBadge'
 import { PointExchangeButton } from '../components/result/PointExchangeButton'
@@ -109,7 +110,6 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
     }
   }
 
-
   const rankDisplay = (rank: number) => rank > 0 ? `#${rank}` : '#—'
 
   return (
@@ -122,11 +122,13 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
       fontFamily: 'var(--vb-font-body)',
       animation: 'slide-up 0.5s ease-out',
     }}>
-      {/* GAME OVER 텍스트 */}
+
+      {/* [A] GAME OVER 헤더 */}
       <div style={{
-        padding: '20px 20px 0',
+        paddingTop: 20,
         textAlign: 'center',
         flexShrink: 0,
+        marginBottom: 12,
       }}>
         <div style={{
           fontFamily: 'var(--vb-font-score)',
@@ -134,19 +136,18 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
           fontWeight: 800,
           color: 'var(--vb-danger)',
           letterSpacing: 4,
-          marginBottom: 4,
         }}>GAME OVER</div>
       </div>
 
-      {/* 최종 점수 카드 */}
+      {/* [B] Hero 카드 (rScoreCard) */}
       <div style={{
-        margin: '16px 20px 0',
-        padding: '24px 0',
+        margin: '0 20px',
+        padding: 24,
         backgroundColor: 'var(--vb-surface)',
         borderRadius: 12,
         border: '1px solid var(--vb-border)',
-        textAlign: 'center',
         flexShrink: 0,
+        marginBottom: 16,
       }}>
         <div style={{
           fontFamily: 'var(--vb-font-score)',
@@ -163,107 +164,108 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
           lineHeight: 1,
           letterSpacing: -1,
         }}>{score.toLocaleString()}</div>
-        <div style={{
-          fontFamily: 'var(--vb-font-body)',
-          fontSize: 12,
-          color: 'var(--vb-text-dim)',
-          marginTop: 8,
-        }}>Stage {stage}</div>
 
-        {/* NEW PERSONAL BEST 배지 */}
-        {isNewBest && (
-          <div style={{ marginTop: 14 }}>
-            <NewRecordBadge />
+        {/* stageRow — Stage + 코인 잔액 행 */}
+        <div style={{
+          marginTop: 8,
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}>
+          <span style={{
+            fontFamily: 'var(--vb-font-body)',
+            fontSize: 12,
+            color: 'var(--vb-text-dim)',
+          }}>Stage {stage}</span>
+          <div style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: 4,
+          }}>
+            <CoinIcon size={16} />
+            <span style={{
+              fontFamily: 'var(--vb-font-score)',
+              fontSize: 12,
+              fontWeight: 700,
+              color: 'var(--vb-accent)',
+            }}>{coinBalance}개</span>
           </div>
+        </div>
+
+        {/* isNewBest 시: divider + NewRecordBadge pill */}
+        {isNewBest && (
+          <>
+            <div style={{
+              borderTop: '1px solid var(--vb-border)',
+              margin: '16px 0 12px',
+            }} />
+            <div style={{ display: 'flex', justifyContent: 'center' }}>
+              <NewRecordBadge />
+            </div>
+          </>
         )}
       </div>
 
-
-      {/* [v0.4] 코인 잔액 표시 */}
+      {/* [C] Stats 카드 (COMBO STATS + 랭킹 통합) */}
       <div style={{
-        margin: '12px 20px 0',
-        padding: '12px 16px',
-        backgroundColor: 'var(--vb-surface)',
-        borderRadius: 12,
-        border: '1px solid var(--vb-border)',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        flexShrink: 0,
-      }}>
-        <span style={{
-          fontFamily: 'var(--vb-font-body)',
-          fontSize: 12,
-          color: 'var(--vb-text-dim)',
-        }}>보유 코인</span>
-        <span style={{
-          fontFamily: 'var(--vb-font-score)',
-          fontSize: 20,
-          fontWeight: 900,
-          color: 'var(--vb-accent)',
-        }}>🪙 {coinBalance}</span>
-      </div>
-      {/* COMBO STATS 카드 */}
-      <div style={{
-        margin: '12px 20px 0',
-        padding: '16px',
+        margin: '0 20px',
         backgroundColor: 'var(--vb-surface)',
         borderRadius: 12,
         border: '1px solid var(--vb-border)',
         flexShrink: 0,
-      }}>
-        <div style={{
-          fontFamily: 'var(--vb-font-score)',
-          fontSize: 10,
-          color: 'var(--vb-text-dim)',
-          letterSpacing: 3,
-          marginBottom: 12,
-        }}>COMBO STATS</div>
-
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          {[
-            { label: 'BEST COMBO',  value: `${fullComboCount}` },
-            { label: 'MULTIPLIER',  value: `${Math.floor(maxComboStreak / 5) + 1}x` },
-            { label: 'COMBO BONUS', value: `+${comboBonus.toLocaleString()}` },
-          ].map(({ label, value }) => (
-            <div key={label} style={{ textAlign: 'center', flex: 1 }}>
-              <div style={{
-                fontFamily: 'var(--vb-font-body)',
-                fontSize: 9,
-                color: 'var(--vb-text-dim)',
-                letterSpacing: 1.5,
-                marginBottom: 4,
-              }}>{label}</div>
-              <div style={{
-                fontFamily: 'var(--vb-font-score)',
-                fontSize: 18,
-                fontWeight: 900,
-                color: 'var(--vb-accent)',
-              }}>{value}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* 랭킹 리스트 */}
-      <div style={{
-        margin: '16px 20px 0',
-        backgroundColor: 'var(--vb-surface)',
-        borderRadius: 12,
-        border: '1px solid var(--vb-border)',
+        marginBottom: 16,
         overflow: 'hidden',
-        flexShrink: 0,
       }}>
+        {/* COMBO STATS 섹션 */}
+        <div style={{ padding: 16 }}>
+          <div style={{
+            fontFamily: 'var(--vb-font-score)',
+            fontSize: 10,
+            color: 'var(--vb-text-dim)',
+            letterSpacing: 3,
+          }}>COMBO STATS</div>
+
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            marginTop: 12,
+          }}>
+            {[
+              { label: 'BEST COMBO',  value: `${fullComboCount}` },
+              { label: 'MULTIPLIER',  value: `${Math.floor(maxComboStreak / 5) + 1}x` },
+              { label: 'COMBO BONUS', value: `+${comboBonus.toLocaleString()}` },
+            ].map(({ label, value }) => (
+              <div key={label} style={{ textAlign: 'center', flex: 1 }}>
+                <div style={{
+                  fontFamily: 'var(--vb-font-body)',
+                  fontSize: 9,
+                  color: 'var(--vb-text-dim)',
+                  letterSpacing: 1.5,
+                  marginBottom: 4,
+                }}>{label}</div>
+                <div style={{
+                  fontFamily: 'var(--vb-font-score)',
+                  fontSize: 18,
+                  fontWeight: 900,
+                  color: 'var(--vb-accent)',
+                }}>{value}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* statsDivider — 카드 전폭 구분선 */}
+        <div style={{
+          borderTop: '1px solid var(--vb-border)',
+          margin: '0 -0px',
+        }} />
+
+        {/* 랭킹 3행 */}
         {[
-          { label: 'Daily',   rank: myRanks.daily,   highlight: myRanks.daily > 0, sub: undefined },
-          {
-            label: 'Monthly',
-            rank: myRanks.monthly,
-            highlight: false,
-            sub: undefined,
-          },
-          { label: 'Season',  rank: myRanks.season,  highlight: false, sub: undefined },
-        ].map(({ label, rank, highlight, sub }, i, arr) => (
+          { label: 'Daily',   rank: myRanks.daily,   highlight: myRanks.daily > 0 },
+          { label: 'Monthly', rank: myRanks.monthly, highlight: false },
+          { label: 'Season',  rank: myRanks.season,  highlight: false },
+        ].map(({ label, rank, highlight }, i, arr) => (
           <div key={label} style={{
             display: 'flex',
             justifyContent: 'space-between',
@@ -271,22 +273,12 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
             padding: '14px 16px',
             borderBottom: i < arr.length - 1 ? '1px solid var(--vb-border)' : 'none',
           }}>
-            <div>
-              <div style={{
-                fontSize: 13,
-                color: 'var(--vb-text-mid)',
-                fontWeight: 600,
-                fontFamily: 'var(--vb-font-body)',
-              }}>{label}</div>
-              {sub && (
-                <div style={{
-                  fontSize: 10,
-                  color: 'var(--vb-text-dim)',
-                  marginTop: 2,
-                  fontFamily: 'var(--vb-font-body)',
-                }}>{sub}</div>
-              )}
-            </div>
+            <div style={{
+              fontSize: 13,
+              color: 'var(--vb-text-mid)',
+              fontWeight: 600,
+              fontFamily: 'var(--vb-font-body)',
+            }}>{label}</div>
             <div style={{
               fontFamily: 'var(--vb-font-score)',
               fontSize: 20,
@@ -297,28 +289,29 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
         ))}
       </div>
 
-      {/* 광고 placeholder */}
+      {/* [D] 광고 placeholder */}
       <div
         data-testid="ad-placeholder"
         style={{
-          margin: '12px 20px 0',
+          margin: '0 20px',
           height: 96,
           backgroundColor: '#1a1a1d',
           border: '1px solid rgba(255,255,255,0.1)',
           borderRadius: 8,
           flexShrink: 0,
+          marginBottom: 16,
         }}
       />
 
-      {/* 버튼 영역 */}
+      {/* [E] CTA 섹션 (rBtnArea) */}
       <div style={{
         marginTop: 'auto',
-        padding: '0 20px 32px',
+        padding: '8px 20px 32px',
         display: 'flex',
         flexDirection: 'column',
         gap: 10,
       }}>
-        {/* [v0.4 F5] 포인트 교환 버튼 — RevivalButton 없음 (F4는 GameOverOverlay 전용) */}
+        {/* [v0.4 F5] 포인트 교환 버튼 */}
         <PointExchangeButton
           coinBalance={coinBalance}
           onExchange={handleExchange}
@@ -342,7 +335,8 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
           disabled={!adDone}
           style={{
             width: '100%',
-            padding: '16px 0',
+            height: 54,
+            padding: 0,
             borderRadius: 8,
             border: 'none',
             backgroundColor: adDone ? 'var(--vb-accent)' : 'var(--vb-border)',
@@ -385,6 +379,7 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
             position: 'fixed',
             bottom: 120,
             left: '50%',
+            transform: 'translateX(-50%)',
             pointerEvents: 'none',
             fontFamily: 'var(--vb-font-score)',
             fontSize: 22,
@@ -392,9 +387,12 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
             color: 'var(--vb-accent)',
             whiteSpace: 'nowrap',
             zIndex: 201,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 4,
           }}
         >
-          +{coinReward} 🪙
+          +{coinReward} <CoinIcon size={20} />
         </div>
       )}
 

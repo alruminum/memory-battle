@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { CoinIcon } from './CoinIcon'
 
 interface CoinRewardBadgeProps {
   amount: number          // 지급된 코인 수
@@ -34,7 +35,10 @@ export function CoinRewardBadge({ amount, onDismiss }: CoinRewardBadgeProps) {
       zIndex: 200,
       border: '1px solid var(--vb-border)',
     }}>
-      🪙 +{amount} 코인 획득!
+      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <CoinIcon size={16} />
+        <span>+{amount} 코인 획득!</span>
+      </div>
     </div>
   )
 }
