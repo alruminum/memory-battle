@@ -153,6 +153,7 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
         {/* stageRow — Stage + 코인 잔액 행 */}
         <div style={{
           marginTop: 8,
+          width: '100%',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
