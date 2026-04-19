@@ -6,7 +6,7 @@ vi.mock('../store/gameStore', () => ({
   useGameStore: vi.fn(() => ({ revive: vi.fn() })),
 }))
 vi.mock('../hooks/useCoin', () => ({
-  useCoin: vi.fn(() => ({ addCoins: vi.fn(), getBalance: vi.fn() })),
+  useCoin: vi.fn(() => ({ addCoins: vi.fn().mockResolvedValue(0), getBalance: vi.fn().mockResolvedValue(0) })),
 }))
 vi.mock('../hooks/useRewardAd', () => ({
   useRewardAd: vi.fn(() => ({ show: vi.fn().mockResolvedValue(false), isLoading: false })),
