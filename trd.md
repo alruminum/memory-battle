@@ -1,6 +1,7 @@
 # 기억력배틀 TRD v0.4
 
 > 변경 이력
+> - v0.4.4 (2026-04-18): ResultPage 리디자인 (#129) — Hero/Stats/CTA 3계층 구조, CoinIcon 신규 컴포넌트, rCoinCard 삭제 → stageRow 통합, rComboCard+rRankCard → 단일 Stats 카드, NewRecordBadge 골든 pill 인라인.
 > - v0.4.3 (2026-04-16): architecture.md DESIGN_REVIEW_FAIL 수정 — useCoin.addCoins 2-param 확정(userId 내부 조회), GameOverOverlay 즉시 부활 경로 addCoins(-5,'revival') 명시.
 > - v0.4.2 (2026-04-16): 설계 문서 불일치 수정 — docs/game-logic.md: add_coins RPC 2-param→3-param atomic 버전 통일, revivalUsed=true 시 RevivalButton 미표시로 수정. docs/db-schema.md: add_coins RPC 정의 누락 추가.
 > - v0.4.1 (2026-04-16): docs/sdk.md 현행화 — grantCoinExchange 미구현 명시, grantDailyReward 삭제 예정 표기, granite.config icon/webViewProps 불일치 수정, 환경변수명 VITE_REWARD_AD_ID→VITE_REWARD_AD_GROUP_ID, VITE_BANNER_AD_ID→VITE_BANNER_AD_GROUP_ID 수정.
@@ -54,9 +55,11 @@ memory-battle/
 │   │   │   ├── BannerAd.tsx
 │   │   │   └── RewardAd.tsx
 │   │   └── result/                     # [v0.4] 게임오버 결과 서브 컴포넌트
-│   │       ├── CoinRewardBadge.tsx     # "🪙 +N 획득!" 피드백
+│   │       ├── CoinIcon.tsx            # [v0.4.4] SVG 코인 아이콘 (size 14/16/20, radialGradient)
+│   │       ├── CoinRewardBadge.tsx     # "코인 +N 획득!" 피드백 (CoinIcon(16) 사용)
+│   │       ├── NewRecordBadge.tsx      # [v0.4.4] 골든 pill 인라인 (🏆 PERSONAL BEST + "+1" + CoinIcon(14))
 │   │       ├── RevivalButton.tsx       # 부활 버튼 (5코인)
-│   │       └── PointExchangeButton.tsx # 토스포인트 교환 버튼 (10코인)
+│   │       └── PointExchangeButton.tsx # 토스포인트 교환 버튼 (CoinIcon(16) 사용)
 │   ├── hooks/
 │   │   ├── useGameEngine.ts    # 핵심 게임 로직 (깜빡임 속도·타이머·콤보 통합)
 │   │   ├── useRanking.ts       # Supabase 랭킹 연동
@@ -452,18 +455,53 @@ interface GameStore {
 - GameOverOverlay (v0.3.2): 게임오버 시 backdrop blur + 바텀 패널 슬라이드업. shake 애니메이션. 탭으로 결과 화면 전환 (자동 전환 X). `position: absolute`(v0.3.2-fix: fixed→absolute). 패널 상단: 핸들바(32×4px) + 경고 아이콘(⚠ 48×48px 원형) + "GAME OVER" 타이틀(Barlow Condensed 13px, letter-spacing 3px)
 - **[v0.4] GameOverOverlay 즉시 부활**: balance≥5 AND !revivalUsed 조건에서 즉시 부활 버튼 표시. 탭 시 `addCoins(-5, 'revival')` → `store.revive()` 호출 → SHOWING 복귀 (ResultPage 미진입). revivalUsed=true 설정으로 판당 1회 보장.
 
-### ResultPage ⚠️ v0.4 변경
-- 이번 점수 + 최고 기록 갱신 여부
-- 최고 도달 스테이지
-- 풀콤보 달성 횟수 + 최고 콤보 스택 + 콤보 보너스 점수
-- 랭킹 진입 시: 일간/월간/시즌 순위 각각 표시
-- 리워드 광고 자동 시작 (강제, 스킵 불가)
-- **[v0.4] CoinRewardBadge**: 완시청 → "🪙 +N 코인 획득!" (최고기록 시 "🏆 +1 코인" 추가)
-- **[v0.4] RevivalButton**: 5코인 소모, 비활성 이유 텍스트 포함
-- **[v0.4] PointExchangeButton**: 10코인→10포인트, 비활성 이유 텍스트 포함
-- **[v0.4] 현재 코인 잔액** 상시 표시
+### ResultPage ⚠️ v0.4.4 리디자인 (#129)
+
+레이아웃 3계층 구조: **Hero 카드 → Stats 카드 → CTA 영역** (루트 gap 제거 → spacer div 기반 간격).
+
+**[A] GAME OVER 헤더** — paddingTop 20, 텍스트 중앙 정렬 (GAME OVER, letterSpacing 4)
+
+**[B] Hero 카드 (rScoreCard)** — `margin: '0 20px 16px'`, padding 24
+- FINAL SCORE 레이블 + 점수 (64px, Barlow Condensed)
+- **stageRow**: Stage N (좌) ↔ CoinIcon(16) + 잔액(우) — space-between (v0.4.4: rCoinCard 삭제, stageRow 통합)
+- isNewBest 시: divider + **NewRecordBadge** pill (center flex)
+
+**[C] Stats 카드** — `margin: '0 20px 16px'`, borderRadius 12, overflow hidden (v0.4.4: rComboCard + rRankCard 통합)
+- COMBO STATS 섹션 (padding 16): BEST COMBO / MULTIPLIER / COMBO BONUS 3열
+- **statsDivider**: `borderTop: '1px solid var(--vb-border)'` (margin 없음 — 카드 outer padding 불필요)
+- 랭킹 3행 (Daily / Monthly / Season): padding '14px 16px', borderBottom
+
+**[D] 광고 placeholder** — `margin: '0 20px 16px'`, height 96, borderRadius 8
+
+**[E] CTA 영역 (rBtnArea)** — `marginTop: 'auto'`, padding '8px 20px 32px', gap 10
+- **PointExchangeButton**: CoinIcon(16) + "N코인 → N포인트 교환"
+- 광고 로딩 중 안내 텍스트 (adLoading && !adDone)
+- **PLAY AGAIN 버튼**: height 54, adDone 시 활성 (vb-accent 배경, boxShadow)
+- View Rankings 버튼: border outline, 높이 자동 (padding 14px 0)
+
+**오버레이/피드백**
+- coin-float-up: `position: fixed, bottom: 120`, CoinIcon(20), z-index 201
+- CoinRewardBadge: 광고 완시청 후 3초 자동 dismiss, CoinIcon(16)
+- 토스트: `position: fixed, bottom: 80`, z-index 200
+
+**신규 컴포넌트** (v0.4.4): `src/components/result/CoinIcon.tsx`
+- SVG ellipse 2개 (본체 radialGradient #FFE08A→#D4A843→#8B7332, 하이라이트 rgba(255,255,255,0.25))
+- viewBox 0 0 20 20, size prop: 14 | 16 | 20
+- gradient id: `coin-grad-{size}` (동일 페이지 크기별 충돌 방지)
+- 이모지 🪙 대체 목적
+
+**NewRecordBadge** (v0.4.4 변경): 박스 UI 제거 → 골든 pill 인라인
+- `borderRadius: 999`, `border: '1px solid var(--vb-accent)'`, `backgroundColor: transparent`
+- `animation: 'nr-badge-fade-in 300ms ease-out both'`
+- 내부: "🏆 PERSONAL BEST" (letterSpacing 1.5) + "+1" + CoinIcon(14) — inline-flex, gap 6
+
+- ~~rCoinCard 독립 카드~~ (v0.4.4 삭제 → stageRow 우측 통합)
+- ~~rComboCard / rRankCard 분리 카드~~ (v0.4.4 삭제 → 단일 Stats 카드 통합)
+- ~~NewRecordBadge 박스~~ (v0.4.4 → 골든 pill 인라인)
+- ~~리워드광고 RevivalButton~~ (GameOverOverlay로 이동, ResultPage 미표시)
 - ~~"10포인트 지급!" 메시지~~ (daily_reward 방식 폐지)
-- 광고 종료 후 **다시하기** 버튼 활성화 (횟수 제한 없음)
+
+광고 종료 후 **PLAY AGAIN** 버튼 활성화 (횟수 제한 없음)
 
 ### RankingPage
 - 탭: 일간 / 월간 / 시즌

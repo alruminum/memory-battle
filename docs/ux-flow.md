@@ -5,6 +5,7 @@
 - PRD: prd.md (v0.4)
 - 참조 문서: docs/architecture.md, docs/ui-spec.md
 - 생성일: 2026-04-17
+- 최종 수정: 2026-04-18 (UX_REFINE — S04 코인 아이콘 이모지 대체 지침 추가)
 
 ---
 
@@ -268,50 +269,56 @@ stateDiagram-v2
 
 ---
 
-### S04 — ResultPage
+### S04 — ResultPage (리디자인)
 
 #### 와이어프레임
 
+섹션을 Hero / Stats / CTA 3계층으로 명확히 구분한다. 기존 카드 나열 구조에서 정보 위계 기반 그룹핑으로 전환.
+
+> **코인 아이콘 규칙 (ResultPage 전역)**: 와이어프레임 내 `[CoinIcon]`으로 표기된 모든 자리는 🪙 이모지가 아닌 커스텀 디자인 CoinIcon 컴포넌트를 사용한다. 이모지 금지. size variant 최소 2종(16/20px 또는 20/24px 중 designer 결정). 색/스타일은 디자인 가이드의 골든 엑센트 방향에 맞춰 designer가 결정.
+
 ```
 ┌──────────────────────────────┐
-│  GAME OVER (레드, 추적)      │  ← 상단 헤더
+│  GAME OVER  (레드, 추적)     │  ← [A] 헤더 — 상단 고정, padding-top 20
 │                              │
-│  ┌──────────────────────┐    │
-│  │  FINAL SCORE         │    │  ← 점수 카드
-│  │  [점수 64px]         │    │
-│  │  Stage N             │    │
-│  │  [NEW PERSONAL BEST] │    │    최고기록 갱신 시 배지
-│  │  🏆 최고기록! 🪙 +1  │    │
-│  └──────────────────────┘    │
+│ ┌──── [B] HERO 섹션 ───────┐ │  ← vb-surface 카드, padding 24
+│ │  FINAL SCORE             │ │    cornerRadius 12, border vb-border
+│ │  ████ N ████  (64px)     │ │    점수 수치가 화면 최대 시각 요소
+│ │  Stage N    [CoinIcon] N개│ │    ← 스테이지 + 코인 잔액을 같은 행 양끝
+│ │  ─────────────────────── │ │    ← divider (isNewBest=true 시만 표시)
+│ │  🏆 PERSONAL BEST  +1[CoinIcon]│ │  ← isNewBest 시: 골든 pill (인라인)
+│ └──────────────────────────┘ │
 │                              │
-│  보유 코인          🪙 N개   │  ← 코인 잔액 카드
+│ ┌──── [C] STATS 섹션 ──────┐ │  ← vb-surface 카드, padding 16
+│ │  COMBO STATS             │ │    세 열 가로 배치 유지
+│ │  BEST  │ MULTI │  BONUS  │ │
+│ │   N    │  xN   │   +N    │ │
+│ ├──────────────────────────┤ │    ← 구분선 (border-top vb-border)
+│ │  Daily     #N            │ │    랭킹 3행 인라인 (기존 별도 카드 → 통합)
+│ │  Monthly   #N            │ │
+│ │  Season    #N            │ │
+│ └──────────────────────────┘ │
 │                              │
-│  ┌──────────────────────┐    │
-│  │  COMBO STATS         │    │  ← 콤보 스탯 카드
-│  │  BEST COMBO │ MULTIPLIER │ COMBO BONUS │
-│  │  N회        │  xN   │  +N    │
-│  └──────────────────────┘    │
+│  [광고 placeholder 96px]     │  ← [D] 광고 영역 (독립 유지)
 │                              │
-│  ┌──────────────────────┐    │
-│  │  Daily     #N        │    │  ← 랭킹 카드 (3행)
-│  │  Monthly   #N        │    │
-│  │  Season    #N        │    │
-│  └──────────────────────┘    │
-│                              │
-│  [광고 placeholder 96px]     │
-│                              │
-│  [🪙 10코인 → 10포인트 교환] │  ← PointExchangeButton
-│  (잔액 부족 시 disabled + 안내)
-│                              │
-│  [광고 로딩 중... 텍스트]    │  ← adLoading AND !adDone 시
-│                              │
-│  [PLAY AGAIN]                │  ← adDone=true 시 활성
-│  [View Rankings]             │
+│ ┌──── [E] CTA 섹션 ────────┐ │  ← gap 없는 스택. padding 0 0 32 0
+│ │  [[CoinIcon] 10코인→10포인트] │ │  PointExchangeButton (보조, 테두리)
+│ │  [광고 로딩 중...]        │ │    adLoading AND !adDone 시만 표시
+│ │  ████ PLAY AGAIN ████    │ │    Primary CTA (골든 채움, 높이 강조)
+│ │  [ View Rankings ]       │ │    보조 CTA (투명 + 테두리)
+│ └──────────────────────────┘ │
 └──────────────────────────────┘
 [CoinRewardBadge: fixed bottom 80, 3초 auto-dismiss]
-[+N🪙 float-up: fixed bottom 120, coin-float-up 애니메이션]
+[+N[CoinIcon] float-up: fixed bottom 120, coin-float-up 애니메이션]
 [토스트: fixed bottom 80, 3초 자동 닫힘]
 ```
+
+**섹션별 간격 규칙:**
+- 헤더(A) → Hero(B): gap 12
+- Hero(B) → Stats(C): gap 16 (섹션 전환 강조)
+- Stats(C) → 광고(D): gap 16
+- 광고(D) → CTA(E): gap 16
+- CTA 내부(ExchangeButton → PLAY AGAIN → View Rankings): gap 10 유지
 
 #### 인터랙션
 
@@ -320,7 +327,7 @@ stateDiagram-v2
 | 화면 진입 (마운트) | showAd() 자동 시작 | 리워드 광고 강제 시작 (스킵 불가) |
 | 광고 완시청 (userEarnedReward) | randomCoinReward() → addCoins(N,'ad_reward') | CoinRewardBadge + float-up 표시 |
 | 광고 스킵/실패 | setAdDone(true) | 코인 미지급, PLAY AGAIN 활성화 |
-| 최고기록 갱신 (score>prevBest) | addCoins(1,'record_bonus') | isNewBest=true → "🏆 최고기록! 🪙 +1" 배지 |
+| 최고기록 갱신 (score>prevBest) | addCoins(1,'record_bonus') | isNewBest=true → Hero 카드 내 PERSONAL BEST pill 표시 |
 | 교환 버튼 탭 (balance≥10) | grantCoinExchange() → addCoins(-10,'toss_points_exchange') | "🎉 10포인트 지급됐어요!" 토스트 |
 | 교환 실패 | showToastMsg('교환 중 오류...') | 에러 토스트 |
 | PLAY AGAIN 탭 (adDone=true) | resetGame() → onPlayAgain() | MainPage IDLE |
@@ -332,7 +339,7 @@ stateDiagram-v2
 |------|------|------|
 | 광고 로딩 중 | adLoading=true AND adDone=false | "광고 로딩 중..." 텍스트, PLAY AGAIN 비활성(회색) |
 | 광고 완료 | adDone=true | PLAY AGAIN 활성(골든), CoinRewardBadge 표시(있으면) |
-| 최고기록 갱신 | isNewBest=true | NEW PERSONAL BEST 배지 + 🏆 +1 표시 |
+| 최고기록 갱신 | isNewBest=true | Hero 카드 내 divider + 골든 pill "🏆 PERSONAL BEST +1[CoinIcon]" 인라인 표시 |
 | 교환 가능 | coinBalance≥10 | PointExchangeButton 활성(골든 테두리) |
 | 교환 불가 | coinBalance<10 | PointExchangeButton disabled + "코인 10개가 필요합니다 (현재 N개)" |
 | 교환 처리 중 | isProcessing=true | "교환 중..." opacity 0.6 |
@@ -343,7 +350,32 @@ stateDiagram-v2
 |------|------|------|
 | 페이지 진입 | slide-up 0.5s ease-out | 게임오버 오버레이에서 결과 화면으로 부드러운 전환 |
 | CoinRewardBadge | 고정 표시 3초 → onDismiss | 코인 획득 명확한 피드백, 자동 소멸 |
-| +N🪙 float-up | coin-float-up CSS 애니메이션 | 광고 시청 보상 즉각 시각화 |
+| +N[CoinIcon] float-up | coin-float-up CSS 애니메이션 | 광고 시청 보상 즉각 시각화 |
+
+#### 리디자인 노트
+
+기능 목록 (모두 유지 필수):
+- rGoText: GAME OVER 헤더
+- rFinalLabel + rFinalScore: 최종 점수
+- rStageLabel: 스테이지 번호
+- rBestBadge(rBestText + coinBestText): 최고기록 배지
+- rCoinCard(coinLabel2 + coinValue2): 보유 코인 잔액
+- rComboCard(rComboTitle + rCS1/CS2/CS3): 콤보 스탯
+- rRankCard(rR1/R2/R3): 일간/월간/시즌 랭킹
+- rAdPlaceholder: 광고 영역
+- rPointExBtn(rPointExBtnInner + rPointExNeededTxt): 교환 버튼
+- rPlayBtn(rPlayTxt): PLAY AGAIN
+- rViewBtn(rViewTxt): View Rankings
+- rCoinFloat(rCoinFloatText): 코인 플로트 애니메이션
+
+| 대상 (노드명) | 현재 문제 | 변경 지침 | 우선순위 |
+|---------------|----------|----------|----------|
+| 코인 아이콘 (ResultPage 전역) | ResultPage 내 모든 코인 표현에 🪙 이모지 사용 중 — 와이어프레임의 "Stage N [CoinIcon] N개", "+1[CoinIcon]" pill, "[CoinIcon] 10코인 → 10포인트" 버튼, "+N[CoinIcon] float-up" 등 | 🪙 이모지를 전부 커스텀 디자인 CoinIcon 컴포넌트로 대체. CoinIcon은 독립 컴포넌트로 별도 정의(이모지 금지). size variant 최소 2종: 16px(인라인 텍스트 옆, pill 내부용)와 20px(float-up, 단독 노출용) — 실제 variant는 designer가 16/20/24 중 택 2. 색/형태는 골든 엑센트(`--vb-accent` 계열) 방향에 맞춰 designer가 결정. 적용 범위: Hero 섹션 코인 잔액 행, PERSONAL BEST pill 내 "+1코인", CTA ExchangeButton 내 코인 표시, CoinRewardBadge, float-up 텍스트 | P0 |
+| rBestBadge (PjMOx) | 독립 박스 형태. `#c8ff001a` 연두빛 fill이 게임 톤(다크+골든)에서 이질적. "NEW PERSONAL BEST"와 "🏆 최고기록!" 두 줄이 수직 나열되어 배지 같지 않고 주석 덩어리처럼 보임 | rScoreCard 내부 하단에 가로 분리선 추가 후, 분리선 아래 단일 행 인라인 pill로 재배치. fill을 `transparent`, stroke를 `$vb-accent`로 유지하되 cornerRadius를 pill 수준(999)으로 변경. 두 텍스트(rBestText + coinBestText)를 한 행 가로 배치(gap 8, layout horizontal). rBestText 내용: "🏆 PERSONAL BEST", coinBestText 내용: "+1[CoinIcon]" — 짧고 직관적. 배지 전체 padding을 [4, 12]로 조임 | P0 |
+| rCoinCard (Fu38h) | rScoreCard와 별도 독립 카드로 분리됨. 코인 잔액이 점수/스테이지와 문맥 단절. 카드 하나 분량의 공간을 단 두 텍스트가 독점 | rCoinCard를 rScoreCard 하단으로 통합. rStageLabel 행을 가로 양끝 레이아웃(justifyContent: space_between)으로 전환해 "Stage N"(좌)과 "[CoinIcon] N개"(우)를 한 행에 배치. coinLabel2("보유 코인") 텍스트는 제거(coinValue2의 CoinIcon이 맥락 충분히 전달). rCoinCard 독립 카드는 삭제 | P0 |
+| rComboCard + rRankCard (NY75d + O5sww) | 콤보 스탯과 랭킹이 각각 독립 카드. 두 카드 모두 "게임 결과 상세 정보"라는 같은 목적인데 시각적으로 분산됨 | rComboCard와 rRankCard를 단일 Stats 카드로 통합. 내부 구조: 상단에 COMBO STATS 섹션(기존 rComboTitle + rComboStats 3열 유지), 그 아래 border-top 구분선 추가, 구분선 아래에 rR1/R2/R3 랭킹 3행 배치. 카드 padding은 0으로 두고 내부 각 섹션에 16px padding 적용 (구분선이 카드 전폭에 걸리도록) | P1 |
+| rBtnArea (UxXnX) | PLAY AGAIN, View Rankings, PointExchangeButton이 gap 10px 균일 나열. PLAY AGAIN이 Primary CTA인데 다른 버튼과 시각적 비중 차이 없음. 상단 패딩 없이 광고 영역 바로 아래 이어져 CTA 섹션 구분 불명확 | rBtnArea padding-top을 4에서 8로 증가. PLAY AGAIN 버튼(rPlayBtn) height를 명시적으로 54px로 키워 Primary CTA 비중 강화. 버튼 순서 유지(ExchangeButton → 광고로딩텍스트 → PLAY AGAIN → View Rankings). 다른 요소 스타일 변경 없음 | P1 |
+| 전체 카드 간격 (uAYzL gap) | gap 12px 균일 적용으로 Hero/Stats/CTA 섹션 경계 없음. 모든 카드가 동등한 비중으로 나열됨 | uAYzL 루트 gap을 제거하고 각 섹션 사이 margin-bottom을 개별 지정: Hero 카드 아래 16px, Stats 카드 아래 16px, 광고 아래 16px. 섹션 내부 요소 간격(콤보-랭킹 구분선 등)은 각 컴포넌트 내부에서 처리 | P2 |
 
 ---
 
@@ -406,7 +438,7 @@ stateDiagram-v2
 | S01 | MainPage | SCREEN | P0 | 코인 잔액 바 [v0.4] 포함 |
 | S02 | GamePage | SCREEN | P0 | StageArea 5개 상태 모두 |
 | S03 | GameOverOverlay | SCREEN | P0 | 바텀 시트 + blur backdrop |
-| S04 | ResultPage | SCREEN | P0 | 코인 흐름 전체 포함 [v0.4] |
+| S04 | ResultPage | SCREEN | P0 | 코인 흐름 전체 포함 [v0.4] — 리디자인 노트 참조 |
 | S05 | RankingPage | SCREEN | P1 | 3개 탭 + 에러/빈 상태 |
 | C01 | ButtonPad | COMPONENT | P0 | IDLE/SHOWING/INPUT/CLEARING/RESULT 5상태 |
 | C02 | ComboTimer | COMPONENT | P0 | normal/warning/danger 3페이즈 |
@@ -417,3 +449,4 @@ stateDiagram-v2
 | C07 | PointExchangeButton | COMPONENT | P1 | 활성/비활성/처리중 3상태 |
 | C08 | FloatingScore | COMPONENT | P1 | x1~x5+ 색상 및 크기 분기 |
 | C09 | RevivalButton | COMPONENT | P1 | 표시(활성/처리중) / 미표시 |
+| C10 | CoinIcon | COMPONENT | P0 | size variant 최소 2종(16/20px 등), 이모지 대체 전용 컴포넌트 |
