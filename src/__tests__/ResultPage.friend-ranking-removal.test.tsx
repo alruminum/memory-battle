@@ -43,6 +43,13 @@ vi.mock('../lib/ait', () => ({
   openLeaderboard: mockOpenLeaderboard,
 }))
 
+vi.mock('../hooks/useCoin', () => ({
+  useCoin: vi.fn(() => ({
+    addCoins: vi.fn().mockResolvedValue(0),
+    getBalance: vi.fn().mockResolvedValue(0),
+  })),
+}))
+
 describe('ResultPage — 친구 랭킹 보기 버튼 제거 (#101)', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -94,7 +101,7 @@ describe('ResultPage — 친구 랭킹 보기 버튼 제거 (#101)', () => {
     expect(btn.disabled).toBe(true)
   })
 
-  it('TC-7 | 버튼이 정확히 2개(PLAY AGAIN, View Rankings)만 렌더링된다', () => {
+  it('TC-7 | 버튼이 정확히 3개 렌더링된다', () => {
     render(<ResultPage onPlayAgain={vi.fn()} onGoRanking={vi.fn()} />)
     const buttons = screen.getAllByRole('button')
     expect(buttons).toHaveLength(3)

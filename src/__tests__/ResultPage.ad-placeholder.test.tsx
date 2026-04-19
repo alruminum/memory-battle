@@ -32,6 +32,13 @@ vi.mock('../hooks/useRewardAd', () => ({
   useRewardAd: vi.fn(() => ({ show: vi.fn().mockResolvedValue(false), isLoading: false })),
 }))
 
+vi.mock('../hooks/useCoin', () => ({
+  useCoin: vi.fn(() => ({
+    addCoins: vi.fn().mockResolvedValue(0),
+    getBalance: vi.fn().mockResolvedValue(0),
+  })),
+}))
+
 describe('ResultPage — 광고 placeholder & monthly 포인트 텍스트 제거 (#102)', () => {
   // TC-1: monthly > 0 일 때 포인트 지급 텍스트 미렌더링
   it('TC-1 | monthly=3 시 "월 1일에 포인트 지급 예정" 텍스트 미렌더링', () => {
@@ -45,8 +52,8 @@ describe('ResultPage — 광고 placeholder & monthly 포인트 텍스트 제거
     expect(screen.getByTestId('ad-placeholder')).toBeInTheDocument()
   })
 
-  // TC-4: 버튼 정확히 2개
-  it('TC-4 | 버튼이 정확히 2개(PLAY AGAIN, View Rankings)만 렌더링된다', () => {
+  // TC-4: 버튼 정확히 3개
+  it('TC-4 | 버튼이 정확히 3개 렌더링된다', () => {
     render(<ResultPage onPlayAgain={vi.fn()} onGoRanking={vi.fn()} />)
     const buttons = screen.getAllByRole('button')
     expect(buttons).toHaveLength(3)
