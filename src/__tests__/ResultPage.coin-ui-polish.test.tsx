@@ -31,9 +31,6 @@ vi.mock('../lib/gameLogic', () => ({
 vi.mock('../components/result/CoinRewardBadge', () => ({
   CoinRewardBadge: () => null,
 }))
-vi.mock('../components/result/PointExchangeButton', () => ({
-  PointExchangeButton: () => null,
-}))
 
 // ── 헬퍼 ──────────────────────────────────────────────
 const mockAddCoins = vi.fn()
