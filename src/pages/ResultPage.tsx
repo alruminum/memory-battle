@@ -130,6 +130,9 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
         borderRadius: 12,
         border: '1px solid var(--vb-border)',
         flexShrink: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
       }}>
         <div style={{
           fontFamily: 'var(--vb-font-score)',
@@ -150,6 +153,7 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
         {/* stageRow — Stage + 코인 잔액 행 */}
         <div style={{
           marginTop: 8,
+          width: '100%',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
@@ -250,7 +254,7 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            padding: '14px 16px',
+            padding: '10px 0',
             borderBottom: i < arr.length - 1 ? '1px solid var(--vb-border)' : 'none',
           }}>
             <div style={{
@@ -261,9 +265,9 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
             }}>{label}</div>
             <div style={{
               fontFamily: 'var(--vb-font-score)',
-              fontSize: 20,
+              fontSize: 16,
               fontWeight: 900,
-              color: highlight ? 'var(--vb-accent)' : 'var(--vb-text)',
+              color: highlight ? 'var(--vb-accent)' : '#8b8b90',
             }}>{rankDisplay(rank)}</div>
           </div>
         ))}
@@ -315,9 +319,9 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
             backgroundColor: adDone ? 'var(--vb-accent)' : 'var(--vb-border)',
             color: adDone ? '#0e0e10' : 'var(--vb-text-dim)',
             fontFamily: 'var(--vb-font-score)',
-            fontSize: 14,
+            fontSize: 18,
             fontWeight: 900,
-            letterSpacing: 2,
+            letterSpacing: 3,
             cursor: adDone ? 'pointer' : 'default',
             boxShadow: adDone ? '0 4px 24px rgba(200,255,0,0.2)' : 'none',
             transition: 'background-color 0.2s, color 0.2s',
