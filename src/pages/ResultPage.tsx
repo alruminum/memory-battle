@@ -276,7 +276,7 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
           margin: '0 20px 16px',
           height: 96,
           backgroundColor: 'var(--vb-surface)',
-          border: '1px solid rgba(255,255,255,0.1)',
+          border: '1px solid var(--vb-border)',
           borderRadius: 8,
           flexShrink: 0,
         }}
