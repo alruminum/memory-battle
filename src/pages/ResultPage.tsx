@@ -275,7 +275,7 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
         style={{
           margin: '0 20px 16px',
           height: 96,
-          backgroundColor: '#1a1a1d',
+          backgroundColor: 'var(--vb-surface)',
           border: '1px solid rgba(255,255,255,0.1)',
           borderRadius: 8,
           flexShrink: 0,
@@ -313,7 +313,7 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
             borderRadius: 8,
             border: 'none',
             backgroundColor: adDone ? 'var(--vb-accent)' : 'var(--vb-border)',
-            color: adDone ? '#0e0e10' : 'var(--vb-text-dim)',
+            color: adDone ? 'var(--vb-bg)' : 'var(--vb-text-dim)',
             fontFamily: 'var(--vb-font-score)',
             fontSize: 14,
             fontWeight: 900,
