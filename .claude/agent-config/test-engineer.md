@@ -38,14 +38,16 @@
 
 ---
 
-## 프로젝트 특화 — 테스트 플랜 대조
+## 프로젝트 특화 — 테스트 제외 원칙
 
-Phase 1.5 갭 체크 시 `docs/test-plan.md`의 A/B/C/D 섹션을 모듈별로 대조한다.
+아래 모듈은 자동 테스트 대신 수동 검증한다:
 
-| 섹션 | 대상 모듈 |
+| 모듈 | 제외 이유 |
 |---|---|
-| A | `src/lib/gameLogic.ts` |
-| B | `src/store/gameStore.ts` |
-| C/D | `src/hooks/useGameEngine.ts` |
+| `src/lib/supabase.ts` / Supabase 호출 | 외부 DB 의존. 실 네트워크 호출 불가. E2E 또는 별도 통합 테스트 환경 필요. |
+| `@apps-in-toss/web-framework` SDK (유저ID, 광고) | 앱인토스 샌드박스 환경 필요. 단위 테스트 환경에서 실행 불가. |
+| `src/components/game/ComboTimer.tsx` | `setInterval` + `Date.now()` 기반 UI 컴포넌트. 타이머 동작은 수동 검증. |
+| `src/components/game/MultiplierBurst.tsx` | CSS 애니메이션 기반 오버레이. `phase` 전환 로직은 수동 검증. |
+| 순수 UI 컴포넌트 (`ButtonPad.tsx` 등) | 스냅샷 테스트는 유지보수 비용 대비 효과 낮음. 수동 검증. |
 
-`getInputTimeout`(A-6), 타이머 통합 TC(D-1~D-5)처럼 플랜에 없는 항목은 `TEST_PLAN_GAP`으로 보고한다.
+> Phase 1.5는 사용하지 않는다. test-plan.md는 v0.5에서 폐기됨 — 테스트 코드(`*.test.ts`)의 `describe`/`it` 블록이 단일 진실 공급원. 갭은 impl 파일 `(TEST)` 태그와 직접 대조한다.
