@@ -2,6 +2,16 @@ import { render, fireEvent } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
 import { GameOverOverlay } from '../components/game/GameOverOverlay'
 
+vi.mock('../store/gameStore', () => ({
+  useGameStore: vi.fn(() => ({ revive: vi.fn() })),
+}))
+vi.mock('../hooks/useCoin', () => ({
+  useCoin: vi.fn(() => ({ addCoins: vi.fn(), getBalance: vi.fn() })),
+}))
+vi.mock('../hooks/useRewardAd', () => ({
+  useRewardAd: vi.fn(() => ({ show: vi.fn().mockResolvedValue(false), isLoading: false })),
+}))
+
 describe('GameOverOverlay — 이벤트 핸들러', () => {
   it('pointerdown 이벤트 발생 시 onConfirm이 호출된다 (wrong reason)', () => {
     const onConfirm = vi.fn()

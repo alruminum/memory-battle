@@ -43,6 +43,13 @@ vi.mock('../lib/ait', () => ({
   openLeaderboard: mockOpenLeaderboard,
 }))
 
+vi.mock('../hooks/useCoin', () => ({
+  useCoin: vi.fn(() => ({
+    addCoins: vi.fn().mockResolvedValue(0),
+    getBalance: vi.fn().mockResolvedValue(0),
+  })),
+}))
+
 describe('ResultPage — 친구 랭킹 보기 버튼 제거 (#101)', () => {
   beforeEach(() => {
     vi.clearAllMocks()

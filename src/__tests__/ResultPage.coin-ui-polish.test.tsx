@@ -82,25 +82,25 @@ beforeEach(() => {
 
 describe('ResultPage — 코인 잔액 표시 (impl 07)', () => {
   // ── 정상 흐름 ──────────────────────────────────────
-  it('TC-7 | "보유 코인" 레이블 텍스트가 렌더링됨', () => {
+  it('TC-8 | coinBalance=25 → CoinIcon SVG + "25개" 형식으로 표시됨', async () => {
     render(<ResultPage onPlayAgain={vi.fn()} onGoRanking={vi.fn()} />)
 
-    expect(screen.getByText('보유 코인')).toBeInTheDocument()
-  })
-
-  it('TC-8 | coinBalance=25 → `🪙 25` 형식으로 표시됨', () => {
-    render(<ResultPage onPlayAgain={vi.fn()} onGoRanking={vi.fn()} />)
-
-    expect(screen.getByText('🪙 25')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getAllByRole('img', { name: '코인' }).length).toBeGreaterThan(0)
+      expect(screen.getByText('25개')).toBeInTheDocument()
+    })
   })
 
   // ── 엣지 케이스 ──────────────────────────────────────
-  it('TC-9 | coinBalance=0 시 `🪙 0` 표시 (빈 잔액도 렌더링)', () => {
+  it('TC-9 | coinBalance=0 시 CoinIcon SVG + "0개" 표시 (빈 잔액도 렌더링)', async () => {
     makeDefaultMocks(0)
 
     render(<ResultPage onPlayAgain={vi.fn()} onGoRanking={vi.fn()} />)
 
-    expect(screen.getByText('🪙 0')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getAllByRole('img', { name: '코인' }).length).toBeGreaterThan(0)
+      expect(screen.getByText('0개')).toBeInTheDocument()
+    })
   })
 })
 

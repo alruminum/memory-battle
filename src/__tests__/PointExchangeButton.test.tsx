@@ -20,9 +20,10 @@ describe('PointExchangeButton — 정상 흐름', () => {
     expect(screen.getByRole('button')).not.toBeDisabled()
   })
 
-  it('버튼 레이블이 "🪙 10코인 → 10포인트 교환"으로 표시된다', () => {
+  it('버튼 레이블이 CoinIcon SVG + 텍스트로 표시된다', () => {
     render(<PointExchangeButton coinBalance={15} onExchange={vi.fn().mockResolvedValue(undefined)} />)
-    expect(screen.getByRole('button')).toHaveTextContent('🪙 10코인 → 10포인트 교환')
+    expect(screen.getByRole('img', { name: '코인' })).toBeInTheDocument()
+    expect(screen.getByText(/10코인 → 10포인트 교환/)).toBeInTheDocument()
   })
 
   it('버튼 클릭 시 onExchange 콜백이 호출된다', async () => {
@@ -40,9 +41,10 @@ describe('PointExchangeButton — 정상 흐름', () => {
     await act(async () => {
       fireEvent.click(screen.getByRole('button'))
     })
-    // 처리 완료 후 원래 텍스트로 복원
+    // 처리 완료 후 원래 CoinIcon SVG + 텍스트로 복원
     await waitFor(() => {
-      expect(screen.getByRole('button')).toHaveTextContent('🪙 10코인 → 10포인트 교환')
+      expect(screen.getByRole('img', { name: '코인' })).toBeInTheDocument()
+      expect(screen.getByText(/10코인 → 10포인트 교환/)).toBeInTheDocument()
     })
   })
 })
