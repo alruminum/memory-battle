@@ -263,7 +263,7 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
               fontFamily: 'var(--vb-font-score)',
               fontSize: 20,
               fontWeight: 900,
-              color: highlight ? 'var(--vb-accent)' : 'var(--vb-text)',
+              color: highlight ? 'var(--vb-accent)' : 'var(--vb-text-dim)',
             }}>{rankDisplay(rank)}</div>
           </div>
         ))}
