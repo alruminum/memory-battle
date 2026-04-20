@@ -37,7 +37,9 @@ const { mockOpenLeaderboard } = vi.hoisted(() => ({
   mockOpenLeaderboard: vi.fn(),
 }))
 vi.mock('../lib/ait', () => ({
+  COIN_EXCHANGE_AMOUNT: 10,
   IS_SANDBOX: false,
+  grantCoinExchange: vi.fn(),
   openLeaderboard: mockOpenLeaderboard,
 }))
 
