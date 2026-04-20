@@ -25,7 +25,7 @@ export function PointExchangeButton({ coinBalance, onExchange }: PointExchangeBu
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+    <div style={{ display: 'flex', alignItems: 'center' }}>
       <button
         onClick={handleExchange}
         disabled={!canExchange || isProcessing}
