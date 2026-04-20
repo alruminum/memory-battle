@@ -7,7 +7,7 @@ import {
   TossAds,
   submitGameCenterLeaderBoardScore,
   openGameCenterLeaderboard,
-  grantPromotionReward,
+  grantPromotionRewardForGame,
 } from '@apps-in-toss/web-framework'
 
 const IS_SANDBOX = import.meta.env.DEV || import.meta.env.VITE_SANDBOX === 'true'
@@ -99,13 +99,15 @@ export function attachBannerAd(container: HTMLElement): () => void {
 }
 
 // getOperationalEnvironment는 동기 함수 (await 불필요)
+const TOSS_ENV = 'toss'
+
 export async function submitScore(score: number): Promise<void> {
-  if (getOperationalEnvironment() !== 'toss') return
+  if (getOperationalEnvironment() !== TOSS_ENV) return
   await submitGameCenterLeaderBoardScore({ score: String(score) })
 }
 
 export async function openLeaderboard(): Promise<void> {
-  if (getOperationalEnvironment() !== 'toss') return
+  if (getOperationalEnvironment() !== TOSS_ENV) return
   await openGameCenterLeaderboard()
 }
 
@@ -114,18 +116,20 @@ const DAILY_REWARD_AMOUNT = 10
 
 export async function grantDailyReward(): Promise<void> {
   if (IS_SANDBOX) return  // 샌드박스 분기: 실제 포인트 지급 생략
-  await grantPromotionReward({ params: { promotionCode: DAILY_REWARD_CODE, amount: DAILY_REWARD_AMOUNT } })
+  await grantPromotionRewardForGame({ params: { promotionCode: DAILY_REWARD_CODE, amount: DAILY_REWARD_AMOUNT } })
 }
 
 // [v0.4] 코인 10개 → 토스포인트 10포인트 교환
 // ⚠️ 운영에서 promotionCode 사전 등록 필요 — 등록 전 호출 시 SDK 에러
+// ⚠️ VITE_COIN_EXCHANGE_CODE 미설정 시 no-op (운영 오호출 방지)
 // ⚠️ 샌드박스: no-op (실제 포인트 지급 없음)
-const COIN_EXCHANGE_CODE   = import.meta.env.VITE_COIN_EXCHANGE_CODE ?? 'COIN_EXCHANGE'
+const COIN_EXCHANGE_CODE: string | undefined = import.meta.env.VITE_COIN_EXCHANGE_CODE
 export const COIN_EXCHANGE_AMOUNT = 10  // 10포인트 = 10원
 
 export async function grantCoinExchange(): Promise<void> {
   if (IS_SANDBOX) return  // 샌드박스: no-op
-  await grantPromotionReward({
+  if (!COIN_EXCHANGE_CODE) return  // 환경변수 미설정: 운영 오호출 방지
+  await grantPromotionRewardForGame({
     params: { promotionCode: COIN_EXCHANGE_CODE, amount: COIN_EXCHANGE_AMOUNT }
   })
 }
