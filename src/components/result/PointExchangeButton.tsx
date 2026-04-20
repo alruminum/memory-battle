@@ -11,9 +11,6 @@ export function PointExchangeButton({ coinBalance, onExchange }: PointExchangeBu
   const [isProcessing, setIsProcessing] = useState(false)
 
   const canExchange = coinBalance >= COIN_EXCHANGE_AMOUNT
-  const disabledReason = !canExchange
-    ? `코인 ${COIN_EXCHANGE_AMOUNT}개가 필요합니다 (현재 ${coinBalance}개)`
-    : null
 
   async function handleExchange() {
     if (!canExchange || isProcessing) return
@@ -28,7 +25,7 @@ export function PointExchangeButton({ coinBalance, onExchange }: PointExchangeBu
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+    <div style={{ display: 'flex', alignItems: 'center' }}>
       <button
         onClick={handleExchange}
         disabled={!canExchange || isProcessing}
@@ -59,15 +56,6 @@ export function PointExchangeButton({ coinBalance, onExchange }: PointExchangeBu
           </>
         )}
       </button>
-      {disabledReason && (
-        <div style={{
-          fontSize: 11,
-          color: 'var(--vb-text-dim)',
-          fontFamily: 'var(--vb-font-body)',
-        }}>
-          {disabledReason}
-        </div>
-      )}
     </div>
   )
 }
