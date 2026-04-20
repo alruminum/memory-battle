@@ -55,14 +55,14 @@ describe('PointExchangeButton — 엣지 케이스', () => {
     expect(screen.getByRole('button')).toBeDisabled()
   })
 
-  it('coinBalance < 10이면 사유 메시지가 표시된다', () => {
+  it('coinBalance < 10이면 사유 메시지가 표시되지 않는다', () => {
     render(<PointExchangeButton coinBalance={5} onExchange={vi.fn()} />)
-    expect(screen.getByText('코인 10개가 필요합니다 (현재 5개)')).toBeInTheDocument()
+    expect(screen.queryByText('코인 10개가 필요합니다 (현재 5개)')).not.toBeInTheDocument()
   })
 
-  it('coinBalance = 0이면 사유 메시지에 현재 잔액 0이 표시된다', () => {
+  it('coinBalance = 0이어도 사유 메시지가 표시되지 않는다', () => {
     render(<PointExchangeButton coinBalance={0} onExchange={vi.fn()} />)
-    expect(screen.getByText('코인 10개가 필요합니다 (현재 0개)')).toBeInTheDocument()
+    expect(screen.queryByText('코인 10개가 필요합니다 (현재 0개)')).not.toBeInTheDocument()
   })
 
   it('coinBalance >= 10이면 사유 메시지가 표시되지 않는다', () => {
