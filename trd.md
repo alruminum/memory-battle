@@ -1,7 +1,6 @@
-# 기억력배틀 TRD v0.5
+# 기억력배틀 TRD v0.4
 
 > 변경 이력
-> - v0.5 (2026-04-19): F5 폐기 (Epic 13) — PointExchangeButton.tsx 제거, grantCoinExchange·COIN_EXCHANGE_CODE·COIN_EXCHANGE_AMOUNT 제거, §2 프로젝트 구조·§5 SDK·§7 ResultPage·§8 환경변수 현행화.
 > - v0.4.4 (2026-04-18): ResultPage 리디자인 (#129) — Hero/Stats/CTA 3계층 구조, CoinIcon 신규 컴포넌트, rCoinCard 삭제 → stageRow 통합, rComboCard+rRankCard → 단일 Stats 카드, NewRecordBadge 골든 pill 인라인.
 > - v0.4.3 (2026-04-16): architecture.md DESIGN_REVIEW_FAIL 수정 — useCoin.addCoins 2-param 확정(userId 내부 조회), GameOverOverlay 즉시 부활 경로 addCoins(-5,'revival') 명시.
 > - v0.4.2 (2026-04-16): 설계 문서 불일치 수정 — docs/game-logic.md: add_coins RPC 2-param→3-param atomic 버전 통일, revivalUsed=true 시 RevivalButton 미표시로 수정. docs/db-schema.md: add_coins RPC 정의 누락 추가.
@@ -59,8 +58,8 @@ memory-battle/
 │   │       ├── CoinIcon.tsx            # [v0.4.4] SVG 코인 아이콘 (size 14/16/20, radialGradient)
 │   │       ├── CoinRewardBadge.tsx     # "코인 +N 획득!" 피드백 (CoinIcon(16) 사용)
 │   │       ├── NewRecordBadge.tsx      # [v0.4.4] 골든 pill 인라인 (🏆 PERSONAL BEST + "+1" + CoinIcon(14))
-│   │       └── RevivalButton.tsx       # 부활 버튼 (5코인)
-│   │       # ~~PointExchangeButton.tsx~~ [v0.5 삭제 — F5 폐기]
+│   │       ├── RevivalButton.tsx       # 부활 버튼 (5코인)
+│   │       └── PointExchangeButton.tsx # 토스포인트 교환 버튼 (CoinIcon(16) 사용)
 │   ├── hooks/
 │   │   ├── useGameEngine.ts    # 핵심 게임 로직 (깜빡임 속도·타이머·콤보 통합)
 │   │   ├── useRanking.ts       # Supabase 랭킹 연동
@@ -359,8 +358,19 @@ export const attachBannerAd = (container: HTMLElement) => {
   return () => TossAds.destroyAll()
 }
 
-// ~~[v0.4] grantCoinExchange~~ [v0.5 삭제 — F5 폐기, grantPromotionReward import 제거]
-// ~~[DEPRECATED v0.4] grantDailyReward~~ [v0.5 삭제 완료]
+// [v0.4] 코인 10개 → 토스포인트 10포인트 교환
+// SDK 성공 시에만 DB balance 차감 (ResultPage에서 호출)
+export async function grantCoinExchange(): Promise<void> {
+  if (IS_SANDBOX) return
+  await grantPromotionReward({
+    params: {
+      promotionCode: import.meta.env.VITE_COIN_EXCHANGE_CODE ?? 'COIN_EXCHANGE',
+      amount: 10
+    }
+  })
+}
+
+// [DEPRECATED v0.4] grantDailyReward — 폐기 (daily_reward 로직 제거)
 
 // 토스 리더보드 점수 제출
 // ⚠️ export명: submitScore (submitLeaderboardScore 아님)
@@ -464,7 +474,7 @@ interface GameStore {
 **[D] 광고 placeholder** — `margin: '0 20px 16px'`, height 96, borderRadius 8
 
 **[E] CTA 영역 (rBtnArea)** — `marginTop: 'auto'`, padding '8px 20px 32px', gap 10
-- ~~**PointExchangeButton**~~ [v0.5 삭제 — F5 폐기]
+- **PointExchangeButton**: CoinIcon(16) + "N코인 → N포인트 교환"
 - 광고 로딩 중 안내 텍스트 (adLoading && !adDone)
 - **PLAY AGAIN 버튼**: height 54, adDone 시 활성 (vb-accent 배경, boxShadow)
 - View Rankings 버튼: border outline, 높이 자동 (padding 14px 0)
@@ -490,7 +500,6 @@ interface GameStore {
 - ~~NewRecordBadge 박스~~ (v0.4.4 → 골든 pill 인라인)
 - ~~리워드광고 RevivalButton~~ (GameOverOverlay로 이동, ResultPage 미표시)
 - ~~"10포인트 지급!" 메시지~~ (daily_reward 방식 폐지)
-- ~~PointExchangeButton~~ [v0.5 삭제 — F5 폐기]
 
 광고 종료 후 **PLAY AGAIN** 버튼 활성화 (횟수 제한 없음)
 
@@ -509,7 +518,7 @@ VITE_SUPABASE_ANON_KEY=
 VITE_APP_NAME=memory-battle
 VITE_REWARD_AD_GROUP_ID=        # 미설정 시 테스트 ID 사용
 VITE_BANNER_AD_GROUP_ID=        # 미설정 시 테스트 ID 사용
-# ~~VITE_COIN_EXCHANGE_CODE~~    # [v0.5 삭제 — F5 폐기]
+VITE_COIN_EXCHANGE_CODE=        # [v0.4] 코인→토스포인트 교환 promotionCode (운영 사전 등록 필수)
 ```
 
 ---

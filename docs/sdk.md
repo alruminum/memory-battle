@@ -178,13 +178,44 @@ return <div ref={containerRef} style={{ width: '100%', height: 96 }} />
 
 ---
 
-## ~~프로모션 리워드 지급 (`grantPromotionReward`)~~ [v0.5 폐기]
+## 프로모션 리워드 지급 (`grantPromotionReward`) ⚠️ v0.4 변경
 
-> **v0.5 완전 폐기** — 앱인토스 게임 카테고리 정책 충돌(유저 보유 재화 교환 금지, 40000 에러).
-> `grantPromotionReward` import·`grantCoinExchange` 함수·`VITE_COIN_EXCHANGE_CODE` 환경변수
-> 모두 Epic 13에서 제거됨.
->
-> 향후 정책 허용 조건(출석·튜토리얼 완료) 기반 지급은 별도 에픽으로 설계 예정.
+- API: `grantPromotionReward({ params: { promotionCode, amount } })` — 토스포인트 지급
+- **v0.4: 코인 10개 소모 시 수동 교환** (기존 게임오버 자동 지급 방식 폐지)
+- 신규 promotionCode: `VITE_COIN_EXCHANGE_CODE` 환경변수 (운영에서 사전 등록 필수)
+- ⚠️ **샌드박스에서 호출 금지** — `IS_SANDBOX` 분기 필수
+
+```typescript
+import { grantPromotionReward } from '@apps-in-toss/web-framework'
+
+// ⚠️ 운영에서 프로모션 코드 사전 등록 필요 — 등록 전 호출 시 SDK 에러
+const COIN_EXCHANGE_CODE   = import.meta.env.VITE_COIN_EXCHANGE_CODE ?? 'COIN_EXCHANGE'
+const COIN_EXCHANGE_AMOUNT = 10  // 10포인트 = 10원
+
+// [v0.4] 코인 10개 → 토스포인트 10포인트 교환
+// ⚠️ [구현 예정 — Epic 12 impl-06 완료 후 ait.ts에 추가, 현재 미구현]
+// SDK 성공 시에만 DB balance 차감 (ResultPage에서 호출, 실패 시 DB 차감 없음)
+export async function grantCoinExchange(): Promise<void> {
+  if (IS_SANDBOX) return  // 샌드박스: no-op
+  await grantPromotionReward({
+    params: { promotionCode: COIN_EXCHANGE_CODE, amount: COIN_EXCHANGE_AMOUNT }
+  })
+}
+
+// [예정 — Epic 12 완료 후 삭제] grantDailyReward — daily_reward 로직 제거 예정, 현재 ait.ts에 현역 존재
+// export async function grantDailyReward(): Promise<void> { ... }
+```
+
+**호출 흐름 (v0.4)**:
+```
+ResultPage (게임오버 화면)
+  └── [교환 버튼 클릭] → grantCoinExchange()  ← lib/ait.ts
+        ├── SDK 성공 → useCoin.deductCoins(10, 'toss_points_exchange')
+        │     └── Supabase: user_coins balance-=10 + coin_transactions INSERT
+        └── SDK 실패 → throw → ResultPage catch → "잠시 후 다시 시도해주세요" 표시
+```
+
+> SDK 실패 시 DB 차감 없음 — 토스포인트 미지급 상태 + 코인 잔액 유지.
 
 ---
 
@@ -284,7 +315,7 @@ if (getOperationalEnvironment() === 'toss') {
 ```
 □ 실제 배너 광고 노출 및 레이아웃
 □ 리워드 광고 완시청 → 코인 1~5개 랜덤 지급 + user_coins/coin_transactions DB 업데이트 확인
-□ ~~[교환 버튼] 10코인 → grantCoinExchange() → 10포인트 지급 + DB balance-=10 확인~~ [v0.5 삭제]
+□ [교환 버튼] 10코인 → grantCoinExchange() → 10포인트 지급 + DB balance-=10 확인
 □ getUserKeyForGame() 실제 hash 반환 확인
 □ 게임센터 리더보드 점수 제출 (submitScore)
 □ openGameCenterLeaderboard() 친구/전체 랭킹 내장 UI

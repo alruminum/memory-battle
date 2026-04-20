@@ -25,8 +25,7 @@ CREATE TABLE user_coins (
 );
 
 -- [v0.4] 코인 거래 내역
--- type: 'ad_reward' | 'record_bonus' | 'revival'
---   ~~'toss_points_exchange'~~ [v0.5 폐기 — 신규 INSERT 금지, 기존 row는 보존]
+-- type: 'ad_reward' | 'record_bonus' | 'revival' | 'toss_points_exchange'
 -- amount: 양수=적립, 음수=차감
 CREATE TABLE coin_transactions (
   id          UUID DEFAULT gen_random_uuid() PRIMARY KEY,
@@ -111,7 +110,7 @@ CREATE POLICY "coin_tx_all_anon"     ON coin_transactions FOR ALL USING (true) W
 CREATE OR REPLACE FUNCTION add_coins(
   p_user_id TEXT,
   p_amount  INTEGER,
-  p_type    TEXT      -- 'ad_reward'|'record_bonus'|'revival'  (~~'toss_points_exchange'~~ v0.5 폐기)
+  p_type    TEXT      -- 'ad_reward'|'record_bonus'|'revival'|'toss_points_exchange'
 )
 RETURNS INTEGER        -- 업데이트 후 최종 balance 반환
 LANGUAGE plpgsql SECURITY DEFINER AS $$

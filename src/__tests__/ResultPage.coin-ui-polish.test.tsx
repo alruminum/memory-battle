@@ -23,12 +23,16 @@ vi.mock('../hooks/useRewardAd', () => ({ useRewardAd: vi.fn() }))
 vi.mock('../hooks/useCoin', () => ({ useCoin: vi.fn() }))
 vi.mock('../lib/ait', () => ({
   getUserId: vi.fn().mockResolvedValue('user-123'),
+  grantCoinExchange: vi.fn().mockResolvedValue(undefined),
 }))
 vi.mock('../lib/gameLogic', () => ({
   randomCoinReward: vi.fn().mockReturnValue(3),
 }))
 vi.mock('../components/result/CoinRewardBadge', () => ({
   CoinRewardBadge: () => null,
+}))
+vi.mock('../components/result/PointExchangeButton', () => ({
+  PointExchangeButton: () => null,
 }))
 
 // ── 헬퍼 ──────────────────────────────────────────────
