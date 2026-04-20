@@ -7,7 +7,7 @@ import {
   TossAds,
   submitGameCenterLeaderBoardScore,
   openGameCenterLeaderboard,
-  grantPromotionReward,
+  grantPromotionRewardForGame,
 } from '@apps-in-toss/web-framework'
 
 const IS_SANDBOX = import.meta.env.DEV || import.meta.env.VITE_SANDBOX === 'true'
@@ -114,7 +114,7 @@ const DAILY_REWARD_AMOUNT = 10
 
 export async function grantDailyReward(): Promise<void> {
   if (IS_SANDBOX) return  // 샌드박스 분기: 실제 포인트 지급 생략
-  await grantPromotionReward({ params: { promotionCode: DAILY_REWARD_CODE, amount: DAILY_REWARD_AMOUNT } })
+  await grantPromotionRewardForGame({ params: { promotionCode: DAILY_REWARD_CODE, amount: DAILY_REWARD_AMOUNT } })
 }
 
 // [v0.4] 코인 10개 → 토스포인트 10포인트 교환
@@ -125,7 +125,7 @@ export const COIN_EXCHANGE_AMOUNT = 10  // 10포인트 = 10원
 
 export async function grantCoinExchange(): Promise<void> {
   if (IS_SANDBOX) return  // 샌드박스: no-op
-  await grantPromotionReward({
+  await grantPromotionRewardForGame({
     params: { promotionCode: COIN_EXCHANGE_CODE, amount: COIN_EXCHANGE_AMOUNT }
   })
 }
