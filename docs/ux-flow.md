@@ -5,7 +5,7 @@
 - PRD: prd.md (v0.4)
 - 참조 문서: docs/architecture.md, docs/ui-spec.md
 - 생성일: 2026-04-17
-- 최종 수정: 2026-04-18 (UX_REFINE — S04 코인 아이콘 이모지 대체 지침 추가)
+- 최종 수정: 2026-04-18 (UX_SYNC_INCREMENTAL — S04 PointExchangeButton 비활성 안내 텍스트 제거 반영 #152)
 
 ---
 
@@ -341,7 +341,7 @@ stateDiagram-v2
 | 광고 완료 | adDone=true | PLAY AGAIN 활성(골든), CoinRewardBadge 표시(있으면) |
 | 최고기록 갱신 | isNewBest=true | Hero 카드 내 divider + 골든 pill "🏆 PERSONAL BEST +1[CoinIcon]" 인라인 표시 |
 | 교환 가능 | coinBalance≥10 | PointExchangeButton 활성(골든 테두리) |
-| 교환 불가 | coinBalance<10 | PointExchangeButton disabled + "코인 10개가 필요합니다 (현재 N개)" |
+| 교환 불가 | coinBalance<10 | PointExchangeButton disabled (테두리 var(--vb-border) + 텍스트 var(--vb-text-dim), cursor default) |
 | 교환 처리 중 | isProcessing=true | "교환 중..." opacity 0.6 |
 
 #### 애니메이션 의도
@@ -363,7 +363,7 @@ stateDiagram-v2
 - rComboCard(rComboTitle + rCS1/CS2/CS3): 콤보 스탯
 - rRankCard(rR1/R2/R3): 일간/월간/시즌 랭킹
 - rAdPlaceholder: 광고 영역
-- rPointExBtn(rPointExBtnInner + rPointExNeededTxt): 교환 버튼
+- rPointExBtn(rPointExBtnInner): 교환 버튼 (비활성 안내 텍스트 제거됨 — #152)
 - rPlayBtn(rPlayTxt): PLAY AGAIN
 - rViewBtn(rViewTxt): View Rankings
 - rCoinFloat(rCoinFloatText): 코인 플로트 애니메이션
@@ -447,6 +447,3 @@ stateDiagram-v2
 | C05 | GameOverOverlay | COMPONENT | P0 | 부활 버튼 표시/미표시 분기 |
 | C06 | CoinRewardBadge | COMPONENT | P1 | 광고 완시청 코인 피드백 |
 | C07 | PointExchangeButton | COMPONENT | P1 | 활성/비활성/처리중 3상태 |
-| C08 | FloatingScore | COMPONENT | P1 | x1~x5+ 색상 및 크기 분기 |
-| C09 | RevivalButton | COMPONENT | P1 | 표시(활성/처리중) / 미표시 |
-| C10 | CoinIcon | COMPONENT | P0 | size variant 최소 2종(16/20px 등), 이모지 대체 전용 컴포넌트 |
