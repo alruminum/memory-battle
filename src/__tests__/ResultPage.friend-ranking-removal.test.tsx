@@ -11,6 +11,9 @@ vi.mock('../store/gameStore', () => ({
     baseScore: 200,
     fullComboCount: 1,
     maxComboStreak: 5,
+    coinBalance: 0,
+    lifetimeExchanged: 0,
+    setLifetimeExchanged: vi.fn(),
   })),
 }))
 
