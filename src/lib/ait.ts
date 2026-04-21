@@ -111,14 +111,6 @@ export async function openLeaderboard(): Promise<void> {
   await openGameCenterLeaderboard()
 }
 
-const DAILY_REWARD_CODE = 'DAILY_PLAY'
-const DAILY_REWARD_AMOUNT = 10
-
-export async function grantDailyReward(): Promise<void> {
-  if (IS_SANDBOX) return  // 샌드박스 분기: 실제 포인트 지급 생략
-  await grantPromotionRewardForGame({ params: { promotionCode: DAILY_REWARD_CODE, amount: DAILY_REWARD_AMOUNT } })
-}
-
 // [v0.4] 코인 10개 → 토스포인트 10포인트 교환
 // ⚠️ 운영에서 promotionCode 사전 등록 필요 — 등록 전 호출 시 SDK 에러
 // ⚠️ VITE_COIN_EXCHANGE_CODE 미설정 시 no-op (운영 오호출 방지)
