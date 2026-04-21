@@ -143,6 +143,30 @@ const { data, error } = await supabase.rpc('add_coins', {
 // data: 업데이트된 balance (INTEGER)
 ```
 
+### [v0.4.2] get_lifetime_exchanged — F5 누적 교환 포인트 조회
+
+1인 누적 5,000 토스포인트 한도(앱인토스 프로모션 정책) 체크용. `coin_transactions` 합산 기반 SSoT.
+
+```sql
+CREATE OR REPLACE FUNCTION get_lifetime_exchanged(p_user_id TEXT)
+RETURNS INTEGER LANGUAGE plpgsql SECURITY DEFINER AS $$
+DECLARE v_total INTEGER;
+BEGIN
+  SELECT COALESCE(SUM(-amount), 0) INTO v_total
+    FROM coin_transactions
+   WHERE user_id = p_user_id AND type = 'toss_points_exchange' AND amount < 0;
+  RETURN v_total;
+END; $$;
+```
+
+> **선택 근거**: `user_coins`에 컬럼 추가 방식은 `coin_transactions`와 이중 진실 + 기존 `add_coins` 수정·백필 필요. 이미 교환 이력이 `coin_transactions`에 기록되므로 SUM 집계가 단일 진실 원칙 부합. 최대 500회 + 기존 인덱스(`idx_coin_tx_user_id`) 하에서 성능 무시 가능.
+
+클라이언트 호출:
+```typescript
+const { data, error } = await supabase.rpc('get_lifetime_exchanged', { p_user_id: userId })
+// data: INTEGER (누적 교환 포인트 합계)
+```
+
 ---
 
 ## Supabase RPC 함수 (KST 타임존 적용, 랭킹용)
