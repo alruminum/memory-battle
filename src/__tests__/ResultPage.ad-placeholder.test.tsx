@@ -36,6 +36,7 @@ vi.mock('../hooks/useCoin', () => ({
   useCoin: vi.fn(() => ({
     addCoins: vi.fn().mockResolvedValue(0),
     getBalance: vi.fn().mockResolvedValue(0),
+    getLifetimeExchanged: vi.fn().mockResolvedValue(0),
   })),
 }))
 

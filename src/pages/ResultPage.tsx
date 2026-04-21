@@ -58,9 +58,8 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
     submitScore(score, stage, userId)
   }, [userId, isLoading]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // [v0.4.2 F5] 마운트 시 누적 교환 포인트 조회 (모킹 환경 호환을 위해 런타임 타입 검사)
+  // [v0.4.2 F5] 마운트 시 누적 교환 포인트 조회
   useEffect(() => {
-    if (typeof getLifetimeExchanged !== 'function') return
     getLifetimeExchanged()
       .catch(() => {
         // 조회 실패 시 조용히 처리 — lifetimeExchanged=0 유지 (교환 버튼 활성)
@@ -115,7 +114,7 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
       await addCoins(-COIN_EXCHANGE_AMOUNT, 'toss_points_exchange')
       // [v0.4.2 F5] 누적 교환 포인트 로컬 즉시 갱신 (재조회 없이)
       setLifetimeExchanged(lifetimeExchanged + COIN_EXCHANGE_AMOUNT)
-      showToastMsg('🎉 10포인트 지급됐어요!')
+      showToastMsg(`🎉 ${COIN_EXCHANGE_AMOUNT}포인트 지급됐어요!`)
     } catch (err) {
       console.error('[exchange] failed:', err)
       showToastMsg('교환 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요')
