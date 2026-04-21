@@ -242,6 +242,8 @@ _(impl 없음 — 문서 구조 작업만)_ · Issues: [#19](https://github.com/
 | 05 revival-item | [impl/05-revival-item.md](docs/milestones/v04/epics/epic-12-coin-v04/impl/05-revival-item.md) | [#111](https://github.com/alruminum/memory-battle/issues/111) |
 | 06 toss-points-exchange | [impl/06-toss-points-exchange.md](docs/milestones/v04/epics/epic-12-coin-v04/impl/06-toss-points-exchange.md) | [#112](https://github.com/alruminum/memory-battle/issues/112) |
 | 07 coin-ui-polish | [impl/07-coin-ui-polish.md](docs/milestones/v04/epics/epic-12-coin-v04/impl/07-coin-ui-polish.md) | [#113](https://github.com/alruminum/memory-battle/issues/113) |
+| 08 toss-exchange-limit | [impl/08-toss-exchange-limit.md](docs/milestones/v04/epics/epic-12-coin-v04/impl/08-toss-exchange-limit.md) | [#158](https://github.com/alruminum/memory-battle/issues/158) |
+| 09 toss-exchange-limit-docs | [impl/09-toss-exchange-limit-docs.md](docs/milestones/v04/epics/epic-12-coin-v04/impl/09-toss-exchange-limit-docs.md) | [#158](https://github.com/alruminum/memory-battle/issues/158) |
 
 ---
 
