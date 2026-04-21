@@ -53,7 +53,7 @@ export function useCoin(): UseCoinReturn {
     return newBalance
   }
 
-  // [v0.4.2 F5] Supabase RPC get_lifetime_exchanged 조회
+  // [v0.4.2 F5] coin_transactions SUM으로 누적 교환 포인트 조회
   const getLifetimeExchanged = async (): Promise<number> => {
     const userId = useGameStore.getState().userId
     if (!userId) return 0

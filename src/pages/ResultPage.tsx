@@ -58,8 +58,9 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
     submitScore(score, stage, userId)
   }, [userId, isLoading]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  // [v0.4.2 F5] 마운트 시 누적 교환 포인트 조회
+  // [v0.4.2 F5] 마운트 시 누적 교환 포인트 조회 (모킹 환경 호환을 위해 런타임 타입 검사)
   useEffect(() => {
+    if (typeof getLifetimeExchanged !== 'function') return
     getLifetimeExchanged()
       .catch(() => {
         // 조회 실패 시 조용히 처리 — lifetimeExchanged=0 유지 (교환 버튼 활성)
