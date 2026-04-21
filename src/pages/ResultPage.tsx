@@ -19,13 +19,15 @@ interface ResultPageProps {
 
 export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
   const { score, stage, userId, baseScore, fullComboCount, maxComboStreak,
-    coinBalance  // [v0.4 F5] PointExchangeButton에 전달
+    coinBalance,        // [v0.4 F5] PointExchangeButton에 전달
+    lifetimeExchanged,  // [v0.4.2 F5] 누적 교환 포인트
+    setLifetimeExchanged,
   } = useGameStore()
 
   const comboBonus = score - baseScore
   const { daily, myRanks, isLoading, submitScore } = useRanking(userId)
   const { show: showAd, isLoading: adLoading } = useRewardAd()
-  const { addCoins } = useCoin()
+  const { addCoins, getLifetimeExchanged } = useCoin()
   const submitted = useRef(false)
   const [adDone, setAdDone] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
@@ -55,6 +57,15 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
 
     submitScore(score, stage, userId)
   }, [userId, isLoading]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // [v0.4.2 F5] 마운트 시 누적 교환 포인트 조회
+  useEffect(() => {
+    getLifetimeExchanged()
+      .catch(() => {
+        // 조회 실패 시 조용히 처리 — lifetimeExchanged=0 유지 (교환 버튼 활성)
+        console.warn('[lifetime-exchanged] fetch failed — non-blocking')
+      })
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // 마운트 시 리워드광고 자동 시작
   useEffect(() => {
@@ -101,7 +112,9 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
       await grantCoinExchange()
       // 2. 코인 차감 (DB 원자 처리)
       await addCoins(-COIN_EXCHANGE_AMOUNT, 'toss_points_exchange')
-      showToastMsg('🎉 10포인트 지급됐어요!')
+      // [v0.4.2 F5] 누적 교환 포인트 로컬 즉시 갱신 (재조회 없이)
+      setLifetimeExchanged(lifetimeExchanged + COIN_EXCHANGE_AMOUNT)
+      showToastMsg(`🎉 ${COIN_EXCHANGE_AMOUNT}포인트 지급됐어요!`)
     } catch (err) {
       console.error('[exchange] failed:', err)
       showToastMsg('교환 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요')
@@ -314,6 +327,7 @@ export function ResultPage({ onPlayAgain, onGoRanking }: ResultPageProps) {
         {/* [v0.4 F5] 포인트 교환 버튼 */}
         <PointExchangeButton
           coinBalance={coinBalance}
+          lifetimeExchanged={lifetimeExchanged}
           onExchange={handleExchange}
         />
 

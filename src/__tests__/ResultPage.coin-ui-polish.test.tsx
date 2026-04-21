@@ -65,6 +65,7 @@ function makeDefaultMocks(coinBalance = 25) {
   vi.mocked(useCoin).mockReturnValue({
     getBalance: vi.fn().mockResolvedValue(coinBalance),
     addCoins: mockAddCoins,
+    getLifetimeExchanged: vi.fn().mockResolvedValue(0),
   } as unknown as ReturnType<typeof useCoin>)
 }
 

@@ -5,6 +5,7 @@ import type { CoinTxType } from '../types'
 interface UseCoinReturn {
   getBalance: () => Promise<number>
   addCoins: (amount: number, type: CoinTxType) => Promise<number>
+  getLifetimeExchanged: () => Promise<number>  // [v0.4.2 F5] 누적 교환 포인트 조회
 }
 
 export function useCoin(): UseCoinReturn {
@@ -52,5 +53,24 @@ export function useCoin(): UseCoinReturn {
     return newBalance
   }
 
-  return { getBalance, addCoins }
+  // [v0.4.2 F5] coin_transactions SUM으로 누적 교환 포인트 조회
+  const getLifetimeExchanged = async (): Promise<number> => {
+    const userId = useGameStore.getState().userId
+    if (!userId) return 0
+
+    const { data, error } = await supabase.rpc('get_lifetime_exchanged', {
+      p_user_id: userId,
+    })
+
+    if (error) {
+      console.error('[useCoin] getLifetimeExchanged error:', error)
+      return 0  // 오류 시 0 반환 — 교환 버튼 활성 유지 (보수적 처리)
+    }
+
+    const total = (data as number) ?? 0
+    useGameStore.getState().setLifetimeExchanged(total)
+    return total
+  }
+
+  return { getBalance, addCoins, getLifetimeExchanged }
 }

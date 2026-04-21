@@ -178,7 +178,7 @@ return <div ref={containerRef} style={{ width: '100%', height: 96 }} />
 
 ---
 
-## 프로모션 리워드 지급 (`grantPromotionReward`) ⚠️ v0.4 변경
+## 프로모션 리워드 지급 (`grantPromotionReward`) ⚠️ v0.4 / v0.4.2 한도 추가
 
 - API: `grantPromotionReward({ params: { promotionCode, amount } })` — 토스포인트 지급
 - **v0.4: 코인 10개 소모 시 수동 교환** (기존 게임오버 자동 지급 방식 폐지)
@@ -216,6 +216,26 @@ ResultPage (게임오버 화면)
 ```
 
 > SDK 실패 시 DB 차감 없음 — 토스포인트 미지급 상태 + 코인 잔액 유지.
+
+**호출 흐름 (v0.4.2 한도 포함)**:
+```
+ResultPage 마운트
+  → useCoin.getLifetimeExchanged()
+  → supabase.rpc('get_lifetime_exchanged')
+  → useGameStore.setLifetimeExchanged(total)
+
+교환 버튼 활성 조건: balance ≥ 10 AND lifetimeExchanged < 5,000
+
+교환 버튼 탭
+  → grantCoinExchange()                        ← lib/ait.ts
+  → SDK 성공
+  → useCoin.addCoins(-10, 'toss_points_exchange')
+      └── Supabase: user_coins balance-=10 + coin_transactions INSERT
+  → setLifetimeExchanged(current + 10)         ← 로컬 즉시 갱신
+  → lifetimeExchanged ≥ 5,000 도달 시 버튼 즉시 disabled 전환
+```
+
+> **정책 근거**: 앱인토스 프로모션 정책 — 1인 누적 5,000 토스포인트 한도. 초과 교환 불가, 최대 500회.
 
 ---
 
