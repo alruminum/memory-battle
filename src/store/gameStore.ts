@@ -23,6 +23,7 @@ interface GameStore {
   // [v0.4] 코인
   coinBalance: number    // Supabase user_coins.balance 미러 (앱 진입·이벤트마다 갱신)
   revivalUsed: boolean   // 이 판 부활 사용 여부 (startGame/resetGame 시 false 초기화)
+  lifetimeExchanged: number  // [v0.4.2 F5] 누적 교환 포인트 (0 초기값, ResultPage 진입 시 갱신)
 
   setUserId: (id: string) => void
   setTodayReward: (value: boolean) => void
@@ -39,6 +40,7 @@ interface GameStore {
 
   // [v0.4] 코인 액션
   setCoinBalance: (balance: number) => void  // useCoin에서 잔액 동기화
+  setLifetimeExchanged: (amount: number) => void  // [v0.4.2 F5] 누적 교환 포인트 갱신
   revive: () => void   // RESULT→SHOWING 전환 (코인 차감은 호출자 책임, sequence 유지 — 실패 스테이지 시퀀스 재점등)
 }
 
@@ -59,6 +61,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
   hasTodayReward: false,
   coinBalance: 0,
   revivalUsed: false,
+  lifetimeExchanged: 0,
 
   setUserId: (id) => set({ userId: id }),
   setTodayReward: (value) => set({ hasTodayReward: value }),
@@ -179,6 +182,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   // [v0.4] 코인 액션
   setCoinBalance: (balance) => set({ coinBalance: balance }),
+  setLifetimeExchanged: (amount) => set({ lifetimeExchanged: amount }),
 
   // RESULT → SHOWING 전환
   // ⚠️ 코인 차감(addCoins(-5,'revival'))은 호출 전 이미 완료되어야 한다
